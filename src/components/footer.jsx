@@ -70,8 +70,7 @@ export default function Footer() {
             </div>
             <ul className="space-y-3 text-sm text-gray-400 text-left md:text-right">
               <li className="flex items-start md:justify-end">
-                <MapPin className="h-5 w-5 mr-2 text-[#ff9a00] mt-0.5" />
-                <span>IIT Madras Campus, Chennai, Tamil Nadu, India</span>
+                
               </li>
               <li className="flex items-center md:justify-end">
                 <Phone className="h-5 w-5 mr-2 text-[#ff9a00]" />
