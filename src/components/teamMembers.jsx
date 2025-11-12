@@ -15,11 +15,13 @@ export default function TeamMembersCarousel() {
   // Updated category order - split Core into Founders and Secretaries
   const categoryOrder = [
     "Secretaries",
+    "Tech & Analytics",
     "Women's Wing",
     "Events & Operations",
     "Design & Media",
-    "Tech & Analytics",
     "PR & Outreach",
+    "Community & Engagement",
+
     /*"Sponsorship",
     "Research & Publication",
     "Content & Documentation",
