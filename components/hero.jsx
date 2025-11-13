@@ -1,9 +1,12 @@
+"use client"
+
 import { useEffect, useRef } from "react";
 import { Button } from "../ui/buttons";
 import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
 import logo from "../assets/sportify_logo1.png";
-import { Link } from "react-router-dom";
+import Link from "next/link";
+import Image from "next/image";
 import HeroBG from '../assets/SportifyHero.jpg';
 
 export default function Hero() {
@@ -28,7 +31,7 @@ export default function Hero() {
         <div
           className="absolute inset-0 bg-cover bg-center sm:bg-center"
           style={{
-            backgroundImage: `url(${HeroBG})`,
+            backgroundImage: `url(${HeroBG.src})`,
             backgroundPosition: 'center 0px',
             filter: 'brightness(1.2)',
             minHeight: '100vh',
@@ -71,7 +74,7 @@ export default function Hero() {
         className="relative z-10 animate-float mb-2"
       >
         <div className="w-28 h-28 sm:w-40 sm:h-40 md:w-56 md:h-56 mx-auto">
-          <img
+          <Image
             src={logo}
             alt="Sportify Logo"
             className="object-contain w-full h-full"
@@ -100,7 +103,7 @@ export default function Hero() {
         </p>
   <div className="flex flex-col sm:flex-row sm:justify-center gap-4 w-full">
           {/* Join Sportify Button (Google Form Link) */}
-          <a
+          <Link
             href="https://docs.google.com/forms/d/e/1FAIpQLSf-uGRSW6krWftInt8yia8iFajoLbrwqBHiBnq6ZfKyclV7DA/viewform"
             target="_blank"
             rel="noopener noreferrer"
@@ -113,11 +116,11 @@ export default function Hero() {
               <Flame className="h-5 w-5" />
               <span>Join Sportify</span>
             </Button>
-          </a>
+          </Link>
 
           {/* Explore Events Button (Internal Link) */}
           <div className="w-full sm:w-auto p-[2px] rounded-md bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400">
-            <Link to="/past-events" className="block w-full h-full">
+            <Link href="/past-events" className="block w-full h-full">
               <Button
                 size="lg"
                 className="w-full sm:w-auto bg-black text-amber-500 font-semibold hover:brightness-110 hover:shadow-yellow-300/40 focus:outline-none active:outline-none transform active:scale-95 rounded-md transition-colors duration-200 flex items-center justify-center"

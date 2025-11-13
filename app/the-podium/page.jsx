@@ -1,8 +1,10 @@
+"use client";
+
 import { useEffect } from "react";
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
-import NewsletterComponent from "../components/ThePodium";
-import podiumBG from "../assets/PodiumBG.jpeg";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
+import NewsletterComponent from "@/components/ThePodium";
+import podiumBG from "@/assets/PodiumBG.jpeg";
 
 export default function ThePodiumPage() {
   // Scroll to the top of the page whenever the route changes
@@ -14,7 +16,7 @@ export default function ThePodiumPage() {
     <main
       className="min-h-screen bg-gradient-to-br from-black via-[#1a1a1a] to-black dark:bg-gray-950"
       style={{
-        backgroundImage: `url(${podiumBG})`,
+        backgroundImage: `url(${podiumBG.src})`,
         backgroundSize: "100% 100%",
         backgroundRepeat: "no-repeat",
         zIndex: 1,

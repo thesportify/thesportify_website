@@ -10,6 +10,7 @@ import {
   X,
   Flame,
 } from "lucide-react";
+import Image from "next/image";
 
 export default function TeamMembersCarousel() {
   // Updated category order - split Core into Founders and Secretaries
@@ -551,7 +552,7 @@ export default function TeamMembersCarousel() {
 
                 return (
                   <div
-                    key={member.id}
+                    key={index}
                     onClick={() => selectMember(index)}
                     className={`absolute cursor-pointer transition-all mb-10 duration-500 ease-out transform-gpu`}
                     style={{
@@ -600,9 +601,10 @@ export default function TeamMembersCarousel() {
                               : "320px",
                         }}
                       >
-                        <img
+                        <Image
                           src={member.image || "/placeholder.svg"}
                           alt={member.name}
+                          fill
                           className="w-full h-full object-cover object-top"
                           loading="lazy"
                         />

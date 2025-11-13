@@ -1,3 +1,5 @@
+"use client"
+
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/buttons";
 import { MessageCircle, ArrowRight, UserPlus } from "lucide-react";
@@ -5,6 +7,7 @@ import meetupBG from "../assets/MeetupBG.png";
 
 export default function JoinCommunity() {
   const sectionRef = useRef(null);
+  const [floatingParticleInlineStyle, setFloatingParticleInlineStyle] = useState(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -62,6 +65,15 @@ export default function JoinCommunity() {
     `;
     document.head.appendChild(style);
 
+    setFloatingParticleInlineStyle({
+      width: `${Math.random() * 10 + 5}px`,
+      height: `${Math.random() * 10 + 5}px`,
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`,
+      animationDelay: `${Math.random() * 2}s`,
+      animationDuration: `${Math.random() * 4 + 3}s`,
+    })
+
     return () => {
       document.head.removeChild(style);
     };
@@ -99,7 +111,7 @@ export default function JoinCommunity() {
       className="py-20 bg-gradient-to-br from-black via-[#1a1a1a] to-black dark:bg-gray-950 px-4 md:px-16 relative"
       id="community"
       style={{
-        backgroundImage: `url(${meetupBG})`,
+        backgroundImage: `url(${meetupBG.src})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -165,14 +177,7 @@ export default function JoinCommunity() {
                   <div
                     key={i}
                     className="opacity-30 transition-opacity duration-700"
-                    style={{
-                      width: `${Math.random() * 10 + 5}px`,
-                      height: `${Math.random() * 10 + 5}px`,
-                      top: `${Math.random() * 100}%`,
-                      left: `${Math.random() * 100}%`,
-                      animationDelay: `${Math.random() * 2}s`,
-                      animationDuration: `${Math.random() * 4 + 3}s`,
-                    }}
+                    style={floatingParticleInlineStyle}
                   />
                 ))}
               </div>

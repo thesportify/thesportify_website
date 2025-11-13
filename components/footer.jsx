@@ -9,6 +9,7 @@ import {
   MapPin,
 } from "lucide-react";
 import logo from "../assets/sportify_logo1.png";
+import Image from "next/image";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -21,7 +22,7 @@ export default function Footer() {
           <div className="flex flex-col justify-start">
             {/* Heading: Logo & Title */}
             <div className="flex items-center mb-4">
-              <img
+              <Image
                 src={logo}
                 alt="Sportify Logo"
                 width={50}

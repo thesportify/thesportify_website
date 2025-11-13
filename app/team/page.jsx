@@ -1,8 +1,10 @@
+"use client";
+
 import { useEffect } from "react";
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
-import TeamMembers from "../components/teamMembers";
-import { teamMembers } from "../lib/data"; // Import your teamMembers data
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
+import TeamMembers from "@/components/teamMembers";
+import { teamMembers } from "@/lib/data"; // Import your teamMembers data
 
 export default function TeamPage() {
   // Scroll to the top of the page whenever the route changes

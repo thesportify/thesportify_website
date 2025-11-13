@@ -1,8 +1,12 @@
+"use client"
+
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import logo from "../assets/sportify_logo1.png";
+import Image from "next/image";
 
 const navLinks = [
   { name: "Home", path: "/" },
@@ -15,8 +19,7 @@ const navLinks = [
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const location = useLocation();
-  const pathname = location.pathname;
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,16 +52,18 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16 md:h-16">
           {/* Logo */}
           <Link
-            to="/"
+            href="/"
             className="flex items-center space-x-2 
              outline-none ring-0 focus:outline-none focus:ring-0 
              active:outline-none active:ring-0 
              focus-visible:outline-none focus-visible:ring-0"
           >
-            <img
+            <Image
               src={logo || "/placeholder.svg"}
               alt="Sportify Logo"
               className="w-10 h-10 md:w-12 md:h-12"
+              width={48}
+              height={48}
             />
             <span className="font-bold text-xl md:text-2xl text-white">
               THE SPORTIFY
@@ -67,11 +72,11 @@ const Navbar = () => {
 
           {/* Desktop Navigation shifted to the right */}
           <div className="flex items-center space-x-6">
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="max-md:hidden md:flex items-center space-x-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
-                  to={link.path}
+                  href={link.path}
                   className={`relative text-sm font-medium py-2 transition-all duration-200 group focus:outline-none active:outline-none active:ring-0 ${
                     pathname === link.path
                       ? "text-transparent bg-clip-text bg-[linear-gradient(90deg,#ff0000,#ff5a00,#ff9a00,#ffce00,#ffe808)]"
@@ -105,7 +110,7 @@ const Navbar = () => {
                   {navLinks.map((link) => (
                     <Link
                       key={link.path}
-                      to={link.path}
+                      href={link.path}
                       className={`text-lg font-medium transition-all duration-300 relative ${
                         pathname === link.path
                           ? "text-transparent bg-clip-text bg-[linear-gradient(90deg,#ff0000,#ff5a00,#ff9a00,#ffce00,#ffe808)]"
