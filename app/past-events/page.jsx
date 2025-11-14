@@ -1,8 +1,10 @@
+"use client";
+
 import { useEffect } from "react"
-import Navbar from "../components/navbar"
-import Footer from "../components/footer"
-import EventsList from "../components/pastEventsList"
-import { pastEvents } from "../lib/data";
+import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
+import EventsList from "@/components/pastEventsList"
+import { pastEvents } from "@/lib/data";
 
 export default function PastEventsPage() {
   // Scroll to the top of the page whenever the route changes

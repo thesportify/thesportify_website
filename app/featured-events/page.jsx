@@ -1,14 +1,12 @@
+"use client";
+
 import { useEffect } from "react";
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
-import EventsList from "../components/upcomingEventsList";
-import { upcomingEvents as featuredEvents } from "../lib/data";
-import eventBgImage from "../assets/Event-BG.jpeg";
-import featEve1 from "../assets/Featured-events/Event-1.jpg";
-import featEve2 from "../assets/Featured-events/Event-2.png";
-import featEve3 from "../assets/Featured-events/Event-3.jpg"; // You may need to add this image if not present
-import Loader from "../components/loader"; // ✅ Import the new Loader component
-import featurepagebg from "../assets/FeaturePageBG.jpeg";
+import Footer from "@/components/footer";
+import featEve1 from "@/assets/Featured-events/Event-1.jpg";
+import featEve2 from "@/assets/Featured-events/Event-2.png";
+import featEve3 from "@/assets/Featured-events/Event-3.jpg"; // You may need to add this image if not present
+import featurepagebg from "@/assets/FeaturePageBG.jpeg";
+import Image from "next/image";
 
 export default function FeaturedEventsPage() {
   
@@ -20,13 +18,12 @@ export default function FeaturedEventsPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-black via-[#1a1a1a] to-black dark:bg-gray-950"
     style={{
-              backgroundImage: `url(${featurepagebg})`,
+              backgroundImage: `url(${featurepagebg.src})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
               zIndex: 1,
             }}>
-      <Navbar />
       <div className="container mx-auto px-4 sm:px-10 py-10 md:py-16">
         {/* New Header Section */}
         <div className="flex flex-col items-center mb-10">
@@ -54,7 +51,7 @@ export default function FeaturedEventsPage() {
           {/* Ultimate IPL Auction */}
           <div className="bg-gradient-to-t from-[#232526] via-[#414345]/30 to-[#232526]/10 rounded-2xl shadow-xl border border-gray-700 p-6 flex flex-col items-center w-full max-w-sm mx-auto md:mx-0" style={{boxSizing: 'border-box'}}>
             <div className="w-36 pt-1 pb-1 h-44 flex items-center justify-center rounded-xl mb-4 shadow-[0_0_20px_8px_rgba(35,37,38,0.95),0_0_40px_12px_rgba(35,37,38,0.7)] overflow-hidden group">
-                <img src={featEve1} alt="Ultimate IPL Auction" className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-2xl" />
+                <Image src={featEve1} alt="Ultimate IPL Auction" className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-2xl" />
             </div>
             <div className="w-full flex flex-col items-center">
               <h3 className="text-lg font-bold text-white mb-1 text-center">Ultimate IPL Auction</h3>
@@ -72,7 +69,7 @@ export default function FeaturedEventsPage() {
           {/* Ultimate Sports Quiz */}
           <div className="bg-gradient-to-t from-[#232526] via-[#414345]/50 to-[#232526]/10 rounded-2xl shadow-xl border border-gray-700 p-6 flex flex-col items-center w-full max-w-sm mx-auto md:mx-0" style={{boxSizing: 'border-box'}}>
             <div className="w-36 pt-1 pb-1 h-44 flex items-center justify-center rounded-xl mb-4 shadow-[0_0_20px_8px_rgba(35,37,38,0.95),0_0_40px_12px_rgba(35,37,38,0.7)] overflow-hidden group">
-                <img src={featEve2} alt="Ultimate Sports Quiz" className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-2xl" />
+                <Image src={featEve2} alt="Ultimate Sports Quiz" className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-2xl" />
             </div>
             <div className="w-full flex flex-col items-center">
               <h3 className="text-lg font-bold text-white mb-1 text-center">Ultimate Sports Quiz</h3>
@@ -90,7 +87,7 @@ export default function FeaturedEventsPage() {
           {/* The Pavilion - Episode 2 with Prof. Mahesh Panchagnula */}
           <div className="bg-gradient-to-t from-[#232526] via-[#414345]/50 to-[#232526]/10 rounded-2xl shadow-xl border border-gray-700 p-6 flex flex-col items-center w-full max-w-sm mx-auto md:mx-0" style={{boxSizing: 'border-box'}}>
             <div className="w-36 pt-1 pb-1 h-44 flex items-center justify-center rounded-xl mb-4 shadow-[0_0_20px_8px_rgba(35,37,38,0.95),0_0_40px_12px_rgba(35,37,38,0.7)] overflow-hidden group">
-                <img src={featEve3} alt="The Pavilion - Episode 2" className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-2xl" />
+                <Image src={featEve3} alt="The Pavilion - Episode 2" className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-2xl" />
             </div>
             <div className="w-full flex flex-col items-center">
               <h3 className="text-lg font-bold text-white mb-1 text-center">The Pavilion - Episode 2 </h3>

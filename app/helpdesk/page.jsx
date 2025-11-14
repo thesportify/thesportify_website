@@ -1,8 +1,9 @@
-// src/HelpdeskPage.jsx
+"use client";
+
 import { useEffect } from "react";
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
-import Helpdesk from "../components/helpdesk";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
+import Helpdesk from "@/components/helpdesk";
 
 export default function HelpdeskPage() {
   // Scroll to the top of the page whenever the route changes

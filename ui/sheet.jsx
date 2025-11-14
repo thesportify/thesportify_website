@@ -1,11 +1,10 @@
-import * as React from "react"
 import * as Dialog from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
 
 export const Sheet = Dialog.Root
 export const SheetTrigger = Dialog.Trigger
 
-export const SheetContent = React.forwardRef(({ children, className = "", side = "right", ...props }, ref) => {
+export function SheetContent({ children, className = "", side = "right", ...props }) {
   const sideStyles = {
     top: "inset-x-0 top-0 h-1/2 w-full",
     bottom: "inset-x-0 bottom-0 h-1/2 w-full",
@@ -17,7 +16,6 @@ export const SheetContent = React.forwardRef(({ children, className = "", side =
     <Dialog.Portal>
       <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
       <Dialog.Content
-        ref={ref}
         className={`fixed z-50 gap-4 bg-black p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500 ${
           side === "right" ? "data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right" : 
           side === "left" ? "data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left" : 
@@ -40,6 +38,6 @@ export const SheetContent = React.forwardRef(({ children, className = "", side =
       </Dialog.Content>
     </Dialog.Portal>
   )
-})
+}
 
 SheetContent.displayName = "SheetContent"

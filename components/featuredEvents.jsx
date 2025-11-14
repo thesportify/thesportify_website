@@ -1,9 +1,10 @@
+"use client"
+
 import { useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
-import { Button } from "../ui/buttons";
 import featEve1 from "../assets/Featured-events/Event-1.jpg";
 import featEve2 from "../assets/Featured-events/Event-2.png";
 import featureBG from '../assets/FeaturedBG.jpg';
+import Image from "next/image";
 
 
 const pastEvents = [
@@ -62,7 +63,7 @@ export default function PastEvents() {
       className="py-10 md:py-20 bg-gradient-to-br from-black via-[#1a1a1a] to-black dark:bg-gray-950 px-4 sm:px-6 md:px-16 relative"
       id="past-events"
       style={{
-        backgroundImage: `url(${featureBG})`,
+        backgroundImage: `url(${featureBG.src})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -96,7 +97,7 @@ export default function PastEvents() {
               >
                 {/* Image */}
                 <div className="w-full md:w-2/5 h-[24rem] sm:h-[32rem] md:h-auto relative flex items-center justify-center">
-                  <img
+                  <Image
                     src={event.image || "/placeholder.svg"}
                     alt={event.title}
                     className="object-cover w-[85%] h-[95%] sm:w-[90%] sm:h-[90%] transition-all duration-300 rounded-lg"

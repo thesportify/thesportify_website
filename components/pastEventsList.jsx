@@ -10,6 +10,8 @@ import {
 import { useEffect, useState, useRef } from "react";
 import bg1 from "../assets/PasteveBG1.jpeg";
 import bg2 from "../assets/PasteveBG2.jpeg";
+import Image from "next/image";
+import "./pastEventsList.css";
 
 // Enhanced wavy border with multiple layers
 const WavyBorder = () => (
@@ -46,15 +48,20 @@ const Reflection = ({ children }) => (
 
 // Decorative animated particle component
 const ParticleField = () => {
-  const particles = Array(10)
-    .fill()
-    .map((_, i) => ({
-      id: i,
-      size: Math.random() * 2 + 1,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      opacity: Math.random() * 0.5 + 0.3,
-    }));
+  const [particles, setParticles] = useState(null);
+  useEffect(() => {
+    particles.setParticles(
+      Array(10)
+      .fill()
+      .map((_, i) => ({
+        id: i,
+        size: Math.random() * 2 + 1,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        opacity: Math.random() * 0.5 + 0.3,
+      }))
+    )
+  });
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -132,7 +139,7 @@ export default function EventsList({ events }) {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [events, activeIndex]);
+  }, [events]);
 
   // Helper function to get random decorative icon
   const getDecorativeIcon = (index) => {
@@ -172,10 +179,10 @@ export default function EventsList({ events }) {
         const bgImage = index % 2 === 0 ? bg1 : bg2;
         return (
           <div 
-            key={event.id}
+            key={index}
             className="relative event-card my-16 px-12 py-16"
             style={{            
-              backgroundImage: `url(${bgImage})`, 
+              backgroundImage: `url(${bgImage.src})`, 
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
@@ -201,11 +208,11 @@ export default function EventsList({ events }) {
               style={{ transitionDelay: `${(index % 5) * 150}ms` }}
             >
               {/* Event Image with enhanced reflection effect - Now in portrait format */}
-              <di v className="w-full lg:w-2/5 rounded-xl overflow-hidden group">
+              <div className="w-full lg:w-2/5 rounded-xl overflow-hidden group">
                 <Reflection>
                   <div className="overflow-hidden rounded-xl relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#ff5a00]/30 to-[#ffe808]/20 z-10 opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
-                    <img
+                    <Image
                       src={event.image || "/api/placeholder/400/600"}
                       alt={event.title}
                       className="w-full h-[500px] object-cover transform transition-all duration-700 ease-in-out"
@@ -225,7 +232,7 @@ export default function EventsList({ events }) {
                     </div>
                   </div>
                 </Reflection>
-              </di>
+              </div>
               {/* Event Details with enhanced decorative elements */}
               <div className="w-full lg:w-3/5 space-y-4 relative p-6 group backdrop-blur-sm bg-gray-900/20 rounded-xl border border-gray-800/50">
                 {/* Fancy animated corners */}
@@ -317,90 +324,3 @@ export default function EventsList({ events }) {
     </div>
   );
 }
-
-// Add necessary CSS animations
-const styleTag = document.createElement("style");
-styleTag.textContent = `
-  @keyframes float {
-    0%, 100% { transform: translateY(0) translateX(0); }
-    50% { transform: translateY(-20px) translateX(10px); }
-  }
-  @keyframes float-delayed {
-    0%, 100% { transform: translateY(0) translateX(0); }
-    50% { transform: translateY(20px) translateX(-10px); }
-  }
-  @keyframes float-slow {
-    0%, 100% { transform: translateY(0) translateX(0); }
-    50% { transform: translateY(-10px) translateX(20px); }
-  }
-  @keyframes float-reverse {
-    0%, 100% { transform: translateY(0) translateX(0); }
-    50% { transform: translateY(15px) translateX(-15px); }
-  }
-  @keyframes float-slow-reverse {
-    0%, 100% { transform: translateY(0) translateX(0); }
-    50% { transform: translateY(12px) translateX(8px); }
-  }
-  @keyframes shine {
-    from {transform: translateX(-100%) skewX(-12deg);}
-    to {transform: translateX(150%) skewX(-12deg);}
-  }
-  @keyframes shimmer {
-    from {transform: translateX(-150%);}
-    to {transform: translateX(150%);}
-  }
-  @keyframes pulse-slow {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.3); opacity: 0.7; }
-  }
-  @keyframes particle-float {
-    0%, 100% { transform: translateY(0) translateX(0); }
-    25% { transform: translateY(-30px) translateX(10px); }
-    50% { transform: translateY(0) translateX(20px); }
-    75% { transform: translateY(30px) translateX(10px); }
-  }
-  @keyframes slow-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-  @keyframes slow-spin-reverse {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(-360deg); }
-  }
-  
-  .animate-float {
-    animation: float 15s ease-in-out infinite;
-  }
-  .animate-float-delayed {
-    animation: float-delayed 20s ease-in-out infinite;
-  }
-  .animate-float-slow {
-    animation: float-slow 25s ease-in-out infinite;
-  }
-  .animate-float-reverse {
-    animation: float-reverse 18s ease-in-out infinite;
-  }
-  .animate-float-slow-reverse {
-    animation: float-slow-reverse 22s ease-in-out infinite;
-  }
-  .animate-shine {
-    animation: shine 8s ease-in-out infinite;
-  }
-  .animate-shimmer {
-    animation: shimmer 2s linear forwards;
-  }
-  .animate-pulse-slow {
-    animation: pulse-slow 3s ease-in-out infinite;
-  }
-  
-  .animate-particle-float {
-    animation: particle-float 25s ease-in-out infinite;
-  }
-  .animate-slow-spin {
-    animation: slow-spin 30s linear infinite;
-  }
-  .animate-slow-spin-reverse {
-    animation: slow-spin-reverse 20s linear infinite;
-  }
-`;
-document.head.appendChild(styleTag);

@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import DelhiBadminton1 from "../assets/Meetups/DelhiBadminton1.jpg";
 import DelhiBadminton2 from "../assets/Meetups/DelhiBadminton2.png";
 import DelhiBadminton3 from "../assets/Meetups/DelhiBadminton3.jpg";
@@ -17,7 +19,7 @@ export default function MeetupsGallery() {
       className="pt-[4rem] pb-[6rem] bg-gradient-to-br from-black via-[#1a1a1a] to-black dark:bg-gray-950 px-4 md:px-16 overflow-hidden sm:overflow-visible relative"
       id="meetups-gallery"
       style={{
-              backgroundImage: `url(${meetupBG})`,
+              backgroundImage: `url(${meetupBG.src})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
@@ -80,7 +82,7 @@ function Photos() {
       };
       return (
         <div key={idx} style={style} className="meetup-photo animate-glow-card">
-          <img
+          <Image
             src={img.src}
             alt={img.alt}
             className="w-full h-full object-cover rounded-xl"
