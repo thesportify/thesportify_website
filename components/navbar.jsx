@@ -10,7 +10,7 @@ import Image from "next/image";
 
 const navLinks = [
   { name: "Home", path: "/" },
-  { name: "Featured Events", path: "/featured-events" },
+  { name: "Verify", path: "/verify" },
   { name: "Past Events", path: "/past-events" },
   { name: "The Podium", path: "/the-podium" },
   { name: "Team", path: "/team" },
