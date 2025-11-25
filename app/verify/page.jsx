@@ -41,7 +41,7 @@ export default function VerifyPage() {
                         </p>
                     </div>
 
-                    <Card className="bg-[#0a0a0a] border border-gray-800 shadow-2xl">
+                    <Card className="!bg-[#0a0a0a] border border-gray-800 shadow-2xl">
                         <CardContent className="p-8">
                             <form onSubmit={handleVerify} className="space-y-6">
                                 <div className="relative">
@@ -57,7 +57,7 @@ export default function VerifyPage() {
                                 </div>
                                 <Button
                                     type="submit"
-                                    className="w-full py-6 text-lg font-bold bg-gradient-to-r from-orange-600 to-yellow-500 hover:from-orange-500 hover:to-yellow-400 text-black shadow-lg shadow-orange-500/20 transition-all transform hover:scale-[1.02]"
+                                    className="w-full py-6 text-lg font-bold bg-gradient-to-r from-orange-600 to-yellow-500 hover:from-orange-500 hover:to-yellow-400 text-black shadow-lg shadow-orange-500/20 transition-all transform hover:scale-[1.02] flex items-center justify-center"
                                 >
                                     Verify Now
                                 </Button>
