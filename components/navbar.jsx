@@ -9,10 +9,10 @@ import logo from "../assets/sportify_logo1.png";
 import Image from "next/image";
 
 const navLinks = [
-  { name: "Home", path: "/" },
-  { name: "Verify", path: "/verify" },
+  //{ name: "Home", path: "/" },
   { name: "Past Events", path: "/past-events" },
   { name: "The Podium", path: "/the-podium" },
+  { name: "Verification", path: "/verify" },
   { name: "Team", path: "/team" },
   { name: "Helpdesk", path: "/helpdesk" },
   { name: "Grievance", path: "/grievance" },
