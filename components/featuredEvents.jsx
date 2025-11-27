@@ -20,7 +20,7 @@ const pastEvents = [
       "MindMuse is more than just a quiz; it’s a celebration of the stories, achievements, and inspiration drawn from women athletes across the world. It’s also an opportunity for women learners to step forward, represent their Houses, and lead from the front.",
     isPast: false,
     tags: ["Women in Sports", "Quiz", "Empowerment"],
-    link: "https://lnkd.in/ggswiYTz"
+    link: "https://forms.gle/w4FS2TW4LQpKmcmaA"
   },
   {
     id: "featured-2",
@@ -86,7 +86,7 @@ export default function PastEvents() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-28 scroll-reveal place-items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-28 scroll-reveal items-stretch justify-items-center">
           {pastEvents.slice(0, 2).map((event, index) => {
             // Trim description to 200 chars for uniformity
             const trimmedDesc = event.description.length > 200
@@ -95,7 +95,7 @@ export default function PastEvents() {
             return (
               <div
                 key={event.id}
-                className="bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-xl overflow-hidden shadow-lg flex flex-col md:flex-row transform hover:scale-[1.02] transition-all duration-300 animate-glow-card max-w-[22rem] sm:max-w-sm md:max-w-[36rem] w-full"
+                className="bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-xl overflow-hidden shadow-lg flex flex-col md:flex-row transform hover:scale-[1.02] transition-all duration-300 animate-glow-card max-w-[22rem] sm:max-w-sm md:max-w-[36rem] w-full h-full"
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
                 {/* Image */}
