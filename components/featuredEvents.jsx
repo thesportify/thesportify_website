@@ -1,36 +1,39 @@
 "use client"
 
 import { useEffect, useRef } from "react";
-import featEve1 from "../assets/Featured-events/Event-1.jpg";
-import featEve2 from "../assets/Featured-events/Event-2.png";
+import featEve1 from "../assets/Featured-events/mindmuse.png";
+import featEve2 from "../assets/Featured-events/actletics.jpg";
 import featureBG from '../assets/FeaturedBG.jpg';
 import Image from "next/image";
+import Link from "next/link";
 
 
 const pastEvents = [
   {
     id: "featured-1",
-    title: "Ultimate IPL Auction",
+    title: "MindMuse – Women in Sports Edition",
     image: featEve1,
-    date: "24 April - 27 April, 2025",
-    location: "Google Meet",
-    category: "Strategy Competition",
+    date: "1 Dec - 8 Dec, 2025",
+    location: "Online (Unstop)",
+    category: "Quiz Competition",
     description:
-      "Participants stepped into the shoes of franchise owners, bidding strategically to build their dream teams under a fixed budget. The event was filled with intense bidding wars, clever tactics, and loads of cricket banter.",
-    isPast: true,
-    tags: ["Cricket", "Auction", "Strategy", "Teamwork"],
+      "MindMuse is more than just a quiz; it’s a celebration of the stories, achievements, and inspiration drawn from women athletes across the world. It’s also an opportunity for women learners to step forward, represent their Houses, and lead from the front.",
+    isPast: false,
+    tags: ["Women in Sports", "Quiz", "Empowerment"],
+    link: "https://lnkd.in/ggswiYTz"
   },
   {
     id: "featured-2",
-    title: "Ultimate Sports Quizz",
+    title: "Actletics",
     image: featEve2,
-    date: "5 June - 6 June, 2025",
-    location: "BioTech Hall, IIT Madras",
-    category: "Quiz Competition",
+    date: "26 Nov - 9 Dec, 2025",
+    location: "Online (Instagram Reels)",
+    category: "Cultural Fusion",
     description:
-      "Get ready to put your sports knowledge to the ultimate test! The Ultimate Sports Quiz at Paradox’25 is a high-energy competition designed for sports lovers. From legendary moments and record-breaking feats to mind-bending trivia, this quiz will challenge even the most passionate fans.",
-    isPast: true,
-    tags: ["Quiz", "Sports", "Trivia"],
+      "Sportify × Aayam bring you IITM BS’s first-ever sports + theatre fusion event! Create a 60–120 sec video where you act out iconic sports moments, do creative sports commentary, or add drama, parody, or theatre twists.",
+    isPast: false,
+    tags: ["Theatre", "Sports", "Creativity", "Reels"],
+    link: "https://form.jotform.com/253252575784062"
   },
 ];
 
@@ -79,11 +82,11 @@ export default function PastEvents() {
             </span>
           </h2>
           <p className="text-gray-300 max-w-xl mx-auto text-sm sm:text-base">
-            Check out the highlights and achievements from our past competitions.
+            Check out our latest and upcoming events!
           </p>
         </div>
 
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-28 scroll-reveal place-items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-28 scroll-reveal place-items-center">
           {pastEvents.slice(0, 2).map((event, index) => {
             // Trim description to 200 chars for uniformity
             const trimmedDesc = event.description.length > 200
@@ -120,7 +123,7 @@ export default function PastEvents() {
                   </p>
 
                   {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mt-1">
+                  <div className="flex flex-wrap gap-2 mt-1 mb-4">
                     {event.tags.map((tag) => (
                       <span
                         key={tag}
@@ -130,6 +133,11 @@ export default function PastEvents() {
                       </span>
                     ))}
                   </div>
+
+                  {/* Register Button */}
+                  <Link href={event.link} target="_blank" rel="noopener noreferrer" className="inline-block text-center w-full py-2 rounded-lg bg-gradient-to-r from-orange-600 to-yellow-500 hover:from-orange-500 hover:to-yellow-400 text-black font-bold text-sm transition-all transform hover:scale-[1.02]">
+                    Register Now
+                  </Link>
                 </div>
               </div>
             );
