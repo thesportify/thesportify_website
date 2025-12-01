@@ -1,16 +1,49 @@
 "use client";
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import EventsList from "@/components/pastEventsList"
-import { pastEvents } from "@/lib/data";
+import { pastEvents as staticPastEvents } from "@/lib/data";
+import { db } from "@/lib/firebase";
+import { collection, query, orderBy, getDocs, where } from "firebase/firestore";
+import { Loader2 } from "lucide-react";
 
 export default function PastEventsPage() {
+  const [events, setEvents] = useState(staticPastEvents);
+  const [loading, setLoading] = useState(true);
+
   // Scroll to the top of the page whenever the route changes
   useEffect(() => {
     window.scrollTo(0, 0) // Scrolls to the top when the component mounts or route changes
   }, []) // Dependency array ensures this happens on route change
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const q = query(
+          collection(db, "events"),
+          where("eventType", "==", "past"),
+          orderBy("createdAt", "desc")
+        );
+        const querySnapshot = await getDocs(q);
+        const fetchedEvents = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        // Merge dynamic events (first) with static events (last)
+        setEvents([...fetchedEvents, ...staticPastEvents]);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        // On error, keep static events
+        setEvents(staticPastEvents);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-black via-[#1a1a1a] to-black dark:bg-gray-950">
@@ -33,9 +66,15 @@ export default function PastEventsPage() {
             </div>
           </div>
         </h1>
-    
+
         {/* Events List */}
-        <EventsList events={pastEvents} />
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-12 w-12 text-orange-500 animate-spin" />
+          </div>
+        ) : (
+          <EventsList events={events} />
+        )}
       </div>
       <Footer />
     </main>

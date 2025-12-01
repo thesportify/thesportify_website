@@ -52,14 +52,14 @@ const ParticleField = () => {
   useEffect(() => {
     particles.setParticles(
       Array(10)
-      .fill()
-      .map((_, i) => ({
-        id: i,
-        size: Math.random() * 2 + 1,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        opacity: Math.random() * 0.5 + 0.3,
-      }))
+        .fill()
+        .map((_, i) => ({
+          id: i,
+          size: Math.random() * 2 + 1,
+          x: Math.random() * 100,
+          y: Math.random() * 100,
+          opacity: Math.random() * 0.5 + 0.3,
+        }))
     )
   });
 
@@ -178,11 +178,11 @@ export default function EventsList({ events }) {
       {displayedEvents.map((event, index) => {
         const bgImage = index % 2 === 0 ? bg1 : bg2;
         return (
-          <div 
+          <div
             key={index}
             className="relative event-card my-16 px-12 py-16"
-            style={{            
-              backgroundImage: `url(${bgImage.src})`, 
+            style={{
+              backgroundImage: `url(${bgImage.src})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
@@ -200,11 +200,9 @@ export default function EventsList({ events }) {
               />
             </div>
             <div
-              className={`flex flex-col ${
-                index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
-              } gap-8 lg:gap-16 items-center opacity-0 transition-all duration-700 ease-out transform ${
-                true ? "opacity-100 translate-y-0" : "translate-y-8"
-              }`}
+              className={`flex flex-col ${index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
+                } gap-8 lg:gap-16 items-center opacity-0 transition-all duration-700 ease-out transform ${true ? "opacity-100 translate-y-0" : "translate-y-8"
+                }`}
               style={{ transitionDelay: `${(index % 5) * 150}ms` }}
             >
               {/* Event Image with enhanced reflection effect - Now in portrait format */}
@@ -215,6 +213,8 @@ export default function EventsList({ events }) {
                     <Image
                       src={event.image || "/api/placeholder/400/600"}
                       alt={event.title}
+                      width={500}
+                      height={500}
                       className="w-full h-[500px] object-cover transform transition-all duration-700 ease-in-out"
                     />
                     {/* Decorative corner accents on image */}
@@ -303,7 +303,7 @@ export default function EventsList({ events }) {
                 </div>
               </div>
             </div>
-            
+
           </div>
         );
       })}
@@ -317,10 +317,9 @@ export default function EventsList({ events }) {
       <div className="fixed -z-10 top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="blur-3xl opacity-10 absolute -top-40 -right-40 w-80 h-80 rounded-full bg-[#ff5a00] animate-float" />
         <div className="blur-3xl opacity-10 absolute top-1/2 -left-20 w-60 h-60 rounded-full bg-[#ffe808] animate-float-delayed" />
-        <div className="blur-3xl opacity-5 absolute bottom-20 right-1/4 w-40 h-40 rounded-full bg-blue-500 animate-float-slow" />
         <div className="blur-3xl opacity-5 absolute top-1/3 right-1/3 w-32 h-32 rounded-full bg-purple-500 animate-float-reverse" />
         <div className="blur-3xl opacity-5 absolute bottom-1/4 left-1/4 w-24 h-24 rounded-full bg-pink-500 animate-float-slow-reverse" />
       </div>
-    </div>
+    </div >
   );
 }

@@ -134,7 +134,7 @@ export default function CertificateResultPage() {
                                         <div className="w-32 h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent mx-auto"></div>
 
                                         <div>
-                                            <p className="text-gray-300 text-lg mb-2 font-light">has successfully participated as</p>
+                                            <p className="text-gray-300 text-lg mb-2 font-light">for their valuable contribution as</p>
                                             <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">{certificate.position}</p>
                                         </div>
 
@@ -161,12 +161,6 @@ export default function CertificateResultPage() {
 
                         {/* Actions */}
                         <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4 print:hidden">
-                            <Button
-                                onClick={handleDownload}
-                                className="bg-white text-black hover:bg-gray-200 px-6 py-6 rounded-lg font-semibold flex items-center gap-2 transition-all"
-                            >
-                                <Download className="h-5 w-5" /> Download Certificate
-                            </Button>
                             <Button
                                 onClick={() => router.push("/verify")}
                                 variant="outline"

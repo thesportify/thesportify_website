@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { db, auth } from "@/lib/firebase";
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp, setDoc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp, setDoc } from "firebase/firestore";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { Button } from "@/ui/buttons";
 import { Card, CardContent } from "@/ui/card";
@@ -26,7 +26,7 @@ export default function AdminPanel() {
     const [date, setDate] = useState("");
     const [issuedBy, setIssuedBy] = useState("The Sportify Society");
 
-    // Certificates List
+    // Data Lists
     const [certificates, setCertificates] = useState([]);
     const [fetchLoading, setFetchLoading] = useState(false);
 
@@ -86,7 +86,6 @@ export default function AdminPanel() {
         e.preventDefault();
         setLoading(true);
         try {
-            // Use certId as document ID
             await setDoc(doc(db, "certificates", certId), {
                 certId,
                 studentName,
@@ -112,7 +111,7 @@ export default function AdminPanel() {
         }
     };
 
-    const handleDelete = async (id) => {
+    const handleDeleteCertificate = async (id) => {
         if (!confirm("Are you sure you want to delete this certificate?")) return;
         try {
             await deleteDoc(doc(db, "certificates", id));
@@ -181,9 +180,9 @@ export default function AdminPanel() {
                 <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                            Certificate <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">Admin Panel</span>
+                            Admin <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">Dashboard</span>
                         </h1>
-                        <p className="text-gray-400">Manage and issue certificates for Sportify events.</p>
+                        <p className="text-gray-400">Manage certificates.</p>
                     </div>
                     <div className="flex items-center gap-4">
                         <span className="text-sm text-gray-400 hidden md:inline">{user.email}</span>
@@ -315,7 +314,7 @@ export default function AdminPanel() {
                                                         <td className="p-4 text-gray-400 text-sm">{cert.date}</td>
                                                         <td className="p-4 text-right">
                                                             <button
-                                                                onClick={() => handleDelete(cert.id)}
+                                                                onClick={() => handleDeleteCertificate(cert.id)}
                                                                 className="text-gray-600 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-500/10"
                                                                 title="Delete"
                                                             >

@@ -35,6 +35,7 @@ export const metadata = {
   icons: {
     icon: "/icon.png",
   },
+  metadataBase: new URL("https://sportify.iitmbs.org"),
 };
 
 

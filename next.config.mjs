@@ -6,7 +6,26 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "ik.imagekit.io",
-        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "viversed.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "viversed.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "firebasestorage.googleapis.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "i.imgur.com",
         pathname: "/**",
       },
     ],
