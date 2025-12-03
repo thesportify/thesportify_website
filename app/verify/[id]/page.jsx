@@ -125,7 +125,7 @@ export default function CertificateResultPage() {
                                     {/* Main Content */}
                                     <div className="space-y-8 max-w-2xl mx-auto">
                                         <div>
-                                            <p className="text-gray-400 uppercase tracking-[0.3em] text-xs mb-4">This is to certify that</p>
+                                            <p className="text-gray-400 uppercase tracking-[0.3em] text-xs mb-4">This Certificate is proudly presented to</p>
                                             <h2 className="text-3xl md:text-5xl font-bold text-white font-serif tracking-wide leading-tight">
                                                 {certificate.studentName}
                                             </h2>
@@ -139,7 +139,7 @@ export default function CertificateResultPage() {
                                         </div>
 
                                         <div>
-                                            <p className="text-gray-300 text-lg mb-2 font-light">in the event</p>
+                                            <p className="text-gray-300 text-lg mb-2 font-light">in </p>
                                             <h3 className="text-2xl md:text-3xl font-bold text-white">{certificate.event}</h3>
                                         </div>
                                     </div>

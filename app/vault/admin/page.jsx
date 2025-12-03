@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { db, auth } from "@/lib/firebase";
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { Button } from "@/ui/buttons";
 import { Card, CardContent } from "@/ui/card";
-import { Trash2, Plus, LogOut, ShieldCheck, Loader2, Calendar, Award, Link as LinkIcon, Pencil, X } from "lucide-react";
+import { Trash2, Plus, LogOut, ShieldCheck, Loader2, Calendar, Award, Link as LinkIcon, Pencil, X, Upload, FileSpreadsheet, Save, RefreshCw, History, RotateCcw } from "lucide-react";
 import Navbar from "@/components/navbar";
 
 export default function VaultAdmin() {
@@ -24,7 +24,7 @@ export default function VaultAdmin() {
     const [event, setEvent] = useState("");
     const [position, setPosition] = useState("");
     const [date, setDate] = useState("");
-    const [issuedBy, setIssuedBy] = useState("The Sportify Society");
+    const [issuedBy, setIssuedBy] = useState("");
 
     // Event Form State
     const [eventTitle, setEventTitle] = useState("");
@@ -40,7 +40,22 @@ export default function VaultAdmin() {
     // Data Lists
     const [certificates, setCertificates] = useState([]);
     const [events, setEvents] = useState([]);
+    const [batches, setBatches] = useState([]);
     const [fetchLoading, setFetchLoading] = useState(false);
+
+    // Bulk Operations State
+    const [isInlineEditing, setIsInlineEditing] = useState(false);
+    const [editedRows, setEditedRows] = useState({}); // { id: { field: value } }
+
+    // Batch Generator State
+    const [batchPrefix, setBatchPrefix] = useState("SPT-2025-");
+    const [batchStart, setBatchStart] = useState(1);
+    const [batchCount, setBatchCount] = useState(10);
+    const [batchEvent, setBatchEvent] = useState("");
+    const [batchDate, setBatchDate] = useState("");
+
+    // CSV Upload State
+    const [csvFile, setCsvFile] = useState(null);
 
     // Editing State
     const [editingCertId, setEditingCertId] = useState(null);
@@ -53,6 +68,7 @@ export default function VaultAdmin() {
             if (currentUser) {
                 fetchCertificates();
                 fetchEvents();
+                fetchBatches();
             }
         });
         return () => unsubscribe();
@@ -111,6 +127,20 @@ export default function VaultAdmin() {
         }
     };
 
+    const fetchBatches = async () => {
+        try {
+            const q = query(collection(db, "batches"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            const b = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            setBatches(b);
+        } catch (err) {
+            console.error("Error fetching batches:", err);
+        }
+    };
+
     const handleAddCertificate = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -147,11 +177,226 @@ export default function VaultAdmin() {
             setEvent("");
             setPosition("");
             setDate("");
-            setIssuedBy("The Sportify Society");
+            setIssuedBy("");
             fetchCertificates();
         } catch (err) {
             console.error("Error saving certificate:", err);
             alert("Failed to save certificate.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Bulk Operations Logic
+
+    const handleBatchGenerate = async (e) => {
+        e.preventDefault();
+        if (!confirm(`Are you sure you want to generate ${batchCount} certificates?`)) return;
+
+        setLoading(true);
+        try {
+            const batchId = doc(collection(db, "batches")).id;
+            const batchPromises = [];
+
+            // Attempt to create batch record, but don't fail if it fails (e.g. permissions)
+            const batchRecordPromise = setDoc(doc(db, "batches", batchId), {
+                id: batchId,
+                type: "batch_generate",
+                count: parseInt(batchCount),
+                description: `Batch: ${batchPrefix}${batchStart}... (${batchCount} items)`,
+                createdAt: serverTimestamp()
+            }).catch(err => {
+                console.warn("Failed to create batch record (check Firestore rules):", err);
+                return null;
+            });
+
+            for (let i = 0; i < batchCount; i++) {
+                const num = parseInt(batchStart) + i;
+                const id = `${batchPrefix}${num.toString().padStart(3, '0')}`;
+
+                batchPromises.push(setDoc(doc(db, "certificates", id), {
+                    certId: id,
+                    studentName: "TBD", // Placeholder
+                    event: batchEvent,
+                    position: "Participant",
+                    date: batchDate,
+                    issuedBy: "The Sportify Society",
+                    createdAt: serverTimestamp(),
+                    isPlaceholder: true,
+                    batchId: batchId
+                }));
+            }
+
+            // Wait for certificates AND the batch record (if it works)
+            await Promise.all([batchRecordPromise, ...batchPromises]);
+            alert(`Successfully generated ${batchCount} certificates!`);
+            fetchCertificates();
+            fetchBatches();
+        } catch (err) {
+            console.error("Error generating batch:", err);
+            alert("Failed to generate batch.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const parseCSV = (text) => {
+        const lines = text.split(/\r?\n/);
+        if (lines.length < 2) return [];
+
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        const result = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            const obj = {};
+            // Handle commas inside quotes roughly or just split by comma for now
+            const currentline = lines[i].split(',');
+
+            for (let j = 0; j < headers.length; j++) {
+                const val = currentline[j] ? currentline[j].trim() : "";
+                obj[headers[j]] = val;
+            }
+            result.push(obj);
+        }
+        return result;
+    };
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            setLoading(true);
+            try {
+                const text = evt.target.result;
+                const data = parseCSV(text);
+
+                console.log("Parsed CSV Data:", data);
+
+                if (data.length === 0) {
+                    alert("No data found in CSV or invalid format.");
+                    setLoading(false);
+                    return;
+                }
+
+                const batchId = doc(collection(db, "batches")).id;
+
+                // Attempt to create batch record, but don't fail the upload if it fails (e.g. permissions)
+                const batchPromise = setDoc(doc(db, "batches", batchId), {
+                    id: batchId,
+                    type: "csv_upload",
+                    count: data.length,
+                    description: `CSV Upload: ${file.name} (${data.length} items)`,
+                    createdAt: serverTimestamp()
+                }).catch(err => {
+                    console.warn("Failed to create batch record (check Firestore rules):", err);
+                    return null; // Resolve so Promise.all doesn't fail
+                });
+
+                const certPromises = data.map(row => {
+                    // Expects headers: id, name, event, position, date, issued by
+                    // Map from lowercase headers to our schema
+                    const id = row.id || row['certificate id'];
+                    const name = row.name || row['student name'];
+
+                    if (!id || !name) {
+                        console.warn("Skipping invalid row:", row);
+                        return null;
+                    }
+
+                    return setDoc(doc(db, "certificates", id), {
+                        certId: id,
+                        studentName: name,
+                        event: row.event || "",
+                        position: row.position || "Participant",
+                        date: row.date || new Date().toISOString().split('T')[0],
+                        issuedBy: row['issued by'] || row.issuedby || "The Sportify Society",
+                        createdAt: serverTimestamp(),
+                        batchId: batchId
+                    });
+                }).filter(p => p !== null);
+
+                if (certPromises.length === 0) {
+                    alert("No valid rows found. Check column headers (ID, Name, etc).");
+                } else {
+                    // Wait for certificates AND the batch record (if it works)
+                    await Promise.all([batchPromise, ...certPromises]);
+                    alert(`Successfully uploaded ${certPromises.length} certificates from CSV!`);
+                    fetchCertificates();
+                    fetchBatches();
+                }
+            } catch (err) {
+                console.error("Error uploading CSV:", err);
+                alert("Failed to upload CSV. Check console for details.");
+            } finally {
+                setLoading(false);
+                e.target.value = null; // Reset input
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    const handleDeleteBatch = async (batch) => {
+        if (!confirm(`Are you sure you want to UNDO this batch? This will delete ${batch.count} certificates.`)) return;
+        setLoading(true);
+        try {
+            // 1. Find all certificates with this batchId
+            const q = query(collection(db, "certificates"), where("batchId", "==", batch.id));
+            const querySnapshot = await getDocs(q);
+
+            // 2. Delete them
+            const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+
+            // 3. Delete the batch record
+            deletePromises.push(deleteDoc(doc(db, "batches", batch.id)));
+
+            await Promise.all(deletePromises);
+            alert("Batch undone successfully!");
+            fetchCertificates();
+            fetchBatches();
+        } catch (err) {
+            console.error("Error deleting batch:", err);
+            alert("Failed to undo batch.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const toggleInlineEdit = () => {
+        setIsInlineEditing(!isInlineEditing);
+        setEditedRows({});
+    };
+
+    const handleInlineChange = (id, field, value) => {
+        setEditedRows(prev => ({
+            ...prev,
+            [id]: {
+                ...prev[id],
+                [field]: value
+            }
+        }));
+    };
+
+    const saveInlineChanges = async () => {
+        setLoading(true);
+        try {
+            const updates = Object.keys(editedRows).map(id => {
+                return updateDoc(doc(db, "certificates", id), {
+                    ...editedRows[id],
+                    updatedAt: serverTimestamp()
+                });
+            });
+
+            await Promise.all(updates);
+            alert("All changes saved successfully!");
+            setIsInlineEditing(false);
+            setEditedRows({});
+            fetchCertificates();
+        } catch (err) {
+            console.error("Error saving inline changes:", err);
+            alert("Failed to save changes.");
         } finally {
             setLoading(false);
         }
@@ -175,7 +420,7 @@ export default function VaultAdmin() {
         setEvent("");
         setPosition("");
         setDate("");
-        setIssuedBy("The Sportify Society");
+        setIssuedBy("");
     };
 
     const handleAddEvent = async (e) => {
@@ -360,8 +605,123 @@ export default function VaultAdmin() {
 
                 {activeTab === "certificates" ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Add Certificate Form */}
-                        <div className="lg:col-span-1">
+                        {/* Bulk Actions & Add Certificate */}
+                        <div className="lg:col-span-1 space-y-8">
+                            <Card className="!bg-black border border-gray-800 shadow-xl">
+                                <CardContent className="p-6">
+                                    <h2 className="text-xl font-semibold mb-6 flex items-center text-white">
+                                        <FileSpreadsheet className="h-5 w-5 mr-2 text-orange-500" /> Bulk Actions
+                                    </h2>
+
+                                    {/* CSV Upload */}
+                                    <div className="mb-8">
+                                        <h3 className="text-sm font-medium text-gray-300 mb-2">Upload CSV</h3>
+                                        <div className="relative">
+                                            <input
+                                                type="file"
+                                                accept=".csv"
+                                                onChange={handleFileUpload}
+                                                className="hidden"
+                                                id="csv-upload"
+                                            />
+                                            <label
+                                                htmlFor="csv-upload"
+                                                className="flex items-center justify-center w-full p-4 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-orange-500 hover:bg-gray-900 transition-all"
+                                            >
+                                                <div className="text-center">
+                                                    <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+                                                    <span className="text-xs text-gray-500">Click to upload CSV</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <p className="text-[10px] text-gray-500 mt-2">
+                                            Format: ID, Name, Event, Position, Date, Issued By
+                                        </p>
+                                    </div>
+
+                                    {/* Batch Generator */}
+                                    <div className="mb-8">
+                                        <h3 className="text-sm font-medium text-gray-300 mb-2">Batch Generator</h3>
+                                        <form onSubmit={handleBatchGenerate} className="space-y-3">
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={batchPrefix}
+                                                    onChange={(e) => setBatchPrefix(e.target.value)}
+                                                    placeholder="Prefix (SPT-)"
+                                                    className="w-full p-2 bg-[#111] border border-gray-800 rounded text-white text-xs"
+                                                    required
+                                                />
+                                                <input
+                                                    type="number"
+                                                    value={batchStart}
+                                                    onChange={(e) => setBatchStart(e.target.value)}
+                                                    placeholder="Start #"
+                                                    className="w-full p-2 bg-[#111] border border-gray-800 rounded text-white text-xs"
+                                                    required
+                                                />
+                                            </div>
+                                            <input
+                                                type="number"
+                                                value={batchCount}
+                                                onChange={(e) => setBatchCount(e.target.value)}
+                                                placeholder="Count"
+                                                className="w-full p-2 bg-[#111] border border-gray-800 rounded text-white text-xs"
+                                                required
+                                            />
+                                            <input
+                                                type="text"
+                                                value={batchEvent}
+                                                onChange={(e) => setBatchEvent(e.target.value)}
+                                                placeholder="Event Name"
+                                                className="w-full p-2 bg-[#111] border border-gray-800 rounded text-white text-xs"
+                                                required
+                                            />
+                                            <input
+                                                type="date"
+                                                value={batchDate}
+                                                onChange={(e) => setBatchDate(e.target.value)}
+                                                className="w-full p-2 bg-[#111] border border-gray-800 rounded text-white text-xs"
+                                                required
+                                            />
+                                            <Button type="submit" className="w-full bg-gray-800 hover:bg-gray-700 text-white text-xs py-2" disabled={loading}>
+                                                <RefreshCw className="h-3 w-3 mr-1" /> Generate Batch
+                                            </Button>
+                                        </form>
+                                    </div>
+
+                                    {/* Recent Batches (Undo) */}
+                                    <div>
+                                        <h3 className="text-sm font-medium text-gray-300 mb-2 flex items-center">
+                                            <History className="h-3 w-3 mr-1" /> Recent Batches
+                                        </h3>
+                                        {batches.length === 0 ? (
+                                            <p className="text-xs text-gray-500 italic">No recent batch operations.</p>
+                                        ) : (
+                                            <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                                                {batches.map(batch => (
+                                                    <div key={batch.id} className="flex items-center justify-between p-2 bg-gray-900 rounded border border-gray-800 text-xs">
+                                                        <div className="overflow-hidden">
+                                                            <p className="font-medium text-gray-300 truncate">{batch.description}</p>
+                                                            <p className="text-[10px] text-gray-500">
+                                                                {batch.createdAt?.toDate ? batch.createdAt.toDate().toLocaleDateString() : 'Just now'} • {batch.count} items
+                                                            </p>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleDeleteBatch(batch)}
+                                                            className="text-red-500 hover:bg-red-500/10 p-1.5 rounded transition-colors"
+                                                            title="Undo Batch"
+                                                        >
+                                                            <RotateCcw className="h-3 w-3" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+
                             <Card className="!bg-black border border-gray-800 sticky top-24 shadow-xl">
                                 <CardContent className="p-6">
                                     <h2 className="text-xl font-semibold mb-6 flex items-center text-white">
@@ -456,7 +816,23 @@ export default function VaultAdmin() {
                         <div className="lg:col-span-2">
                             <Card className="!bg-black border border-gray-800 shadow-xl h-full">
                                 <CardContent className="p-6">
-                                    <h2 className="text-xl font-semibold mb-6 text-white">Recent Certificates</h2>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-xl font-semibold text-white">Recent Certificates</h2>
+                                        <div className="flex gap-2">
+                                            {isInlineEditing ? (
+                                                <Button onClick={saveInlineChanges} className="bg-green-600 hover:bg-green-500 text-white text-xs px-3 py-1 h-8">
+                                                    <Save className="h-3 w-3 mr-1" /> Save Changes
+                                                </Button>
+                                            ) : null}
+                                            <Button
+                                                onClick={toggleInlineEdit}
+                                                variant="outline"
+                                                className={`text-xs px-3 py-1 h-8 ${isInlineEditing ? "border-red-500 text-red-500 hover:bg-red-500/10" : "border-gray-700 text-gray-400 hover:text-white"}`}
+                                            >
+                                                {isInlineEditing ? <><X className="h-3 w-3 mr-1" /> Cancel Edit</> : <><Pencil className="h-3 w-3 mr-1" /> Quick Edit</>}
+                                            </Button>
+                                        </div>
+                                    </div>
                                     {fetchLoading ? (
                                         <div className="flex justify-center py-10">
                                             <Loader2 className="h-8 w-8 text-orange-500 animate-spin" />
@@ -482,12 +858,39 @@ export default function VaultAdmin() {
                                                     {certificates.map((cert) => (
                                                         <tr key={cert.id} className="border-b border-gray-800/50 hover:bg-white/5 transition group">
                                                             <td className="p-4 font-mono text-orange-400 text-sm">{cert.id}</td>
-                                                            <td className="p-4 font-medium text-white">{cert.studentName}</td>
-                                                            <td className="p-4 text-gray-300 text-sm">{cert.event}</td>
+                                                            <td className="p-4 font-medium text-white">
+                                                                {isInlineEditing ? (
+                                                                    <input
+                                                                        type="text"
+                                                                        value={editedRows[cert.id]?.studentName ?? cert.studentName}
+                                                                        onChange={(e) => handleInlineChange(cert.id, 'studentName', e.target.value)}
+                                                                        className="bg-[#111] border border-gray-700 rounded px-2 py-1 text-white w-full text-sm focus:border-orange-500 outline-none"
+                                                                    />
+                                                                ) : cert.studentName}
+                                                            </td>
                                                             <td className="p-4 text-gray-300 text-sm">
-                                                                <span className="px-2 py-1 rounded-full bg-gray-800 text-xs border border-gray-700">
-                                                                    {cert.position}
-                                                                </span>
+                                                                {isInlineEditing ? (
+                                                                    <input
+                                                                        type="text"
+                                                                        value={editedRows[cert.id]?.event ?? cert.event}
+                                                                        onChange={(e) => handleInlineChange(cert.id, 'event', e.target.value)}
+                                                                        className="bg-[#111] border border-gray-700 rounded px-2 py-1 text-white w-full text-sm focus:border-orange-500 outline-none"
+                                                                    />
+                                                                ) : cert.event}
+                                                            </td>
+                                                            <td className="p-4 text-gray-300 text-sm">
+                                                                {isInlineEditing ? (
+                                                                    <input
+                                                                        type="text"
+                                                                        value={editedRows[cert.id]?.position ?? cert.position}
+                                                                        onChange={(e) => handleInlineChange(cert.id, 'position', e.target.value)}
+                                                                        className="bg-[#111] border border-gray-700 rounded px-2 py-1 text-white w-full text-sm focus:border-orange-500 outline-none"
+                                                                    />
+                                                                ) : (
+                                                                    <span className="px-2 py-1 rounded-full bg-gray-800 text-xs border border-gray-700">
+                                                                        {cert.position}
+                                                                    </span>
+                                                                )}
                                                             </td>
                                                             <td className="p-4 text-gray-400 text-sm">{cert.date}</td>
                                                             <td className="p-4 text-right flex justify-end gap-2">
