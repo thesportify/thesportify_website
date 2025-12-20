@@ -25,7 +25,7 @@ export default function Hero() {
   }, []);
 
   return (
-  <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-8 px-2 sm:pt-12 sm:px-4">
+    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-8 px-2 sm:pt-12 sm:px-4">
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <div
@@ -101,10 +101,10 @@ export default function Hero() {
           that celebrates athleticism, teamwork, and the undying spirit of
           competition.
         </p>
-  <div className="flex flex-col sm:flex-row sm:justify-center gap-4 w-full">
+        <div className="flex flex-col sm:flex-row sm:justify-center gap-4 w-full">
           {/* Join Sportify Button (Google Form Link) */}
           <Link
-            href="https://docs.google.com/forms/d/e/1FAIpQLSf-uGRSW6krWftInt8yia8iFajoLbrwqBHiBnq6ZfKyclV7DA/viewform"
+            href="https://forms.gle/p3155Ce9UUy9CrzW6"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto"
