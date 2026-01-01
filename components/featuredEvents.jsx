@@ -8,48 +8,14 @@ import { db } from "@/lib/firebase";
 import { collection, query, orderBy, getDocs, where } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 
-// Import static images
-import featEve1 from "../assets/Featured-events/mindmuse.png";
-import featEve2 from "../assets/Featured-events/actletics.jpg";
-
-const staticEvents = [
-  {
-    id: "featured-1",
-    title: "MindMuse – Women in Sports Edition",
-    image: featEve1,
-    date: "1 Dec - 8 Dec, 2025",
-    location: "Online (Unstop)",
-    category: "Quiz Competition",
-    description:
-      "MindMuse is more than just a quiz; it’s a celebration of the stories, achievements, and inspiration drawn from women athletes across the world. It’s also an opportunity for women learners to step forward, represent their Houses, and lead from the front.",
-    tags: ["Women in Sports", "Quiz", "Empowerment"],
-    link: "https://forms.gle/w4FS2TW4LQpKmcmaA"
-  },
-  {
-    id: "featured-2",
-    title: "Actletics",
-    image: featEve2,
-    date: "26 Nov - 9 Dec, 2025",
-    location: "Online (Instagram Reels)",
-    category: "Cultural Fusion",
-    description:
-      "Sportify × Aayam bring you IITM BS’s first-ever sports + theatre fusion event! Create a 60–120 sec video where you act out iconic sports moments, do creative sports commentary, or add drama, parody, or theatre twists.",
-    tags: ["Theatre", "Sports", "Creativity", "Reels"],
-    link: "https://form.jotform.com/253252575784062"
-  },
-];
-
-export default function PastEvents() {
+export default function FeaturedEvents() {
   const sectionRef = useRef(null);
-  const [events, setEvents] = useState(staticEvents); // Initialize with static events
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        // Only fetch events marked as 'featured' (or missing eventType, for backward compatibility if needed, but let's be strict or default)
-        // Actually, let's allow 'featured' OR null (if we want to show old ones, but new ones have type).
-        // For simplicity and strictness requested by user:
         const q = query(
           collection(db, "events"),
           where("eventType", "==", "featured"),
@@ -60,12 +26,11 @@ export default function PastEvents() {
           id: doc.id,
           ...doc.data()
         }));
-        // Merge dynamic events (first) with static events (last)
-        setEvents([...fetchedEvents, ...staticEvents]);
+
+        setEvents(fetchedEvents);
       } catch (error) {
         console.error("Error fetching events:", error);
-        // On error, keep static events
-        setEvents(staticEvents);
+        setEvents([]);
       } finally {
         setLoading(false);
       }
@@ -92,13 +57,13 @@ export default function PastEvents() {
     return () => {
       elements.forEach((el) => observer.unobserve(el));
     };
-  }, [events]); // Re-run observer when events change
+  }, [events]);
 
   return (
     <section
       ref={sectionRef}
       className="py-10 md:py-20 bg-gradient-to-br from-black via-[#1a1a1a] to-black dark:bg-gray-950 px-4 sm:px-6 md:px-16 relative"
-      id="past-events"
+      id="featured-events"
       style={{
         backgroundImage: `url(${featureBG.src})`,
         backgroundSize: 'cover',
@@ -124,15 +89,20 @@ export default function PastEvents() {
           <div className="flex justify-center items-center h-64">
             <Loader2 className="h-12 w-12 text-orange-500 animate-spin" />
           </div>
+        ) : events.length === 0 ? (
+          <div className="flex justify-center items-center h-40 scroll-reveal">
+            <p className="text-2xl font-bold text-gray-500 animate-pulse">
+              Events Coming Soon
+            </p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-28 scroll-reveal items-stretch justify-items-center">
             {events.map((event, index) => {
-              // Trim description to 200 chars for uniformity
-              const trimmedDesc = event.description.length > 200
+              // Trim description only if it exists
+              const trimmedDesc = event.description && event.description.length > 200
                 ? event.description.slice(0, 200) + "..."
-                : event.description;
+                : event.description || "";
 
-              // Handle image source: URL string (dynamic) or StaticImageData (static)
               const imageSrc = event.image || "/placeholder.svg";
 
               return (
@@ -141,14 +111,14 @@ export default function PastEvents() {
                   className="bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-xl overflow-hidden shadow-lg flex flex-col md:flex-row transform hover:scale-[1.02] transition-all duration-300 animate-glow-card max-w-[22rem] sm:max-w-sm md:max-w-[36rem] w-full h-full"
                   style={{ transitionDelay: `${index * 100}ms` }}
                 >
-                  {/* Image */}
-                  <div className="w-full md:w-2/5 h-[24rem] sm:h-[32rem] md:h-auto relative flex items-center justify-center bg-black/50">
+                  {/* Image Container with black background for containment */}
+                  <div className="w-full md:w-2/5 h-[24rem] sm:h-[32rem] md:h-auto relative flex items-center justify-center bg-black">
                     <Image
                       src={imageSrc}
                       alt={event.title}
                       width={500}
                       height={500}
-                      className="object-cover w-[85%] h-[95%] sm:w-[90%] sm:h-[90%] transition-all duration-300 rounded-lg"
+                      className="object-contain w-full h-full transition-all duration-300 rounded-lg p-2"
                     />
                   </div>
 
