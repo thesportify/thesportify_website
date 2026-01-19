@@ -16,12 +16,11 @@ export default function TeamMembersCarousel() {
   // Updated category order - split Core into Founders and Secretaries
   const categoryOrder = [
     "Secretaries",
-    "Tech & Analytics",
     "Women's Wing",
     "Events & Operations",
-    "Design & Media",
+    "Tech & Analytics",
     "PR & Outreach",
-    // "Community & Engagement",
+    "Design & Media",
 
     /*"Sponsorship",
     "Research & Publication",
@@ -341,8 +340,8 @@ export default function TeamMembersCarousel() {
                     setIsMobileMenuOpen(false);
                   }}
                   className={`block w-full text-left px-4 py-3 transition-all duration-300 ${activeCategory === category
-                      ? "bg-gradient-to-r from-[#ff5a00] to-[#ffb700] text-white"
-                      : "text-gray-300 hover:text-white hover:bg-gray-800/50"
+                    ? "bg-gradient-to-r from-[#ff5a00] to-[#ffb700] text-white"
+                    : "text-gray-300 hover:text-white hover:bg-gray-800/50"
                     }`}
                 >
                   {category}
@@ -358,8 +357,8 @@ export default function TeamMembersCarousel() {
               onClick={scrollLeft}
               disabled={!scrollState.canScrollLeft}
               className={`absolute left-0 z-10 bg-gray-900/80 text-white rounded-full p-1 backdrop-blur-sm shadow-lg transform transition-all duration-200 ${scrollState.canScrollLeft
-                  ? "opacity-100 hover:bg-gray-800 hover:scale-110 cursor-pointer"
-                  : "opacity-0 pointer-events-none"
+                ? "opacity-100 hover:bg-gray-800 hover:scale-110 cursor-pointer"
+                : "opacity-0 pointer-events-none"
                 }`}
               aria-label="Scroll left"
             >
@@ -383,8 +382,8 @@ export default function TeamMembersCarousel() {
                     data-category={category}
                     onClick={() => setActiveCategory(category)}
                     className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 relative ${activeCategory === category
-                        ? "active-category bg-gradient-to-r from-[#ff5a00] to-[#ffb700] text-white shadow-lg shadow-orange-900/30 scale-105"
-                        : "text-gray-300 hover:text-white hover:bg-gray-800/50"
+                      ? "active-category bg-gradient-to-r from-[#ff5a00] to-[#ffb700] text-white shadow-lg shadow-orange-900/30 scale-105"
+                      : "text-gray-300 hover:text-white hover:bg-gray-800/50"
                       }`}
                   >
                     <span className="relative z-10">{category}</span>
@@ -403,8 +402,8 @@ export default function TeamMembersCarousel() {
               onClick={scrollRight}
               disabled={!scrollState.canScrollRight}
               className={`absolute right-0 z-10 bg-gray-900/80 text-white rounded-full p-1 backdrop-blur-sm shadow-lg transform transition-all duration-200 ${scrollState.canScrollRight
-                  ? "opacity-100 hover:bg-gray-800 hover:scale-110 cursor-pointer"
-                  : "opacity-0 pointer-events-none"
+                ? "opacity-100 hover:bg-gray-800 hover:scale-110 cursor-pointer"
+                : "opacity-0 pointer-events-none"
                 }`}
               aria-label="Scroll right"
             >
@@ -564,8 +563,8 @@ export default function TeamMembersCarousel() {
 
                     <div
                       className={`rounded-xl overflow-hidden ${isActive
-                          ? "shadow-2xl shadow-orange-900/30"
-                          : "shadow-lg"
+                        ? "shadow-2xl shadow-orange-900/30"
+                        : "shadow-lg"
                         } relative`}
                       style={{
                         width: isActive
@@ -634,14 +633,14 @@ export default function TeamMembersCarousel() {
                         {/* Bottom info panel - enhanced styling with corner accents */}
                         <div
                           className={`absolute bottom-0 left-0 right-0 p-3 sm:p-4 text-center transition-all duration-500 ${isActive
-                              ? "bg-gradient-to-t from-black via-black/90 to-transparent pt-10 sm:pt-12"
-                              : "bg-black/80"
+                            ? "bg-gradient-to-t from-black via-black/90 to-transparent pt-10 sm:pt-12"
+                            : "bg-black/80"
                             }`}
                         >
                           <h3
                             className={`font-bold text-white transition-all duration-300 ${isActive
-                                ? "text-lg sm:text-xl mb-1"
-                                : "text-sm sm:text-base mb-0.5"
+                              ? "text-lg sm:text-xl mb-1"
+                              : "text-sm sm:text-base mb-0.5"
                               }`}
                           >
                             {member.name}
@@ -649,8 +648,8 @@ export default function TeamMembersCarousel() {
 
                           <p
                             className={`font-medium transition-all duration-300 ${isActive
-                                ? "text-gray-200 text-xs sm:text-sm"
-                                : "text-gray-400 text-xs"
+                              ? "text-gray-200 text-xs sm:text-sm"
+                              : "text-gray-400 text-xs"
                               }`}
                           >
                             {member.position}
@@ -723,8 +722,8 @@ export default function TeamMembersCarousel() {
                 key={index}
                 onClick={() => selectMember(index)}
                 className={`transition-all duration-300 rounded-full ${index === activeMemberIndex
-                    ? "bg-gradient-to-r from-[#ff5a00] to-[#ffb700] w-5 sm:w-6 h-1.5"
-                    : "bg-gray-700 w-2 sm:w-2.5 h-1.5 hover:bg-gray-500"
+                  ? "bg-gradient-to-r from-[#ff5a00] to-[#ffb700] w-5 sm:w-6 h-1.5"
+                  : "bg-gray-700 w-2 sm:w-2.5 h-1.5 hover:bg-gray-500"
                   }`}
                 aria-label={`View team member ${index + 1}`}
               />
