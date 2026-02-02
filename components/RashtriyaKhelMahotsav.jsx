@@ -78,7 +78,7 @@ export default function RashtriyaKhelMahotsav() {
             {/* Header Text */}
             <div>
               <div className="flex items-center mb-4">
-                <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24">
+                <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-24 md:h-24">
                   <Image 
                     src={rkmLogo} 
                     alt="RKM Logo" 
