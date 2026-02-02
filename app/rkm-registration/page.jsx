@@ -298,13 +298,13 @@ export default function RKMRegistration() {
 
   const cities = [
     { name: 'Lucknow', date: '18 Feb', sports: ['Cricket'] },
-    { name: 'Patna', date: '20 Feb', sports: ['Badminton'] },
     { name: 'Delhi', date: '21 Feb', sports: ['Cricket', 'Badminton'] },
     { name: 'Mumbai', date: '21 Feb', sports: ['Badminton'] },
     { name: 'Jaipur', date: '22 Feb', sports: ['Cricket'] },
     { name: 'Hyderabad', date: '22 Feb', sports: ['Badminton'] },
     { name: 'Kolkata', date: '22 Feb', sports: ['Cricket'] },
-    { name: 'Chennai', date: '22 Feb', sports: ['Badminton'] }
+    { name: 'Chennai', date: '22 Feb', sports: ['Badminton'] },
+    { name: 'Patna', date: '22 Feb', sports: ['Badminton'] }
   ];
 
   const getAvailableSports = () => {
