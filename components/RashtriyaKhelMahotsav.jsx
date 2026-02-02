@@ -122,7 +122,7 @@ export default function RashtriyaKhelMahotsav() {
                 </div>
                 <div className="bg-gradient-to-br from-[hsl(var(--flame-dark))/60] to-[hsl(var(--flame))/50] border border-[hsl(var(--flame))/50] rounded-lg p-2 md:p-2.5 backdrop-blur-md bg-black/30">
                   <p className="text-[0.6rem] md:text-[0.7rem] text-gray-400 mb-0.5 md:mb-1">Sports</p>
-                  <p className="text-[0.75rem] md:text-[0.94rem] font-bold text-white">Badminton + Cricket/Football</p>
+                  <p className="text-[0.75rem] md:text-[0.94rem] font-bold text-white">Badminton + Cricket</p>
                 </div>
                 <div className="bg-gradient-to-br from-[hsl(var(--flame-dark))/60] to-[hsl(var(--flame))/50] border border-[hsl(var(--flame))/50] rounded-lg p-2 md:p-2.5 backdrop-blur-md bg-black/30">
                   <p className="text-[0.6rem] md:text-[0.7rem] text-gray-400 mb-0.5 md:mb-1">Format</p>
@@ -197,11 +197,11 @@ export default function RashtriyaKhelMahotsav() {
                         <p className="text-foreground text-xs md:text-sm font-semibold">🏏 Cricket</p>
                       </div>
 
-                      {/* Mumbai */}
+                      {/* Patna */}
                       <div className="bg-card/40 border border-[hsl(var(--flame))]/30 rounded-xl p-3 md:p-4 hover:border-[hsl(var(--flame))]/60 transition-all">
                         <div className="flex items-start justify-between mb-1.5 md:mb-2">
-                          <h4 className="text-sm md:text-base font-bold text-[hsl(var(--flame))]">📍 Mumbai</h4>
-                          <span className="text-[10px] md:text-xs text-muted-foreground bg-[hsl(var(--flame))]/10 px-1.5 md:px-2 py-0.5 rounded-full">21 Feb</span>
+                          <h4 className="text-sm md:text-base font-bold text-[hsl(var(--flame))]">📍 Patna</h4>
+                          <span className="text-[10px] md:text-xs text-muted-foreground bg-[hsl(var(--flame))]/10 px-1.5 md:px-2 py-0.5 rounded-full">20 Feb</span>
                         </div>
                         <p className="text-foreground text-xs md:text-sm font-semibold">🏸 Badminton</p>
                       </div>
@@ -215,11 +215,11 @@ export default function RashtriyaKhelMahotsav() {
                         <p className="text-foreground text-xs md:text-sm font-semibold">🏏 Cricket & 🏸 Badminton</p>
                       </div>
 
-                      {/* Chennai */}
+                      {/* Mumbai */}
                       <div className="bg-card/40 border border-[hsl(var(--flame))]/30 rounded-xl p-3 md:p-4 hover:border-[hsl(var(--flame))]/60 transition-all">
                         <div className="flex items-start justify-between mb-1.5 md:mb-2">
-                          <h4 className="text-sm md:text-base font-bold text-[hsl(var(--flame))]">📍 Chennai</h4>
-                          <span className="text-[10px] md:text-xs text-muted-foreground bg-[hsl(var(--flame))]/10 px-1.5 md:px-2 py-0.5 rounded-full">22 Feb</span>
+                          <h4 className="text-sm md:text-base font-bold text-[hsl(var(--flame))]">📍 Mumbai</h4>
+                          <span className="text-[10px] md:text-xs text-muted-foreground bg-[hsl(var(--flame))]/10 px-1.5 md:px-2 py-0.5 rounded-full">21 Feb</span>
                         </div>
                         <p className="text-foreground text-xs md:text-sm font-semibold">🏸 Badminton</p>
                       </div>
@@ -233,6 +233,15 @@ export default function RashtriyaKhelMahotsav() {
                         <p className="text-foreground text-xs md:text-sm font-semibold">🏏 Cricket</p>
                       </div>
 
+                      {/* Hyderabad */}
+                      <div className="bg-card/40 border border-[hsl(var(--flame))]/30 rounded-xl p-3 md:p-4 hover:border-[hsl(var(--flame))]/60 transition-all">
+                        <div className="flex items-start justify-between mb-1.5 md:mb-2">
+                          <h4 className="text-sm md:text-base font-bold text-[hsl(var(--flame))]">📍 Hyderabad</h4>
+                          <span className="text-[10px] md:text-xs text-muted-foreground bg-[hsl(var(--flame))]/10 px-1.5 md:px-2 py-0.5 rounded-full">22 Feb</span>
+                        </div>
+                        <p className="text-foreground text-xs md:text-sm font-semibold">🏸 Badminton</p>
+                      </div>
+
                       {/* Kolkata */}
                       <div className="bg-card/40 border border-[hsl(var(--flame))]/30 rounded-xl p-3 md:p-4 hover:border-[hsl(var(--flame))]/60 transition-all">
                         <div className="flex items-start justify-between mb-1.5 md:mb-2">
@@ -242,19 +251,10 @@ export default function RashtriyaKhelMahotsav() {
                         <p className="text-foreground text-xs md:text-sm font-semibold">🏏 Cricket</p>
                       </div>
 
-                      {/* Hyderabad */}
+                      {/* Chennai */}
                       <div className="bg-card/40 border border-[hsl(var(--flame))]/30 rounded-xl p-3 md:p-4 hover:border-[hsl(var(--flame))]/60 transition-all">
                         <div className="flex items-start justify-between mb-1.5 md:mb-2">
-                          <h4 className="text-sm md:text-base font-bold text-[hsl(var(--flame))]">📍 Hyderabad</h4>
-                          <span className="text-[10px] md:text-xs text-muted-foreground bg-[hsl(var(--flame))]/10 px-1.5 md:px-2 py-0.5 rounded-full">22 Feb</span>
-                        </div>
-                        <p className="text-foreground text-xs md:text-sm font-semibold">TBA</p>
-                      </div>
-
-                      {/* Patna */}
-                      <div className="bg-card/40 border border-[hsl(var(--flame))]/30 rounded-xl p-3 md:p-4 hover:border-[hsl(var(--flame))]/60 transition-all">
-                        <div className="flex items-start justify-between mb-1.5 md:mb-2">
-                          <h4 className="text-sm md:text-base font-bold text-[hsl(var(--flame))]">📍 Patna</h4>
+                          <h4 className="text-sm md:text-base font-bold text-[hsl(var(--flame))]">📍 Chennai</h4>
                           <span className="text-[10px] md:text-xs text-muted-foreground bg-[hsl(var(--flame))]/10 px-1.5 md:px-2 py-0.5 rounded-full">22 Feb</span>
                         </div>
                         <p className="text-foreground text-xs md:text-sm font-semibold">🏸 Badminton</p>

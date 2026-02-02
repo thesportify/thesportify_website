@@ -14,7 +14,7 @@ export default function RKMRegistration() {
     house: '',
     contact: '',
     city: '',
-    sport: '',
+    sports: [], // Changed from sport to sports array
     badmintonType: '',
     cricketRole: '',
     emergencyName: '',
@@ -27,112 +27,267 @@ export default function RKMRegistration() {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => {
-      const updated = {
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      };
+      const updated = { ...prev };
       
-      // Reset sport when city changes
-      if (name === 'city') {
-        updated.sport = '';
-        updated.badmintonType = '';
-        updated.cricketRole = '';
+      // Handle sport checkboxes
+      if (name === 'sportCheckbox') {
+        if (checked) {
+          updated.sports = [...prev.sports, value];
+        } else {
+          updated.sports = prev.sports.filter(s => s !== value);
+          // Reset conditional fields when sport is unchecked
+          if (value === 'Badminton') {
+            updated.badmintonType = '';
+          }
+          if (value === 'Cricket') {
+            updated.cricketRole = '';
+          }
+        }
+      }
+      // Handle regular checkboxes (declaration, mediaConsent)
+      else if (type === 'checkbox') {
+        updated[name] = checked;
+      }
+      // Handle regular inputs
+      else {
+        updated[name] = value;
       }
       
-      // Reset conditional fields when sport changes
-      if (name === 'sport') {
-        if (value !== 'Badminton') {
-          updated.badmintonType = '';
-        }
-        if (value !== 'Cricket') {
-          updated.cricketRole = '';
-        }
+      // Reset sports when city changes
+      if (name === 'city') {
+        updated.sports = [];
+        updated.badmintonType = '';
+        updated.cricketRole = '';
       }
       
       return updated;
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Build Google Form URL with pre-filled data
-    const baseUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSf3o4GKPXtsru4rG5BVQjVB9bddlpQxZQhpByl--sVcWpjMiQ/formResponse';
+    if (isSubmitting) return;
     
-    const params = new URLSearchParams({
-      'entry.707996126': formData.fullName,
-      'entry.1870420685': formData.email,
-      'entry.1310150483': formData.gender,
-      'entry.1752023195': formData.age,
-      'entry.1852101874': formData.house,
-      'entry.2087966706': formData.contact,
-      'entry.1596139706': `${formData.city} – ${cities.find(c => c.name === formData.city)?.date}`,
-      'entry.2043308924': formData.sport,
-      'entry.414051539': formData.emergencyName,
-      'entry.2037347418': formData.emergencyContact,
-      'entry.1368391597': formData.emergencyRelation,
-      'entry.1823333164': formData.medicalCondition,
-      'entry.831970724': formData.medicalDetails || '',
-    });
-
-    // Add conditional fields
-    if (formData.sport === 'Badminton' && formData.badmintonType) {
-      params.append('entry.826712633', formData.badmintonType);
+    // Comprehensive validation for all required fields
+    if (!formData.fullName.trim()) {
+      alert('Please enter your full name');
+      return;
     }
-    if (formData.sport === 'Cricket' && formData.cricketRole) {
-      params.append('entry.2005278859', formData.cricketRole);
+    
+    if (!formData.email.trim()) {
+      alert('Please enter your email address');
+      return;
     }
-
-    // Add declaration checkboxes (all checked if form is submitted)
-    if (formData.declaration) {
-      params.append('entry.354605521', 'I confirm that I am a currently enrolled IIT Madras BS student and that all information provided by me in this form is true, accurate, and verifiable.');
-      params.append('entry.354605521', 'I confirm that I will be physically present in the selected city on the event date(s) and will participate only in the city chosen during registration.');
-      params.append('entry.354605521', 'I agree to strictly adhere to all event rules, codes of conduct, discipline policies, and instructions issued by the Sportify Society and the event coordinators, before and during the event.');
-      params.append('entry.354605521', 'I acknowledge that any form of misconduct, including but not limited to abusive language, unsportsmanlike behaviour, cheating, misrepresentation, or violation of institute policies, may result in immediate disqualification, forfeiture of match results, and/or further action as deemed appropriate by the organizers.');
-      params.append('entry.354605521', 'I understand that participation in physical sports involves inherent risks, and I voluntarily choose to participate. I confirm that I am medically fit to take part in the event and that I will immediately inform the coordinators of any injury or health concern.');
-      params.append('entry.354605521', 'I agree that Sportify Society, Nilgiri House, Nallamala House, Sundarbans House and IIT Madras BS shall not be held responsible for any personal injury, loss, or damage to personal belongings arising during travel to, participation in, or return from the event, except in cases of proven organizer negligence');
-      params.append('entry.354605521', 'I agree that any false declaration or misrepresentation may lead to cancellation of my registration, revocation of certificates, and appropriate disciplinary action.');
+    
+    if (!formData.gender) {
+      alert('Please select your gender');
+      return;
     }
-
-    if (formData.mediaConsent) {
-      params.append('entry.714345332', 'I grant permission to Sportify Society and IIT Madras BS to use photographs, videos, and recordings captured during the event for official documentation, reporting, and non-commercial promotional purposes.');
+    
+    if (!formData.age || formData.age < 16) {
+      alert('Please enter a valid age (minimum 16)');
+      return;
     }
+    
+    if (!formData.house) {
+      alert('Please select your house affiliation');
+      return;
+    }
+    
+    if (!formData.contact || formData.contact.length !== 10) {
+      alert('Please enter a valid 10-digit contact number');
+      return;
+    }
+    
+    if (!formData.city) {
+      alert('Please select a city');
+      return;
+    }
+    
+    if (formData.sports.length === 0) {
+      alert('Please select at least one sport');
+      return;
+    }
+    
+    // Validate conditional fields for selected sports
+    if (formData.sports.includes('Badminton') && !formData.badmintonType) {
+      alert('Please select Badminton participation type (Singles or Doubles)');
+      return;
+    }
+    
+    if (formData.sports.includes('Cricket') && !formData.cricketRole) {
+      alert('Please select your Cricket role (Batter, Bowler, or All Rounder)');
+      return;
+    }
+    
+    // Emergency contact validation
+    if (!formData.emergencyName.trim()) {
+      alert('Please enter emergency contact name');
+      return;
+    }
+    
+    if (!formData.emergencyContact || formData.emergencyContact.length !== 10) {
+      alert('Please enter a valid 10-digit emergency contact number');
+      return;
+    }
+    
+    if (!formData.emergencyRelation) {
+      alert('Please select emergency contact relationship');
+      return;
+    }
+    
+    // Medical condition validation
+    if (!formData.medicalCondition) {
+      alert('Please indicate if you have any medical condition or injury');
+      return;
+    }
+    
+    // Declaration validation
+    if (!formData.declaration) {
+      alert('Please accept the declaration to proceed');
+      return;
+    }
+    
+    if (!formData.mediaConsent) {
+      alert('Please provide media consent to proceed');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Build Google Form URL with pre-filled data
+      const baseUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSf3o4GKPXtsru4rG5BVQjVB9bddlpQxZQhpByl--sVcWpjMiQ/formResponse';
+      
+      const params = new URLSearchParams({
+        'entry.707996126': formData.fullName,
+        'entry.1870420685': formData.email,
+        'entry.1310150483': formData.gender,
+        'entry.1752023195': formData.age,
+        'entry.1852101874': formData.house,
+        'entry.2087966706': formData.contact,
+        'entry.1596139706': `${formData.city} – ${cities.find(c => c.name === formData.city)?.date}`,
+        'entry.414051539': formData.emergencyName,
+        'entry.2037347418': formData.emergencyContact,
+        'entry.1368391597': formData.emergencyRelation,
+        'entry.1823333164': formData.medicalCondition,
+        'entry.831970724': formData.medicalDetails || '',
+      });
 
-    // Submit to Google Form via iframe
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.name = 'hidden_iframe';
-    document.body.appendChild(iframe);
+      // Add sports as separate entries (Google Forms checkbox field requires multiple entries)
+      formData.sports.forEach(sport => {
+        params.append('entry.2043308924', sport);
+      });
 
-    const form = document.createElement('form');
-    form.target = 'hidden_iframe';
-    form.method = 'POST';
-    form.action = baseUrl;
+      // Add conditional fields
+      if (formData.sports.includes('Badminton') && formData.badmintonType) {
+        params.append('entry.826712633', formData.badmintonType);
+      }
+      if (formData.sports.includes('Cricket') && formData.cricketRole) {
+        params.append('entry.2005278859', formData.cricketRole);
+      }
 
-    params.forEach((value, key) => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = key;
-      input.value = value;
-      form.appendChild(input);
-    });
+      // Add declaration checkboxes (all checked if form is submitted)
+      if (formData.declaration) {
+        params.append('entry.354605521', 'I confirm that I am a currently enrolled IIT Madras BS student and that all information provided by me in this form is true, accurate, and verifiable.');
+        params.append('entry.354605521', 'I confirm that I will be physically present in the selected city on the event date(s) and will participate only in the city chosen during registration.');
+        params.append('entry.354605521', 'I agree to strictly adhere to all event rules, codes of conduct, discipline policies, and instructions issued by the Sportify Society and the event coordinators, before and during the event.');
+        params.append('entry.354605521', 'I acknowledge that any form of misconduct, including but not limited to abusive language, unsportsmanlike behaviour, cheating, misrepresentation, or violation of institute policies, may result in immediate disqualification, forfeiture of match results, and/or further action as deemed appropriate by the organizers.');
+        params.append('entry.354605521', 'I understand that participation in physical sports involves inherent risks, and I voluntarily choose to participate. I confirm that I am medically fit to take part in the event and that I will immediately inform the coordinators of any injury or health concern.');
+        params.append('entry.354605521', 'I agree that Sportify Society, Nilgiri House, Nallamala House, Sundarbans House and IIT Madras BS shall not be held responsible for any personal injury, loss, or damage to personal belongings arising during travel to, participation in, or return from the event, except in cases of proven organizer negligence');
+        params.append('entry.354605521', 'I agree that any false declaration or misrepresentation may lead to cancellation of my registration, revocation of certificates, and appropriate disciplinary action.');
+      }
 
-    document.body.appendChild(form);
-    form.submit();
+      if (formData.mediaConsent) {
+        params.append('entry.714345332', 'I grant permission to Sportify Society and IIT Madras BS to use photographs, videos, and recordings captured during the event for official documentation, reporting, and non-commercial promotional purposes.');
+      }
 
-    // Show success message
-    setSubmitted(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Submit to Google Form via fetch with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-    // Clean up
-    setTimeout(() => {
-      document.body.removeChild(form);
-      document.body.removeChild(iframe);
-    }, 1000);
+      try {
+        const response = await fetch(baseUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: params.toString(),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        // With no-cors, we can't check response status, but if we reach here without error, submission likely succeeded
+        // Wait a bit to ensure form processes
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Show success message only after successful submission
+        setSubmitted(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        
+        // If fetch fails, fall back to iframe method
+        console.warn('Fetch method failed, using iframe fallback:', fetchError);
+        
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.name = 'hidden_iframe';
+        document.body.appendChild(iframe);
+
+        const form = document.createElement('form');
+        form.target = 'hidden_iframe';
+        form.method = 'POST';
+        form.action = baseUrl;
+
+        params.forEach((value, key) => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = value;
+          form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        
+        // Wait for iframe to load
+        await new Promise((resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            reject(new Error('Form submission timeout'));
+          }, 10000);
+          
+          iframe.onload = () => {
+            clearTimeout(timeoutId);
+            resolve();
+          };
+          
+          form.submit();
+        });
+
+        // Clean up
+        setTimeout(() => {
+          if (document.body.contains(form)) document.body.removeChild(form);
+          if (document.body.contains(iframe)) document.body.removeChild(iframe);
+        }, 1000);
+        
+        // Show success message only after iframe loads
+        setSubmitted(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      alert('Form submission failed. Please try again or contact support if the issue persists.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const houses = [
@@ -143,13 +298,13 @@ export default function RKMRegistration() {
 
   const cities = [
     { name: 'Lucknow', date: '18 Feb', sports: ['Cricket'] },
-    { name: 'Mumbai', date: '21 Feb', sports: ['Badminton'] },
+    { name: 'Patna', date: '20 Feb', sports: ['Badminton'] },
     { name: 'Delhi', date: '21 Feb', sports: ['Cricket', 'Badminton'] },
-    { name: 'Chennai', date: '22 Feb', sports: ['Badminton'] },
+    { name: 'Mumbai', date: '21 Feb', sports: ['Badminton'] },
     { name: 'Jaipur', date: '22 Feb', sports: ['Cricket'] },
+    { name: 'Hyderabad', date: '22 Feb', sports: ['Badminton'] },
     { name: 'Kolkata', date: '22 Feb', sports: ['Cricket'] },
-    { name: 'Hyderabad', date: '22 Feb', sports: ['Cricket', 'Badminton'] },
-    { name: 'Patna', date: '22 Feb', sports: ['Badminton'] }
+    { name: 'Chennai', date: '22 Feb', sports: ['Badminton'] }
   ];
 
   const getAvailableSports = () => {
@@ -322,7 +477,6 @@ export default function RKMRegistration() {
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
-                  required
                   className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
                   placeholder="As per IITM records"
                 />
@@ -337,7 +491,6 @@ export default function RKMRegistration() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  required
                   className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
                   placeholder="your.email@ds.study.iitm.ac.in"
                 />
@@ -355,7 +508,6 @@ export default function RKMRegistration() {
                       value="Male"
                       checked={formData.gender === 'Male'}
                       onChange={handleChange}
-                      required
                       className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
                     />
                     <span className="text-foreground font-medium">Male</span>
@@ -367,7 +519,6 @@ export default function RKMRegistration() {
                       value="Female"
                       checked={formData.gender === 'Female'}
                       onChange={handleChange}
-                      required
                       className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
                     />
                     <span className="text-foreground font-medium">Female</span>
@@ -384,7 +535,6 @@ export default function RKMRegistration() {
                   name="age"
                   value={formData.age}
                   onChange={handleChange}
-                  required
                   min="16"
                   max="100"
                   className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
@@ -400,7 +550,6 @@ export default function RKMRegistration() {
                   name="house"
                   value={formData.house}
                   onChange={handleChange}
-                  required
                   className="w-full px-4 py-3.5 bg-black border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-white transition-all [&>option]:bg-black [&>option]:text-white"
                 >
                   <option value="" className="bg-black text-white">Select your house</option>
@@ -419,7 +568,6 @@ export default function RKMRegistration() {
                   name="contact"
                   value={formData.contact}
                   onChange={handleChange}
-                  required
                   pattern="[0-9]{10}"
                   className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
                   placeholder="WhatsApp preferred"
@@ -456,7 +604,6 @@ export default function RKMRegistration() {
                 name="city"
                 value={formData.city}
                 onChange={handleChange}
-                required
                 className="w-full px-4 py-3.5 bg-black border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-white transition-all [&>option]:bg-black [&>option]:text-white"
               >
                 <option value="" className="bg-black text-white">Select your city</option>
@@ -483,20 +630,19 @@ export default function RKMRegistration() {
                   <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 mb-3">
                     <p className="text-xs md:text-sm text-yellow-600 dark:text-yellow-400 flex items-start gap-2">
                       <span className="text-lg">⚠️</span>
-                      <span>Final match formats will depend on number of registrations</span>
+                      <span>{getAvailableSports().length > 1 ? 'You can select both sports if you wish to participate in both' : 'Final match formats will depend on number of registrations'}</span>
                     </p>
                   </div>
                   <div className={`grid gap-4 ${getAvailableSports().length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                     {getAvailableSports().includes('Badminton') && (
                       <label className="relative flex items-center gap-3 p-4 md:p-5 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5 has-[:checked]:shadow-lg has-[:checked]:shadow-[hsl(var(--flame))]/10">
                         <input
-                          type="radio"
-                          name="sport"
+                          type="checkbox"
+                          name="sportCheckbox"
                           value="Badminton"
-                          checked={formData.sport === 'Badminton'}
+                          checked={formData.sports.includes('Badminton')}
                           onChange={handleChange}
-                          required
-                          className="w-4 h-4 md:w-5 md:h-5 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
+                          className="w-4 h-4 md:w-5 md:h-5 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))] rounded"
                         />
                         <span className="text-foreground font-semibold text-sm md:text-base">🏸 Badminton</span>
                       </label>
@@ -504,13 +650,12 @@ export default function RKMRegistration() {
                     {getAvailableSports().includes('Cricket') && (
                       <label className="relative flex items-center gap-3 p-4 md:p-5 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5 has-[:checked]:shadow-lg has-[:checked]:shadow-[hsl(var(--flame))]/10">
                         <input
-                          type="radio"
-                          name="sport"
+                          type="checkbox"
+                          name="sportCheckbox"
                           value="Cricket"
-                          checked={formData.sport === 'Cricket'}
+                          checked={formData.sports.includes('Cricket')}
                           onChange={handleChange}
-                          required
-                          className="w-4 h-4 md:w-5 md:h-5 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
+                          className="w-4 h-4 md:w-5 md:h-5 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))] rounded"
                         />
                         <span className="text-foreground font-semibold text-sm md:text-base">🏏 Cricket</span>
                       </label>
@@ -520,7 +665,7 @@ export default function RKMRegistration() {
               )}
             </div>
 
-            {formData.sport === 'Badminton' && (
+            {formData.sports.includes('Badminton') && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
@@ -537,7 +682,6 @@ export default function RKMRegistration() {
                       value="Singles"
                       checked={formData.badmintonType === 'Singles'}
                       onChange={handleChange}
-                      required
                       className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
                     />
                     <span className="text-foreground font-medium">Singles</span>
@@ -549,7 +693,6 @@ export default function RKMRegistration() {
                       value="Doubles"
                       checked={formData.badmintonType === 'Doubles'}
                       onChange={handleChange}
-                      required
                       className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
                     />
                     <span className="text-foreground font-medium">Doubles</span>
@@ -558,7 +701,7 @@ export default function RKMRegistration() {
               </motion.div>
             )}
 
-            {formData.sport === 'Cricket' && (
+            {formData.sports.includes('Cricket') && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
@@ -575,7 +718,6 @@ export default function RKMRegistration() {
                       value="Batter"
                       checked={formData.cricketRole === 'Batter'}
                       onChange={handleChange}
-                      required
                       className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
                     />
                     <span className="text-foreground font-medium text-sm">Batter</span>
@@ -587,7 +729,6 @@ export default function RKMRegistration() {
                       value="Bowler"
                       checked={formData.cricketRole === 'Bowler'}
                       onChange={handleChange}
-                      required
                       className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
                     />
                     <span className="text-foreground font-medium text-sm">Bowler</span>
@@ -599,7 +740,6 @@ export default function RKMRegistration() {
                       value="All Rounder"
                       checked={formData.cricketRole === 'All Rounder'}
                       onChange={handleChange}
-                      required
                       className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
                     />
                     <span className="text-foreground font-medium text-sm">All Rounder</span>
@@ -633,7 +773,6 @@ export default function RKMRegistration() {
                   name="emergencyName"
                   value={formData.emergencyName}
                   onChange={handleChange}
-                  required
                   className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
                   placeholder="Emergency contact person"
                 />
@@ -648,7 +787,6 @@ export default function RKMRegistration() {
                   name="emergencyContact"
                   value={formData.emergencyContact}
                   onChange={handleChange}
-                  required
                   pattern="[0-9]{10}"
                   className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
                   placeholder="10-digit number"
@@ -663,7 +801,6 @@ export default function RKMRegistration() {
                   name="emergencyRelation"
                   value={formData.emergencyRelation}
                   onChange={handleChange}
-                  required
                   className="w-full px-4 py-3.5 bg-black border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-white transition-all [&>option]:bg-black [&>option]:text-white"
                 >
                   <option value="" className="bg-black text-white">Select relationship</option>
@@ -698,7 +835,6 @@ export default function RKMRegistration() {
                     value="Yes"
                     checked={formData.medicalCondition === 'Yes'}
                     onChange={handleChange}
-                    required
                     className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
                   />
                   <span className="text-foreground font-medium">Yes</span>
@@ -710,7 +846,6 @@ export default function RKMRegistration() {
                     value="No"
                     checked={formData.medicalCondition === 'No'}
                     onChange={handleChange}
-                    required
                     className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
                   />
                   <span className="text-foreground font-medium">No</span>
@@ -758,7 +893,6 @@ export default function RKMRegistration() {
                   name="declaration"
                   checked={formData.declaration}
                   onChange={handleChange}
-                  required
                   className="w-6 h-6 mt-1 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))] rounded border-2 flex-shrink-0"
                 />
                 <div className="flex-1">
@@ -785,7 +919,6 @@ export default function RKMRegistration() {
                   name="mediaConsent"
                   checked={formData.mediaConsent}
                   onChange={handleChange}
-                  required
                   className="w-6 h-6 mt-1 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))] rounded border-2 flex-shrink-0"
                 />
                 <div className="flex-1">
@@ -812,9 +945,9 @@ export default function RKMRegistration() {
               className="w-full md:w-auto px-12 md:px-16 py-4 md:py-5 bg-gradient-to-r from-[hsl(var(--flame))] via-[hsl(var(--flame-light))] to-[hsl(var(--flame))] text-black font-bold rounded-full text-base md:text-xl shadow-xl hover:shadow-[0_0_40px_rgba(255,140,0,0.6)] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-xl"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              disabled={!formData.declaration || !formData.mediaConsent}
+              disabled={!formData.declaration || !formData.mediaConsent || formData.sports.length === 0 || isSubmitting}
             >
-              Submit Registration
+              {isSubmitting ? 'Submitting...' : 'Submit Registration'}
             </motion.button>
             <p className="text-xs md:text-sm text-muted-foreground text-center">
               By submitting, you agree to all terms and conditions stated above
