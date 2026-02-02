@@ -74,7 +74,7 @@ export default function RashtriyaKhelMahotsav() {
           
           <div className="absolute top-0 left-0 w-full h-full bg-black/20 z-[1]"></div>
           
-          <div className="relative z-10 space-y-4 p-6 md:pl-20 md:pr-12 order-1 md:order-1">
+          <div className="relative z-10 space-y-4 pt-2 px-6 pb-6 md:pt-6 md:pl-20 md:pr-12 order-1 md:order-1">
             {/* Header Text */}
             <div>
               <div className="flex items-center mb-4">
