@@ -848,9 +848,6 @@ export default function RKMRegistration() {
                   className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                   placeholder="your.email@ds.study.iitm.ac.in"
                 />
-                <p className="text-xs text-muted-foreground mt-1.5">
-                  🔒 Email is locked and auto-filled from your Google account
-                </p>
               </div>
 
               <div>
