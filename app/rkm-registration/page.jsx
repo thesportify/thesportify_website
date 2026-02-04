@@ -421,51 +421,51 @@ export default function RKMRegistration() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-background py-20 px-4">
-        <div className="max-w-3xl mx-auto">
+      <div className="h-screen bg-background flex items-center justify-center px-3 md:px-4 py-4 overflow-hidden">
+        <div className="max-w-2xl w-full">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-2 border-green-500/30 rounded-3xl p-8 md:p-12 text-center"
+            transition={{ duration: 0.4 }}
+            className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-2 border-green-500/30 rounded-2xl md:rounded-3xl p-4 md:p-6 text-center"
           >
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
             >
-              <div className="inline-block p-4 bg-green-500/20 rounded-full mb-6">
-                <CheckCircle className="w-16 h-16 md:w-20 md:h-20 text-green-500" />
+              <div className="inline-block p-2 md:p-3 bg-green-500/20 rounded-full mb-3 md:mb-4">
+                <CheckCircle className="w-12 h-12 md:w-16 md:h-16 text-green-500" />
               </div>
             </motion.div>
-            <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-4">Registration Successful!</h1>
-            <p className="text-base md:text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
+            <h1 className="text-xl md:text-3xl font-bold text-foreground mb-2 md:mb-3">Registration Successful!</h1>
+            <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">
               Thank you for registering for Sportify Rashtriya Khel Mahotsav 2026.
             </p>
-            <div className="bg-[hsl(var(--flame))]/10 border border-[hsl(var(--flame))]/30 rounded-2xl p-6 mb-6 text-left max-w-2xl mx-auto">
-              <p className="text-sm md:text-base text-foreground mb-4">
-                Further details regarding match schedules, reporting time, and venue will be shared via official WhatsApp / email communication.
+            <div className="bg-[hsl(var(--flame))]/10 border border-[hsl(var(--flame))]/30 rounded-xl md:rounded-2xl p-3 md:p-4 mb-3 md:mb-4 text-left">
+              <p className="text-xs md:text-sm text-foreground mb-3">
+                Match schedules and venue details will be shared via WhatsApp / email.
               </p>
-              <div className="space-y-3">
+              <div className="space-y-2 md:space-y-2.5">
                 <div>
-                  <p className="text-sm font-semibold text-foreground mb-2">Join the WhatsApp group for updates:</p>
+                  <p className="text-xs font-semibold text-foreground mb-1.5">Join WhatsApp group:</p>
                   <a 
                     href="https://chat.whatsapp.com/KjAjRB5bCvvG7COgttB3Xk" 
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
+                    className="inline-block px-3 py-1.5 md:px-4 md:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium transition-colors"
                   >
-                    Join WhatsApp Group
+                    Join Group
                   </a>
                 </div>
-                <div className="pt-3 border-t border-border">
-                  <p className="text-sm font-semibold text-foreground mb-2">For queries or issues:</p>
-                  <div className="space-y-2 text-xs md:text-sm text-muted-foreground">
+                <div className="pt-2 border-t border-border">
+                  <p className="text-xs font-semibold text-foreground mb-1.5">For queries:</p>
+                  <div className="space-y-1 text-xs text-muted-foreground">
                     <p>
-                      Grievance Portal: <a href="https://sportify.iitmbs.org/grievance" target="_blank" rel="noopener noreferrer" className="text-[hsl(var(--flame))] hover:underline">sportify.iitmbs.org/grievance</a>
+                      Portal: <a href="https://sportify.iitmbs.org/grievance" target="_blank" rel="noopener noreferrer" className="text-[hsl(var(--flame))] hover:underline">sportify.iitmbs.org/grievance</a>
                     </p>
                     <p>
-                      Email: <a href="mailto:thesportify.society@study.iitm.ac.in" className="text-[hsl(var(--flame))] hover:underline">thesportify.society@study.iitm.ac.in</a>
+                      Email: <a href="mailto:thesportify.society@study.iitm.ac.in" className="text-[hsl(var(--flame))] hover:underline break-all">thesportify.society@study.iitm.ac.in</a>
                     </p>
                   </div>
                 </div>
@@ -473,7 +473,7 @@ export default function RKMRegistration() {
             </div>
             <Link href="/">
               <motion.button 
-                className="px-10 py-4 bg-gradient-to-r from-[hsl(var(--flame))] to-[hsl(var(--flame-light))] text-black font-bold rounded-full hover:shadow-[0_0_30px_rgba(255,140,0,0.5)] transition-all"
+                className="px-6 md:px-8 py-2.5 md:py-3 bg-gradient-to-r from-[hsl(var(--flame))] to-[hsl(var(--flame-light))] text-black font-bold rounded-full hover:shadow-[0_0_30px_rgba(255,140,0,0.5)] transition-all text-sm md:text-base"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
