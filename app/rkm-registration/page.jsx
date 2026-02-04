@@ -1,11 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle, Shield, Calendar, User, Trophy } from 'lucide-react';
 import Link from 'next/link';
+import { rkmAuth, rkmGoogleProvider } from '@/lib/Rkm-firebase';
+import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 
 export default function RKMRegistration() {
+  // Authentication state
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState('');
+  
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -29,13 +36,113 @@ export default function RKMRegistration() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Allowed email domains
+  const ALLOWED_DOMAINS = ['ds.study.iitm.ac.in', 'es.study.iitm.ac.in'];
+
+  // Check authentication state on component mount
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(rkmAuth, (currentUser) => {
+      if (currentUser) {
+        const emailDomain = currentUser.email.split('@')[1];
+        if (ALLOWED_DOMAINS.includes(emailDomain)) {
+          setUser(currentUser);
+          // Pre-fill and lock email field
+          setFormData(prev => ({ ...prev, email: currentUser.email }));
+          setAuthError('');
+        } else {
+          // Domain not allowed - sign out immediately
+          signOut(rkmAuth);
+          setUser(null);
+          setAuthError(`Access restricted. Only ${ALLOWED_DOMAINS.join(' and ')} domains are allowed.`);
+        }
+      } else {
+        setUser(null);
+      }
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Google Sign-In handler
+  const handleGoogleSignIn = async () => {
+    setAuthError('');
+    setAuthLoading(true);
+    
+    try {
+      const result = await signInWithPopup(rkmAuth, rkmGoogleProvider);
+      const userEmail = result.user.email;
+      const emailDomain = userEmail.split('@')[1];
+      
+      // Check if domain is allowed
+      if (!ALLOWED_DOMAINS.includes(emailDomain)) {
+        await signOut(rkmAuth);
+        setAuthError(`Access Denied: Only students with ${ALLOWED_DOMAINS.join(' or ')} email addresses can register.`);
+        setUser(null);
+      } else {
+        setUser(result.user);
+        setFormData(prev => ({ ...prev, email: userEmail }));
+        setAuthError('');
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
+      if (error.code === 'auth/popup-closed-by-user') {
+        setAuthError('Sign-in cancelled. Please try again.');
+      } else if (error.code === 'auth/popup-blocked') {
+        setAuthError('Pop-up blocked. Please allow pop-ups for this site and try again.');
+      } else {
+        setAuthError('Authentication failed. Please try again.');
+      }
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Logout handler
+  const handleBackToHome = async () => {
+    if (user) {
+      try {
+        await signOut(rkmAuth);
+        setUser(null);
+        setFormData({
+          fullName: '',
+          email: '',
+          gender: '',
+          age: '',
+          house: '',
+          contact: '',
+          city: '',
+          sports: [],
+          badmintonType: '',
+          cricketRole: '',
+          emergencyName: '',
+          emergencyContact: '',
+          emergencyRelation: '',
+          medicalCondition: '',
+          medicalDetails: '',
+          declaration: false,
+          mediaConsent: false
+        });
+        setAuthError('');
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }
+    // Navigate to home will be handled by Link component
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => {
       const updated = { ...prev };
       
+      // Handle phone number fields - only allow digits
+      if (name === 'contact' || name === 'emergencyContact') {
+        const numericValue = value.replace(/\D/g, ''); // Remove all non-digit characters
+        updated[name] = numericValue.slice(0, 10); // Limit to 10 digits
+      }
       // Handle sport checkboxes
-      if (name === 'sportCheckbox') {
+      else if (name === 'sportCheckbox') {
         if (checked) {
           updated.sports = [...prev.sports, value];
         } else {
@@ -379,6 +486,231 @@ export default function RKMRegistration() {
     );
   }
 
+  // Google Sign-In Screen (shown before form access)
+  if (!user && !authLoading) {
+    return (
+      <div className="h-screen bg-gradient-to-br from-black via-gray-900 to-black relative flex items-center justify-center px-3 md:px-6 overflow-hidden pt-16 md:pt-20 pb-4">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="absolute top-0 left-0 w-96 h-96 bg-[hsl(var(--flame))] rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.1, 0.15, 0.1],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 2
+            }}
+            className="absolute bottom-0 right-0 w-96 h-96 bg-[hsl(var(--flame-light))] rounded-full blur-3xl"
+          />
+        </div>
+
+        {/* Back Button - Top Left */}
+        <div className="fixed top-16 md:top-20 left-3 md:left-6 z-20">
+          <Link href="/" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black/50 backdrop-blur-md border border-[hsl(var(--flame))]/30 rounded-lg text-[hsl(var(--flame))] hover:text-[hsl(var(--flame-light))] hover:border-[hsl(var(--flame))]/50 transition-all group text-xs md:text-sm">
+            <ArrowLeft className="w-3 h-3 md:w-4 md:h-4 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-semibold">Back</span>
+          </Link>
+        </div>
+
+        {/* Error Popup Modal */}
+        {authError && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setAuthError('')}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              className="bg-gradient-to-br from-red-900/90 to-red-950/90 border-2 border-red-500/50 rounded-2xl p-5 md:p-6 max-w-sm w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-red-500/20 rounded-full mb-3">
+                  <span className="text-3xl">⚠️</span>
+                </div>
+                <h3 className="text-lg md:text-xl font-bold text-red-400 mb-2">Access Denied</h3>
+                <p className="text-xs md:text-sm text-gray-300 leading-relaxed mb-4">
+                  {authError}
+                </p>
+                <button
+                  onClick={() => setAuthError('')}
+                  className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors text-sm"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Main Content - Split Layout */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="max-w-5xl w-full relative z-10"
+        >
+          <div className="bg-gradient-to-br from-gray-900/90 via-black/90 to-gray-900/90 backdrop-blur-xl border-2 border-[hsl(var(--flame))]/40 rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl">
+            
+            {/* Desktop & Tablet: Two Column Layout */}
+            <div className="grid md:grid-cols-2 gap-0">
+              
+              {/* LEFT SIDE - Logo & Information */}
+              <div className="p-4 md:p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-[hsl(var(--flame))]/20">
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+                  animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 150 }}
+                  className="mb-3 md:mb-4"
+                >
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--flame))]/30 to-[hsl(var(--flame-light))]/20 rounded-full blur-2xl"></div>
+                    <img 
+                      src="/RKM2.png" 
+                      alt="Rashtriya Khel Mahotsav 2026"
+                      className="w-24 h-24 md:w-32 md:h-32 lg:w-36 lg:h-36 object-contain drop-shadow-2xl relative z-10"
+                    />
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-center space-y-2 md:space-y-3"
+                >
+                  <h1 className="text-xl md:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[hsl(var(--flame))] via-[hsl(var(--flame-light))] to-[hsl(var(--flame))] leading-tight">
+                    Rashtriya Khel Mahotsav
+                  </h1>
+                  <p className="text-lg md:text-xl font-bold text-[hsl(var(--flame-light))]">
+                    2026
+                  </p>
+                  <p className="text-xs md:text-sm text-gray-400 max-w-xs mx-auto leading-relaxed">
+                    India's premier inter-city sports festival
+                  </p>
+                </motion.div>
+
+                {/* Features */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="mt-4 md:mt-5 space-y-2 w-full max-w-xs"
+                >
+                  <div className="flex items-center gap-2 text-xs md:text-sm text-gray-300">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    <span>Secure Google Authentication</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs md:text-sm text-gray-300">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    <span>Verified Student Access Only</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs md:text-sm text-gray-300">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    <span>Quick & Easy Registration</span>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* RIGHT SIDE - Sign In */}
+              <div className="p-4 md:p-8 flex flex-col items-center justify-center">
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="w-full max-w-sm space-y-4 md:space-y-5"
+                >
+                  <div className="text-center">
+                    <h2 className="text-xl md:text-2xl font-bold text-foreground mb-1">
+                      Sign In to Register
+                    </h2>
+                    <p className="text-xs text-gray-400">
+                      Use your IIT Madras BS email
+                    </p>
+                  </div>
+
+                  {/* Authorized Domains */}
+                  <div className="bg-gradient-to-br from-[hsl(var(--flame))]/20 to-[hsl(var(--flame-light))]/10 border border-[hsl(var(--flame))]/40 rounded-xl p-3 md:p-4 backdrop-blur-sm">
+                    <p className="text-xs md:text-sm font-bold text-[hsl(var(--flame))] mb-2 flex items-center justify-center gap-2">
+                      <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
+                      Authorized Domains
+                    </p>
+                    <div className="space-y-1.5 text-xs text-gray-300">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                        <span className="font-mono">@ds.study.iitm.ac.in</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                        <span className="font-mono">@es.study.iitm.ac.in</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Google Sign In Button */}
+                  <motion.button
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    onClick={handleGoogleSignIn}
+                    className="w-full px-5 py-3 md:py-3.5 bg-gradient-to-r from-white to-gray-100 hover:from-gray-50 hover:to-white text-gray-900 font-bold rounded-xl md:rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] group relative overflow-hidden"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--flame))]/0 via-[hsl(var(--flame))]/10 to-[hsl(var(--flame))]/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <svg className="w-5 h-5 md:w-6 md:h-6 relative z-10" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    <span className="relative z-10 text-sm md:text-base">Sign in with Google</span>
+                  </motion.button>
+
+                  <p className="text-xs text-gray-500 text-center leading-relaxed">
+                    🔒 Email locked after authentication
+                  </p>
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (authLoading) {
+    return (
+      <div className="h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative inline-block">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[hsl(var(--flame))]/20 border-t-[hsl(var(--flame))] mx-auto mb-4"></div>
+            <div className="absolute inset-0 animate-ping rounded-full h-12 w-12 border-2 border-[hsl(var(--flame))]/20"></div>
+          </div>
+          <p className="text-muted-foreground text-base font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black relative">
       {/* RKM Logo in top-right corner */}
@@ -397,13 +729,34 @@ export default function RKMRegistration() {
       <div className="h-20 md:h-24"></div>
       
       <div className="max-w-5xl mx-auto px-4 py-8 md:py-12">
-        {/* Back Button - Separated with spacing */}
+        {/* Back Button with Logout functionality */}
         <div className="mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-[hsl(var(--flame))] hover:text-[hsl(var(--flame-light))] transition-colors group">
+          <Link 
+            href="/" 
+            onClick={handleBackToHome}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500/10 to-orange-500/10 hover:from-red-500/20 hover:to-orange-500/20 border border-[hsl(var(--flame))]/40 hover:border-[hsl(var(--flame))]/60 rounded-xl text-[hsl(var(--flame))] transition-all group shadow-lg hover:shadow-xl"
+          >
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-semibold">Back to Home</span>
+            <span className="font-semibold">Logout & Back to Home</span>
           </Link>
         </div>
+
+        {/* User Info Display */}
+        {user && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/40 rounded-xl p-4 flex items-center gap-3 shadow-lg"
+          >
+            <div className="p-2 bg-green-500/20 rounded-full">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">✅ Authenticated as</p>
+              <p className="text-xs text-muted-foreground font-mono">{user.email}</p>
+            </div>
+          </motion.div>
+        )}
 
         {/* Header Section */}
         <motion.div
@@ -491,9 +844,13 @@ export default function RKMRegistration() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
+                  disabled={true} // Email is locked after Google authentication
+                  className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                   placeholder="your.email@ds.study.iitm.ac.in"
                 />
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  🔒 Email is locked and auto-filled from your Google account
+                </p>
               </div>
 
               <div>
