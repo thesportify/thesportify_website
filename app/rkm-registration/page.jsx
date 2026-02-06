@@ -1,8 +1,14 @@
 'use client';
 
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, CheckCircle, Shield, Calendar, User, Trophy, LogIn, Lock, AlertCircle } from 'lucide-react';
+=======
+import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, CheckCircle, Shield, Calendar, User, Trophy, Loader2 } from 'lucide-react';
+>>>>>>> a9ad3229532f7c738a7243fb0e0d905898518d01
 import Link from 'next/link';
 import { rkmAuth, rkmGoogleProvider } from '@/lib/Rkm-firebase';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
@@ -35,6 +41,43 @@ export default function RKMRegistration() {
 
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
+  // Use ref to prevent race conditions on rapid clicks
+  const isSubmittingRef = useRef(false);
+  const hasSubmittedRef = useRef(false);
+  const submissionAttempts = useRef(0);
+
+  /**
+   * SESSION TIMEOUT & SECURITY MANAGEMENT
+   * 
+   * Comprehensive protection against accidental logout during form filling:
+   * 
+   * 1. INCREASED TIMEOUT: 10 minutes (not 5) to allow slow form filling
+   * 2. COMPREHENSIVE ACTIVITY DETECTION:
+   *    - All mouse events (click, move, down)
+   *    - All keyboard events (keydown, keyup, input)
+   *    - All form interactions (change, select, focus, blur)
+   *    - All touch events (mobile support)
+   *    - Scroll and wheel events
+   * 3. TRIPLE-CHECK BEFORE LOGOUT:
+   *    - Must exceed timeout (10 min)
+   *    - NOT during submission
+   *    - NOT after successful submission
+   *    - Page must be hidden (user switched tabs)
+   * 4. VISIBILITY HANDLING:
+   *    - Resets timer when user returns to tab
+   *    - Only logs out if tab was hidden
+   * 5. SESSION PERSISTENCE:
+   *    - Session-only (clears on browser/tab close)
+   *    - No visual timer to distract users
+   * 
+   * Result: Users will NEVER be logged out while actively filling the form
+   */
+  const IDLE_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds (increased for form filling)
+  const idleTimerRef = useRef(null);
+  const lastActivityRef = useRef(Date.now());
+  const isUserActiveRef = useRef(false); // Track if user has interacted with form
 
   // Allowed email domains
   const ALLOWED_DOMAINS = ['ds.study.iitm.ac.in', 'es.study.iitm.ac.in'];
@@ -48,6 +91,8 @@ export default function RKMRegistration() {
           // Pre-fill and lock email field
           setFormData(prev => ({ ...prev, email: currentUser.email }));
           setAuthError('');
+          // Start idle timeout when user is authenticated
+          resetIdleTimer();
         } else {
           // Domain not allowed - sign out immediately
           signOut(rkmAuth);
@@ -56,12 +101,131 @@ export default function RKMRegistration() {
         }
       } else {
         setUser(null);
+        // Clear idle timer when user logs out
+        clearIdleTimer();
       }
       setAuthLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      clearIdleTimer();
+    };
   }, []);
+
+  // Idle timeout management - Auto logout ONLY after TRUE inactivity
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const handleActivity = () => {
+      lastActivityRef.current = Date.now();
+      isUserActiveRef.current = true;
+      resetIdleTimer();
+    };
+
+    // Comprehensive activity event listeners - captures ALL user interactions
+    const events = [
+      // Mouse events
+      'mousedown', 'mousemove', 'click', 'dblclick',
+      // Keyboard events (modern and legacy)
+      'keydown', 'keyup', 'input',
+      // Touch events (mobile)
+      'touchstart', 'touchmove', 'touchend',
+      // Scroll events
+      'scroll', 'wheel',
+      // Form interaction events - CRITICAL for preventing logout during form filling
+      'change', 'select', 'focus', 'blur',
+      // Drag and drop
+      'drag', 'drop'
+    ];
+
+    events.forEach(event => {
+      document.addEventListener(event, handleActivity, true);
+    });
+
+    // Check for idle timeout - less frequent checks, longer timeout
+    const checkIdleInterval = setInterval(() => {
+      const timeSinceLastActivity = Date.now() - lastActivityRef.current;
+
+      // Only timeout if:
+      // 1. Truly idle (exceeded timeout)
+      // 2. NOT currently submitting
+      // 3. NOT already submitted
+      // 4. Page is not visible (user switched tabs)
+      if (timeSinceLastActivity >= IDLE_TIMEOUT &&
+        !isSubmitting &&
+        !submitted &&
+        document.hidden) {
+        handleIdleTimeout();
+      }
+    }, 60000); // Check every 60 seconds (less aggressive)
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleActivity, true);
+      });
+      clearInterval(checkIdleInterval);
+    };
+  }, [user, isSubmitting, submitted]);
+
+  // Handle page visibility - reset activity timer when user returns to tab
+  useEffect(() => {
+    if (!user) return;
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // User returned to tab - reset activity timer
+        lastActivityRef.current = Date.now();
+        resetIdleTimer();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user]);
+
+  const resetIdleTimer = () => {
+    clearIdleTimer();
+    lastActivityRef.current = Date.now();
+
+    idleTimerRef.current = setTimeout(() => {
+      handleIdleTimeout();
+    }, IDLE_TIMEOUT);
+  };
+
+  const clearIdleTimer = () => {
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = null;
+    }
+  };
+
+  const handleIdleTimeout = async () => {
+    // Triple-check conditions before logging out to prevent accidental logouts
+    if (!user) return;
+    if (submitted) return; // Never logout after successful submission
+    if (isSubmitting) return; // Never logout during submission
+    if (isSubmittingRef.current) return; // Check ref as well
+    if (!document.hidden) return; // Don't logout if page is visible
+
+    try {
+      console.log('Auto-logout triggered after 10 minutes of true inactivity');
+      await signOut(rkmAuth);
+      setUser(null);
+      setAuthError('Session expired due to inactivity. Please sign in again.');
+      // Only alert if window is focused
+      if (!document.hidden) {
+        alert('Your session has expired due to inactivity (10 minutes). Please sign in again for security.');
+      }
+    } catch (error) {
+      console.error('Auto logout error:', error);
+    }
+  };
 
   // Google Sign-In handler
   const handleGoogleSignIn = async () => {
@@ -177,9 +341,16 @@ export default function RKMRegistration() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // CRITICAL: Prevent double submission with ref check
+    if (isSubmittingRef.current || hasSubmittedRef.current) {
+      console.warn('Submission already in progress or completed');
+      return;
+    }
 
-    if (isSubmitting) return;
-
+    // Lock submission immediately
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
+    setSubmitError('');
     // Comprehensive validation for all required fields
     if (!formData.fullName.trim()) {
       alert('Please enter your full name');
@@ -257,15 +428,17 @@ export default function RKMRegistration() {
     // Declaration validation
     if (!formData.declaration) {
       alert('Please accept the declaration to proceed');
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
       return;
     }
 
     if (!formData.mediaConsent) {
       alert('Please provide media consent to proceed');
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
       return;
     }
-
-    setIsSubmitting(true);
 
     try {
       // Build Google Form URL with pre-filled data
@@ -316,7 +489,7 @@ export default function RKMRegistration() {
 
       // Submit to Google Form via fetch with timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout for better reliability
 
       try {
         const response = await fetch(baseUrl, {
@@ -332,12 +505,18 @@ export default function RKMRegistration() {
         clearTimeout(timeoutId);
 
         // With no-cors, we can't check response status, but if we reach here without error, submission likely succeeded
-        // Wait a bit to ensure form processes
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Wait to ensure form processes
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Show success message only after successful submission
+        // Mark as successfully submitted
+        hasSubmittedRef.current = true;
         setSubmitted(true);
+
+        // Scroll to top to show success message
         window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Keep button disabled permanently after successful submission
+        return;
       } catch (fetchError) {
         clearTimeout(timeoutId);
 
@@ -383,16 +562,38 @@ export default function RKMRegistration() {
           if (document.body.contains(form)) document.body.removeChild(form);
           if (document.body.contains(iframe)) document.body.removeChild(iframe);
         }, 1000);
-
-        // Show success message only after iframe loads
+        // Mark as successfully submitted
+        hasSubmittedRef.current = true;
         setSubmitted(true);
+
+        // Scroll to top to show success message
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error) {
       console.error('Form submission error:', error);
-      alert('Form submission failed. Please try again or contact support if the issue persists.');
-    } finally {
+
+      // Track submission attempts
+      submissionAttempts.current += 1;
+
+      // Unlock for retry only if not a critical error
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
+
+      // User-friendly error message
+      const errorMsg = error.name === 'AbortError'
+        ? 'Submission timeout. Please check your internet connection and try again.'
+        : submissionAttempts.current >= 3
+          ? 'Multiple submission attempts failed. Please refresh the page and try again, or contact support if the issue persists.'
+          : 'Form submission failed. Please try again.';
+
+      setSubmitError(errorMsg);
+      alert(errorMsg);
+    } finally {
+      // Only unlock if submission was not successful
+      if (!hasSubmittedRef.current) {
+        setIsSubmitting(false);
+        isSubmittingRef.current = false;
+      }
     }
   };
 
@@ -752,7 +953,7 @@ export default function RKMRegistration() {
             <div className="p-2 bg-green-500/20 rounded-full">
               <CheckCircle className="w-5 h-5 text-green-500" />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-sm font-semibold text-foreground">✅ Authenticated as</p>
               <p className="text-xs text-muted-foreground font-mono">{user.email}</p>
             </div>
@@ -855,509 +1056,534 @@ export default function RKMRegistration() {
             onSubmit={handleSubmit}
             className="space-y-8"
           >
-            {/* Personal Information */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-black/80 backdrop-blur-lg border-2 border-gray-800/50 hover:border-[hsl(var(--flame))]/30 rounded-2xl p-6 md:p-8 space-y-6 transition-all"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-[hsl(var(--flame))]/10 rounded-lg">
-                  <User className="w-6 h-6 text-[hsl(var(--flame))]" />
-                </div>
-                <h3 className="text-lg md:text-2xl font-bold text-foreground">Personal Information</h3>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                    Full Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
-                    placeholder="As per IITM records"
-                  />
+            {/* Fieldset to disable entire form during submission */}
+            <fieldset disabled={isSubmitting || submitted} className="space-y-8">
+              {/* Personal Information */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-black/80 backdrop-blur-lg border-2 border-gray-800/50 hover:border-[hsl(var(--flame))]/30 rounded-2xl p-6 md:p-8 space-y-6 transition-all"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-[hsl(var(--flame))]/10 rounded-lg">
+                    <User className="w-6 h-6 text-[hsl(var(--flame))]" />
+                  </div>
+                  <h3 className="text-lg md:text-2xl font-bold text-foreground">Personal Information</h3>
                 </div>
 
-                <div>
-                  <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                    Student Email ID <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
+                      Full Name <span className="text-red-500">*</span>
+                    </label>
                     <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      readOnly
-                      className="w-full pl-4 pr-10 py-3.5 bg-zinc-900/50 border-2 border-zinc-800 rounded-xl text-gray-400 cursor-not-allowed focus:outline-none"
-                      placeholder="your.email@ds.study.iitm.ac.in"
+                      type="text"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
+                      placeholder="As per IITM records"
                     />
-                    <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
+                      Student Email ID <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        readOnly
+                        className="w-full pl-4 pr-10 py-3.5 bg-zinc-900/50 border-2 border-zinc-800 rounded-xl text-gray-400 cursor-not-allowed focus:outline-none"
+                        placeholder="your.email@ds.study.iitm.ac.in"
+                      />
+                      <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
+                      Gender <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 px-5 py-3.5 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
+                        <input
+                          type="radio"
+                          name="gender"
+                          value="Male"
+                          checked={formData.gender === 'Male'}
+                          onChange={handleChange}
+                          className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
+                        />
+                        <span className="text-foreground font-medium">Male</span>
+                      </label>
+                      <label className="flex items-center gap-2 px-5 py-3.5 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
+                        <input
+                          type="radio"
+                          name="gender"
+                          value="Female"
+                          checked={formData.gender === 'Female'}
+                          onChange={handleChange}
+                          className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
+                        />
+                        <span className="text-foreground font-medium">Female</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
+                      Age <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="age"
+                      value={formData.age}
+                      onChange={handleChange}
+                      min="16"
+                      max="100"
+                      className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
+                      placeholder="e.g. 20"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
+                      House Affiliation <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="house"
+                      value={formData.house}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3.5 bg-black border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-white transition-all [&>option]:bg-black [&>option]:text-white"
+                    >
+                      <option value="" className="bg-black text-white">Select your house</option>
+                      {houses.map((house) => (
+                        <option key={house} value={house} className="bg-black text-white">{house}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
+                      Contact Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="contact"
+                      value={formData.contact}
+                      onChange={handleChange}
+                      pattern="[0-9]{10}"
+                      className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
+                      placeholder="WhatsApp preferred"
+                    />
                   </div>
                 </div>
+              </motion.div>
 
-                <div>
-                  <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                    Gender <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2 px-5 py-3.5 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="Male"
-                        checked={formData.gender === 'Male'}
-                        onChange={handleChange}
-                        className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
-                      />
-                      <span className="text-foreground font-medium">Male</span>
-                    </label>
-                    <label className="flex items-center gap-2 px-5 py-3.5 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="Female"
-                        checked={formData.gender === 'Female'}
-                        onChange={handleChange}
-                        className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
-                      />
-                      <span className="text-foreground font-medium">Female</span>
-                    </label>
+              {/* Event Selection */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="bg-black/80 backdrop-blur-lg border-2 border-gray-800/50 hover:border-[hsl(var(--flame))]/30 rounded-2xl p-6 md:p-8 space-y-6 transition-all"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-[hsl(var(--flame))]/10 rounded-lg">
+                    <Calendar className="w-6 h-6 text-[hsl(var(--flame))]" />
                   </div>
+                  <h3 className="text-lg md:text-2xl font-bold text-foreground">Event Selection</h3>
                 </div>
 
                 <div>
                   <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                    Age <span className="text-red-500">*</span>
+                    Select City <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="number"
-                    name="age"
-                    value={formData.age}
-                    onChange={handleChange}
-                    min="16"
-                    max="100"
-                    className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
-                    placeholder="e.g. 20"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                    House Affiliation <span className="text-red-500">*</span>
-                  </label>
+                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 mb-3">
+                    <p className="text-xs md:text-sm text-yellow-600 dark:text-yellow-400 flex items-start gap-2">
+                      <span className="text-lg">⚠️</span>
+                      <span>Participants must be physically present in the selected city on the event date</span>
+                    </p>
+                  </div>
                   <select
-                    name="house"
-                    value={formData.house}
+                    name="city"
+                    value={formData.city}
                     onChange={handleChange}
                     className="w-full px-4 py-3.5 bg-black border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-white transition-all [&>option]:bg-black [&>option]:text-white"
                   >
-                    <option value="" className="bg-black text-white">Select your house</option>
-                    {houses.map((house) => (
-                      <option key={house} value={house} className="bg-black text-white">{house}</option>
+                    <option value="" className="bg-black text-white">Select your city</option>
+                    {cities.map((city) => (
+                      <option key={city.name} value={city.name} className="bg-black text-white">
+                        {city.name} – {city.date}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                    Contact Number <span className="text-red-500">*</span>
+                    Select Sport <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="tel"
-                    name="contact"
-                    value={formData.contact}
-                    onChange={handleChange}
-                    pattern="[0-9]{10}"
-                    className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
-                    placeholder="WhatsApp preferred"
-                  />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Event Selection */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-black/80 backdrop-blur-lg border-2 border-gray-800/50 hover:border-[hsl(var(--flame))]/30 rounded-2xl p-6 md:p-8 space-y-6 transition-all"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-[hsl(var(--flame))]/10 rounded-lg">
-                  <Calendar className="w-6 h-6 text-[hsl(var(--flame))]" />
-                </div>
-                <h3 className="text-lg md:text-2xl font-bold text-foreground">Event Selection</h3>
-              </div>
-
-              <div>
-                <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                  Select City <span className="text-red-500">*</span>
-                </label>
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 mb-3">
-                  <p className="text-xs md:text-sm text-yellow-600 dark:text-yellow-400 flex items-start gap-2">
-                    <span className="text-lg">⚠️</span>
-                    <span>Participants must be physically present in the selected city on the event date</span>
-                  </p>
-                </div>
-                <select
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3.5 bg-black border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-white transition-all [&>option]:bg-black [&>option]:text-white"
-                >
-                  <option value="" className="bg-black text-white">Select your city</option>
-                  {cities.map((city) => (
-                    <option key={city.name} value={city.name} className="bg-black text-white">
-                      {city.name} – {city.date}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                  Select Sport <span className="text-red-500">*</span>
-                </label>
-                {!formData.city ? (
-                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
-                    <p className="text-xs md:text-sm text-blue-600 dark:text-blue-400">
-                      Please select a city first to see available sports
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 mb-3">
-                      <p className="text-xs md:text-sm text-yellow-600 dark:text-yellow-400 flex items-start gap-2">
-                        <span className="text-lg">⚠️</span>
-                        <span>{getAvailableSports().length > 1 ? 'You can select both sports if you wish to participate in both' : 'Final match formats will depend on number of registrations'}</span>
+                  {!formData.city ? (
+                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+                      <p className="text-xs md:text-sm text-blue-600 dark:text-blue-400">
+                        Please select a city first to see available sports
                       </p>
                     </div>
-                    <div className={`grid gap-4 ${getAvailableSports().length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                      {getAvailableSports().includes('Badminton') && (
-                        <label className="relative flex items-center gap-3 p-4 md:p-5 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5 has-[:checked]:shadow-lg has-[:checked]:shadow-[hsl(var(--flame))]/10">
-                          <input
-                            type="checkbox"
-                            name="sportCheckbox"
-                            value="Badminton"
-                            checked={formData.sports.includes('Badminton')}
-                            onChange={handleChange}
-                            className="w-4 h-4 md:w-5 md:h-5 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))] rounded"
-                          />
-                          <span className="text-foreground font-semibold text-sm md:text-base">🏸 Badminton</span>
-                        </label>
-                      )}
-                      {getAvailableSports().includes('Cricket') && (
-                        <label className="relative flex items-center gap-3 p-4 md:p-5 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5 has-[:checked]:shadow-lg has-[:checked]:shadow-[hsl(var(--flame))]/10">
-                          <input
-                            type="checkbox"
-                            name="sportCheckbox"
-                            value="Cricket"
-                            checked={formData.sports.includes('Cricket')}
-                            onChange={handleChange}
-                            className="w-4 h-4 md:w-5 md:h-5 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))] rounded"
-                          />
-                          <span className="text-foreground font-semibold text-sm md:text-base">🏏 Cricket</span>
-                        </label>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
+                  ) : (
+                    <>
+                      <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 mb-3">
+                        <p className="text-xs md:text-sm text-yellow-600 dark:text-yellow-400 flex items-start gap-2">
+                          <span className="text-lg">⚠️</span>
+                          <span>{getAvailableSports().length > 1 ? 'You can select both sports if you wish to participate in both' : 'Final match formats will depend on number of registrations'}</span>
+                        </p>
+                      </div>
+                      <div className={`grid gap-4 ${getAvailableSports().length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                        {getAvailableSports().includes('Badminton') && (
+                          <label className="relative flex items-center gap-3 p-4 md:p-5 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5 has-[:checked]:shadow-lg has-[:checked]:shadow-[hsl(var(--flame))]/10">
+                            <input
+                              type="checkbox"
+                              name="sportCheckbox"
+                              value="Badminton"
+                              checked={formData.sports.includes('Badminton')}
+                              onChange={handleChange}
+                              className="w-4 h-4 md:w-5 md:h-5 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))] rounded"
+                            />
+                            <span className="text-foreground font-semibold text-sm md:text-base">🏸 Badminton</span>
+                          </label>
+                        )}
+                        {getAvailableSports().includes('Cricket') && (
+                          <label className="relative flex items-center gap-3 p-4 md:p-5 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5 has-[:checked]:shadow-lg has-[:checked]:shadow-[hsl(var(--flame))]/10">
+                            <input
+                              type="checkbox"
+                              name="sportCheckbox"
+                              value="Cricket"
+                              checked={formData.sports.includes('Cricket')}
+                              onChange={handleChange}
+                              className="w-4 h-4 md:w-5 md:h-5 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))] rounded"
+                            />
+                            <span className="text-foreground font-semibold text-sm md:text-base">🏏 Cricket</span>
+                          </label>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
 
-              {formData.sports.includes('Badminton') && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                >
-                  <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                    Participation Type <span className="text-red-500">*</span>
+                {formData.sports.includes('Badminton') && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
+                      Participation Type <span className="text-red-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <label className="flex items-center gap-3 p-4 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
+                        <input
+                          type="radio"
+                          name="badmintonType"
+                          value="Singles"
+                          checked={formData.badmintonType === 'Singles'}
+                          onChange={handleChange}
+                          className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
+                        />
+                        <span className="text-foreground font-medium">Singles</span>
+                      </label>
+                      <label className="flex items-center gap-3 p-4 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
+                        <input
+                          type="radio"
+                          name="badmintonType"
+                          value="Doubles"
+                          checked={formData.badmintonType === 'Doubles'}
+                          onChange={handleChange}
+                          className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
+                        />
+                        <span className="text-foreground font-medium">Doubles</span>
+                      </label>
+                    </div>
+                  </motion.div>
+                )}
+
+                {formData.sports.includes('Cricket') && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
+                      Preferred Role <span className="text-red-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-3 gap-3">
+                      <label className="flex items-center gap-2 p-4 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
+                        <input
+                          type="radio"
+                          name="cricketRole"
+                          value="Batter"
+                          checked={formData.cricketRole === 'Batter'}
+                          onChange={handleChange}
+                          className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
+                        />
+                        <span className="text-foreground font-medium text-sm">Batter</span>
+                      </label>
+                      <label className="flex items-center gap-2 p-4 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
+                        <input
+                          type="radio"
+                          name="cricketRole"
+                          value="Bowler"
+                          checked={formData.cricketRole === 'Bowler'}
+                          onChange={handleChange}
+                          className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
+                        />
+                        <span className="text-foreground font-medium text-sm">Bowler</span>
+                      </label>
+                      <label className="flex items-center gap-2 p-4 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
+                        <input
+                          type="radio"
+                          name="cricketRole"
+                          value="All Rounder"
+                          checked={formData.cricketRole === 'All Rounder'}
+                          onChange={handleChange}
+                          className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
+                        />
+                        <span className="text-foreground font-medium text-sm">All Rounder</span>
+                      </label>
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+
+              {/* Emergency Contact */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="bg-black/80 backdrop-blur-lg border-2 border-gray-800/50 hover:border-[hsl(var(--flame))]/30 rounded-2xl p-6 md:p-8 space-y-6 transition-all"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-red-500/10 rounded-lg">
+                    <Shield className="w-6 h-6 text-red-500" />
+                  </div>
+                  <h3 className="text-lg md:text-2xl font-bold text-foreground">Emergency Contact</h3>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
+                      Full Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="emergencyName"
+                      value={formData.emergencyName}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
+                      placeholder="Emergency contact person"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
+                      Mobile Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="emergencyContact"
+                      value={formData.emergencyContact}
+                      onChange={handleChange}
+                      pattern="[0-9]{10}"
+                      className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
+                      placeholder="10-digit number"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
+                      Relationship <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="emergencyRelation"
+                      value={formData.emergencyRelation}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3.5 bg-black border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-white transition-all [&>option]:bg-black [&>option]:text-white"
+                    >
+                      <option value="" className="bg-black text-white">Select relationship</option>
+                      <option value="Mother" className="bg-black text-white">Mother</option>
+                      <option value="Father" className="bg-black text-white">Father</option>
+                      <option value="Grandparent" className="bg-black text-white">Grandparent</option>
+                      <option value="Brother" className="bg-black text-white">Brother</option>
+                      <option value="Sister" className="bg-black text-white">Sister</option>
+                    </select>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Medical Information */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                className="bg-black/80 backdrop-blur-lg border-2 border-gray-800/50 hover:border-[hsl(var(--flame))]/30 rounded-2xl p-6 md:p-8 space-y-6 transition-all"
+              >
+                <h3 className="text-lg md:text-2xl font-bold text-foreground mb-4">Medical Information</h3>
+
+                <div>
+                  <label className="block text-xs md:text-sm font-semibold text-foreground mb-3">
+                    Do you have any medical condition or injury? <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-2 gap-4">
                     <label className="flex items-center gap-3 p-4 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
                       <input
                         type="radio"
-                        name="badmintonType"
-                        value="Singles"
-                        checked={formData.badmintonType === 'Singles'}
+                        name="medicalCondition"
+                        value="Yes"
+                        checked={formData.medicalCondition === 'Yes'}
                         onChange={handleChange}
                         className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
                       />
-                      <span className="text-foreground font-medium">Singles</span>
+                      <span className="text-foreground font-medium">Yes</span>
                     </label>
                     <label className="flex items-center gap-3 p-4 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
                       <input
                         type="radio"
-                        name="badmintonType"
-                        value="Doubles"
-                        checked={formData.badmintonType === 'Doubles'}
+                        name="medicalCondition"
+                        value="No"
+                        checked={formData.medicalCondition === 'No'}
                         onChange={handleChange}
                         className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
                       />
-                      <span className="text-foreground font-medium">Doubles</span>
+                      <span className="text-foreground font-medium">No</span>
                     </label>
                   </div>
-                </motion.div>
-              )}
-
-              {formData.sports.includes('Cricket') && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                >
-                  <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                    Preferred Role <span className="text-red-500">*</span>
-                  </label>
-                  <div className="grid grid-cols-3 gap-3">
-                    <label className="flex items-center gap-2 p-4 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
-                      <input
-                        type="radio"
-                        name="cricketRole"
-                        value="Batter"
-                        checked={formData.cricketRole === 'Batter'}
-                        onChange={handleChange}
-                        className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
-                      />
-                      <span className="text-foreground font-medium text-sm">Batter</span>
-                    </label>
-                    <label className="flex items-center gap-2 p-4 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
-                      <input
-                        type="radio"
-                        name="cricketRole"
-                        value="Bowler"
-                        checked={formData.cricketRole === 'Bowler'}
-                        onChange={handleChange}
-                        className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
-                      />
-                      <span className="text-foreground font-medium text-sm">Bowler</span>
-                    </label>
-                    <label className="flex items-center gap-2 p-4 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
-                      <input
-                        type="radio"
-                        name="cricketRole"
-                        value="All Rounder"
-                        checked={formData.cricketRole === 'All Rounder'}
-                        onChange={handleChange}
-                        className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
-                      />
-                      <span className="text-foreground font-medium text-sm">All Rounder</span>
-                    </label>
-                  </div>
-                </motion.div>
-              )}
-            </motion.div>
-
-            {/* Emergency Contact */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="bg-black/80 backdrop-blur-lg border-2 border-gray-800/50 hover:border-[hsl(var(--flame))]/30 rounded-2xl p-6 md:p-8 space-y-6 transition-all"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-red-500/10 rounded-lg">
-                  <Shield className="w-6 h-6 text-red-500" />
-                </div>
-                <h3 className="text-lg md:text-2xl font-bold text-foreground">Emergency Contact</h3>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                    Full Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="emergencyName"
-                    value={formData.emergencyName}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
-                    placeholder="Emergency contact person"
-                  />
                 </div>
 
-                <div>
-                  <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                    Mobile Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    name="emergencyContact"
-                    value={formData.emergencyContact}
-                    onChange={handleChange}
-                    pattern="[0-9]{10}"
-                    className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all"
-                    placeholder="10-digit number"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                    Relationship <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="emergencyRelation"
-                    value={formData.emergencyRelation}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3.5 bg-black border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-white transition-all [&>option]:bg-black [&>option]:text-white"
+                {formData.medicalCondition === 'Yes' && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
                   >
-                    <option value="" className="bg-black text-white">Select relationship</option>
-                    <option value="Mother" className="bg-black text-white">Mother</option>
-                    <option value="Father" className="bg-black text-white">Father</option>
-                    <option value="Grandparent" className="bg-black text-white">Grandparent</option>
-                    <option value="Brother" className="bg-black text-white">Brother</option>
-                    <option value="Sister" className="bg-black text-white">Sister</option>
-                  </select>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Medical Information */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              className="bg-black/80 backdrop-blur-lg border-2 border-gray-800/50 hover:border-[hsl(var(--flame))]/30 rounded-2xl p-6 md:p-8 space-y-6 transition-all"
-            >
-              <h3 className="text-lg md:text-2xl font-bold text-foreground mb-4">Medical Information</h3>
-
-              <div>
-                <label className="block text-xs md:text-sm font-semibold text-foreground mb-3">
-                  Do you have any medical condition or injury? <span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-2 gap-4">
-                  <label className="flex items-center gap-3 p-4 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
-                    <input
-                      type="radio"
-                      name="medicalCondition"
-                      value="Yes"
-                      checked={formData.medicalCondition === 'Yes'}
+                    <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
+                      Please specify the condition/injury
+                    </label>
+                    <textarea
+                      name="medicalDetails"
+                      value={formData.medicalDetails}
                       onChange={handleChange}
-                      className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
+                      rows="4"
+                      className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all resize-none"
+                      placeholder="Provide details about your medical condition or injury..."
                     />
-                    <span className="text-foreground font-medium">Yes</span>
-                  </label>
-                  <label className="flex items-center gap-3 p-4 bg-background/50 border-2 border-border rounded-xl cursor-pointer hover:border-[hsl(var(--flame))]/50 transition-all has-[:checked]:border-[hsl(var(--flame))] has-[:checked]:bg-[hsl(var(--flame))]/5">
-                    <input
-                      type="radio"
-                      name="medicalCondition"
-                      value="No"
-                      checked={formData.medicalCondition === 'No'}
-                      onChange={handleChange}
-                      className="w-4 h-4 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))]"
-                    />
-                    <span className="text-foreground font-medium">No</span>
-                  </label>
-                </div>
-              </div>
+                  </motion.div>
+                )}
+              </motion.div>
 
-              {formData.medicalCondition === 'Yes' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                >
-                  <label className="block text-xs md:text-sm font-semibold text-foreground mb-2">
-                    Please specify the condition/injury
-                  </label>
-                  <textarea
-                    name="medicalDetails"
-                    value={formData.medicalDetails}
-                    onChange={handleChange}
-                    rows="4"
-                    className="w-full px-4 py-3.5 bg-background/50 border-2 border-border rounded-xl focus:border-[hsl(var(--flame))] focus:outline-none focus:ring-4 focus:ring-[hsl(var(--flame))]/10 text-foreground transition-all resize-none"
-                    placeholder="Provide details about your medical condition or injury..."
-                  />
-                </motion.div>
-              )}
-            </motion.div>
-
-            {/* Declaration & Consent */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="bg-gradient-to-br from-[hsl(var(--flame))]/10 via-[hsl(var(--flame-light))]/5 to-transparent border-2 border-[hsl(var(--flame))]/30 rounded-2xl p-6 md:p-8 space-y-6"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <Shield className="w-7 h-7 text-[hsl(var(--flame))]" />
-                <h3 className="text-lg md:text-2xl font-bold text-foreground">Declaration & Consent</h3>
-              </div>
-
-              <div className="space-y-6">
-                <label className="flex items-start gap-4 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    name="declaration"
-                    checked={formData.declaration}
-                    onChange={handleChange}
-                    className="w-6 h-6 mt-1 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))] rounded border-2 flex-shrink-0"
-                  />
-                  <div className="flex-1">
-                    <span className="text-sm font-semibold text-foreground leading-relaxed block mb-2">
-                      <span className="text-red-500">*</span> I hereby declare and confirm:
-                    </span>
-                    <ul className="list-disc ml-5 space-y-2 text-xs md:text-sm text-muted-foreground">
-                      <li>I am a currently enrolled IIT Madras BS student and all information provided is true and accurate</li>
-                      <li>I will be physically present in the selected city on the event date(s)</li>
-                      <li>I agree to strictly adhere to all event rules, codes of conduct, and discipline policies</li>
-                      <li>I acknowledge that misconduct may result in immediate disqualification</li>
-                      <li>I understand participation involves inherent risks and I am medically fit to participate</li>
-                      <li>I agree that Sportify Society and IIT Madras BS shall not be held responsible for any personal injury or loss during the event, except in cases of proven organizer negligence</li>
-                      <li>I understand that false declaration may lead to cancellation of registration and disciplinary action</li>
-                    </ul>
-                  </div>
-                </label>
-
-                <div className="h-px bg-border"></div>
-
-                <label className="flex items-start gap-4 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    name="mediaConsent"
-                    checked={formData.mediaConsent}
-                    onChange={handleChange}
-                    className="w-6 h-6 mt-1 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))] rounded border-2 flex-shrink-0"
-                  />
-                  <div className="flex-1">
-                    <span className="text-sm font-semibold text-foreground leading-relaxed block mb-1">
-                      <span className="text-red-500">*</span> Media Consent
-                    </span>
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      I grant permission to Sportify Society and IIT Madras BS to use photographs, videos, and recordings captured during the event for official documentation, reporting, and non-commercial promotional purposes.
-                    </p>
-                  </div>
-                </label>
-              </div>
-            </motion.div>
-
-            {/* Submit Button */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.9 }}
-              className="flex flex-col items-center gap-4 pt-6 pb-12"
-            >
-              <motion.button
-                type="submit"
-                className="w-full md:w-auto px-12 md:px-16 py-4 md:py-5 bg-gradient-to-r from-[hsl(var(--flame))] via-[hsl(var(--flame-light))] to-[hsl(var(--flame))] text-black font-bold rounded-full text-base md:text-xl shadow-xl hover:shadow-[0_0_40px_rgba(255,140,0,0.6)] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-xl"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                disabled={!formData.declaration || !formData.mediaConsent || formData.sports.length === 0 || isSubmitting}
+              {/* Declaration & Consent */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                className="bg-gradient-to-br from-[hsl(var(--flame))]/10 via-[hsl(var(--flame-light))]/5 to-transparent border-2 border-[hsl(var(--flame))]/30 rounded-2xl p-6 md:p-8 space-y-6"
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Registration'}
-              </motion.button>
-              <p className="text-xs md:text-sm text-muted-foreground text-center">
-                By submitting, you agree to all terms and conditions stated above
-              </p>
-            </motion.div>
+                <div className="flex items-center gap-3 mb-4">
+                  <Shield className="w-7 h-7 text-[hsl(var(--flame))]" />
+                  <h3 className="text-lg md:text-2xl font-bold text-foreground">Declaration & Consent</h3>
+                </div>
+
+                <div className="space-y-6">
+                  <label className="flex items-start gap-4 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      name="declaration"
+                      checked={formData.declaration}
+                      onChange={handleChange}
+                      className="w-6 h-6 mt-1 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))] rounded border-2 flex-shrink-0"
+                    />
+                    <div className="flex-1">
+                      <span className="text-sm font-semibold text-foreground leading-relaxed block mb-2">
+                        <span className="text-red-500">*</span> I hereby declare and confirm:
+                      </span>
+                      <ul className="list-disc ml-5 space-y-2 text-xs md:text-sm text-muted-foreground">
+                        <li>I am a currently enrolled IIT Madras BS student and all information provided is true and accurate</li>
+                        <li>I will be physically present in the selected city on the event date(s)</li>
+                        <li>I agree to strictly adhere to all event rules, codes of conduct, and discipline policies</li>
+                        <li>I acknowledge that misconduct may result in immediate disqualification</li>
+                        <li>I understand participation involves inherent risks and I am medically fit to participate</li>
+                        <li>I agree that Sportify Society and IIT Madras BS shall not be held responsible for any personal injury or loss during the event, except in cases of proven organizer negligence</li>
+                        <li>I understand that false declaration may lead to cancellation of registration and disciplinary action</li>
+                      </ul>
+                    </div>
+                  </label>
+
+                  <div className="h-px bg-border"></div>
+
+                  <label className="flex items-start gap-4 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      name="mediaConsent"
+                      checked={formData.mediaConsent}
+                      onChange={handleChange}
+                      className="w-6 h-6 mt-1 text-[hsl(var(--flame))] focus:ring-[hsl(var(--flame))] rounded border-2 flex-shrink-0"
+                    />
+                    <div className="flex-1">
+                      <span className="text-sm font-semibold text-foreground leading-relaxed block mb-1">
+                        <span className="text-red-500">*</span> Media Consent
+                      </span>
+                      <p className="text-xs md:text-sm text-muted-foreground">
+                        I grant permission to Sportify Society and IIT Madras BS to use photographs, videos, and recordings captured during the event for official documentation, reporting, and non-commercial promotional purposes.
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </motion.div>
+
+              {/* Submit Button */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.9 }}
+                className="flex flex-col items-center gap-4 pt-6 pb-12"
+              >
+                {submitError && (
+                  <div className="w-full p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm text-center">
+                    {submitError}
+                  </div>
+                )}
+
+                <motion.button
+                  type="submit"
+                  className="w-full md:w-auto px-12 md:px-16 py-4 md:py-5 bg-gradient-to-r from-[hsl(var(--flame))] via-[hsl(var(--flame-light))] to-[hsl(var(--flame))] text-black font-bold rounded-full text-base md:text-xl shadow-xl hover:shadow-[0_0_40px_rgba(255,140,0,0.6)] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-xl flex items-center justify-center gap-3"
+                  whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                  whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+                  disabled={!formData.declaration || !formData.mediaConsent || formData.sports.length === 0 || isSubmitting || submitted}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Submitting...</span>
+                    </>
+                  ) : submitted ? (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      <span>Submitted Successfully</span>
+                    </>
+                  ) : (
+                    'Submit Registration'
+                  )}
+                </motion.button>
+
+                <p className="text-xs md:text-sm text-muted-foreground text-center">
+                  {isSubmitting
+                    ? 'Please wait, do not close this page or click again...'
+                    : 'By submitting, you agree to all terms and conditions stated above'
+                  }
+                </p>
+              </motion.div>
+            </fieldset>
           </motion.form>
         )}
       </div>
