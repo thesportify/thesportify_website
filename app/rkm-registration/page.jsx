@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CheckCircle, Shield, Calendar, User, Trophy } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Shield, Calendar, User, Trophy, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { rkmAuth, rkmGoogleProvider } from '@/lib/Rkm-firebase';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
@@ -35,6 +35,43 @@ export default function RKMRegistration() {
 
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  
+  // Use ref to prevent race conditions on rapid clicks
+  const isSubmittingRef = useRef(false);
+  const hasSubmittedRef = useRef(false);
+  const submissionAttempts = useRef(0);
+  
+  /**
+   * SESSION TIMEOUT & SECURITY MANAGEMENT
+   * 
+   * Comprehensive protection against accidental logout during form filling:
+   * 
+   * 1. INCREASED TIMEOUT: 10 minutes (not 5) to allow slow form filling
+   * 2. COMPREHENSIVE ACTIVITY DETECTION:
+   *    - All mouse events (click, move, down)
+   *    - All keyboard events (keydown, keyup, input)
+   *    - All form interactions (change, select, focus, blur)
+   *    - All touch events (mobile support)
+   *    - Scroll and wheel events
+   * 3. TRIPLE-CHECK BEFORE LOGOUT:
+   *    - Must exceed timeout (10 min)
+   *    - NOT during submission
+   *    - NOT after successful submission
+   *    - Page must be hidden (user switched tabs)
+   * 4. VISIBILITY HANDLING:
+   *    - Resets timer when user returns to tab
+   *    - Only logs out if tab was hidden
+   * 5. SESSION PERSISTENCE:
+   *    - Session-only (clears on browser/tab close)
+   *    - No visual timer to distract users
+   * 
+   * Result: Users will NEVER be logged out while actively filling the form
+   */
+  const IDLE_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds (increased for form filling)
+  const idleTimerRef = useRef(null);
+  const lastActivityRef = useRef(Date.now());
+  const isUserActiveRef = useRef(false); // Track if user has interacted with form
 
   // Allowed email domains
   const ALLOWED_DOMAINS = ['ds.study.iitm.ac.in', 'es.study.iitm.ac.in'];
@@ -49,6 +86,8 @@ export default function RKMRegistration() {
           // Pre-fill and lock email field
           setFormData(prev => ({ ...prev, email: currentUser.email }));
           setAuthError('');
+          // Start idle timeout when user is authenticated
+          resetIdleTimer();
         } else {
           // Domain not allowed - sign out immediately
           signOut(rkmAuth);
@@ -57,12 +96,131 @@ export default function RKMRegistration() {
         }
       } else {
         setUser(null);
+        // Clear idle timer when user logs out
+        clearIdleTimer();
       }
       setAuthLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      clearIdleTimer();
+    };
   }, []);
+  
+  // Idle timeout management - Auto logout ONLY after TRUE inactivity
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const handleActivity = () => {
+      lastActivityRef.current = Date.now();
+      isUserActiveRef.current = true;
+      resetIdleTimer();
+    };
+
+    // Comprehensive activity event listeners - captures ALL user interactions
+    const events = [
+      // Mouse events
+      'mousedown', 'mousemove', 'click', 'dblclick',
+      // Keyboard events (modern and legacy)
+      'keydown', 'keyup', 'input',
+      // Touch events (mobile)
+      'touchstart', 'touchmove', 'touchend',
+      // Scroll events
+      'scroll', 'wheel',
+      // Form interaction events - CRITICAL for preventing logout during form filling
+      'change', 'select', 'focus', 'blur',
+      // Drag and drop
+      'drag', 'drop'
+    ];
+    
+    events.forEach(event => {
+      document.addEventListener(event, handleActivity, true);
+    });
+
+    // Check for idle timeout - less frequent checks, longer timeout
+    const checkIdleInterval = setInterval(() => {
+      const timeSinceLastActivity = Date.now() - lastActivityRef.current;
+      
+      // Only timeout if:
+      // 1. Truly idle (exceeded timeout)
+      // 2. NOT currently submitting
+      // 3. NOT already submitted
+      // 4. Page is not visible (user switched tabs)
+      if (timeSinceLastActivity >= IDLE_TIMEOUT && 
+          !isSubmitting && 
+          !submitted &&
+          document.hidden) {
+        handleIdleTimeout();
+      }
+    }, 60000); // Check every 60 seconds (less aggressive)
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleActivity, true);
+      });
+      clearInterval(checkIdleInterval);
+    };
+  }, [user, isSubmitting, submitted]);
+  
+  // Handle page visibility - reset activity timer when user returns to tab
+  useEffect(() => {
+    if (!user) return;
+    
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // User returned to tab - reset activity timer
+        lastActivityRef.current = Date.now();
+        resetIdleTimer();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user]);
+  
+  const resetIdleTimer = () => {
+    clearIdleTimer();
+    lastActivityRef.current = Date.now();
+    
+    idleTimerRef.current = setTimeout(() => {
+      handleIdleTimeout();
+    }, IDLE_TIMEOUT);
+  };
+  
+  const clearIdleTimer = () => {
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = null;
+    }
+  };
+  
+  const handleIdleTimeout = async () => {
+    // Triple-check conditions before logging out to prevent accidental logouts
+    if (!user) return;
+    if (submitted) return; // Never logout after successful submission
+    if (isSubmitting) return; // Never logout during submission
+    if (isSubmittingRef.current) return; // Check ref as well
+    if (!document.hidden) return; // Don't logout if page is visible
+    
+    try {
+      console.log('Auto-logout triggered after 10 minutes of true inactivity');
+      await signOut(rkmAuth);
+      setUser(null);
+      setAuthError('Session expired due to inactivity. Please sign in again.');
+      // Only alert if window is focused
+      if (!document.hidden) {
+        alert('Your session has expired due to inactivity (10 minutes). Please sign in again for security.');
+      }
+    } catch (error) {
+      console.error('Auto logout error:', error);
+    }
+  };
 
   // Google Sign-In handler
   const handleGoogleSignIn = async () => {
@@ -179,7 +337,16 @@ export default function RKMRegistration() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (isSubmitting) return;
+    // CRITICAL: Prevent double submission with ref check
+    if (isSubmittingRef.current || hasSubmittedRef.current) {
+      console.warn('Submission already in progress or completed');
+      return;
+    }
+    
+    // Lock submission immediately
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
+    setSubmitError('');
     
     // Comprehensive validation for all required fields
     if (!formData.fullName.trim()) {
@@ -258,15 +425,17 @@ export default function RKMRegistration() {
     // Declaration validation
     if (!formData.declaration) {
       alert('Please accept the declaration to proceed');
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
       return;
     }
     
     if (!formData.mediaConsent) {
       alert('Please provide media consent to proceed');
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
       return;
     }
-    
-    setIsSubmitting(true);
     
     try {
       // Build Google Form URL with pre-filled data
@@ -317,7 +486,7 @@ export default function RKMRegistration() {
 
       // Submit to Google Form via fetch with timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout for better reliability
 
       try {
         const response = await fetch(baseUrl, {
@@ -333,12 +502,18 @@ export default function RKMRegistration() {
         clearTimeout(timeoutId);
         
         // With no-cors, we can't check response status, but if we reach here without error, submission likely succeeded
-        // Wait a bit to ensure form processes
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Wait to ensure form processes
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // Show success message only after successful submission
+        // Mark as successfully submitted
+        hasSubmittedRef.current = true;
         setSubmitted(true);
+        
+        // Scroll to top to show success message
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Keep button disabled permanently after successful submission
+        return;
       } catch (fetchError) {
         clearTimeout(timeoutId);
         
@@ -385,15 +560,38 @@ export default function RKMRegistration() {
           if (document.body.contains(iframe)) document.body.removeChild(iframe);
         }, 1000);
         
-        // Show success message only after iframe loads
+        // Mark as successfully submitted
+        hasSubmittedRef.current = true;
         setSubmitted(true);
+        
+        // Scroll to top to show success message
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error) {
       console.error('Form submission error:', error);
-      alert('Form submission failed. Please try again or contact support if the issue persists.');
-    } finally {
+      
+      // Track submission attempts
+      submissionAttempts.current += 1;
+      
+      // Unlock for retry only if not a critical error
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
+      
+      // User-friendly error message
+      const errorMsg = error.name === 'AbortError' 
+        ? 'Submission timeout. Please check your internet connection and try again.'
+        : submissionAttempts.current >= 3
+        ? 'Multiple submission attempts failed. Please refresh the page and try again, or contact support if the issue persists.'
+        : 'Form submission failed. Please try again.';
+      
+      setSubmitError(errorMsg);
+      alert(errorMsg);
+    } finally {
+      // Only unlock if submission was not successful
+      if (!hasSubmittedRef.current) {
+        setIsSubmitting(false);
+        isSubmittingRef.current = false;
+      }
     }
   };
 
@@ -751,7 +949,7 @@ export default function RKMRegistration() {
             <div className="p-2 bg-green-500/20 rounded-full">
               <CheckCircle className="w-5 h-5 text-green-500" />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-sm font-semibold text-foreground">✅ Authenticated as</p>
               <p className="text-xs text-muted-foreground font-mono">{user.email}</p>
             </div>
@@ -806,6 +1004,8 @@ export default function RKMRegistration() {
           onSubmit={handleSubmit}
           className="space-y-8"
         >
+          {/* Fieldset to disable entire form during submission */}
+          <fieldset disabled={isSubmitting || submitted} className="space-y-8">
           {/* Personal Information */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -1294,19 +1494,42 @@ export default function RKMRegistration() {
             transition={{ delay: 0.9 }}
             className="flex flex-col items-center gap-4 pt-6 pb-12"
           >
+            {submitError && (
+              <div className="w-full p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm text-center">
+                {submitError}
+              </div>
+            )}
+            
             <motion.button
               type="submit"
-              className="w-full md:w-auto px-12 md:px-16 py-4 md:py-5 bg-gradient-to-r from-[hsl(var(--flame))] via-[hsl(var(--flame-light))] to-[hsl(var(--flame))] text-black font-bold rounded-full text-base md:text-xl shadow-xl hover:shadow-[0_0_40px_rgba(255,140,0,0.6)] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-xl"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              disabled={!formData.declaration || !formData.mediaConsent || formData.sports.length === 0 || isSubmitting}
+              className="w-full md:w-auto px-12 md:px-16 py-4 md:py-5 bg-gradient-to-r from-[hsl(var(--flame))] via-[hsl(var(--flame-light))] to-[hsl(var(--flame))] text-black font-bold rounded-full text-base md:text-xl shadow-xl hover:shadow-[0_0_40px_rgba(255,140,0,0.6)] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-xl flex items-center justify-center gap-3"
+              whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+              whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+              disabled={!formData.declaration || !formData.mediaConsent || formData.sports.length === 0 || isSubmitting || submitted}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Registration'}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Submitting...</span>
+                </>
+              ) : submitted ? (
+                <>
+                  <CheckCircle className="w-5 h-5" />
+                  <span>Submitted Successfully</span>
+                </>
+              ) : (
+                'Submit Registration'
+              )}
             </motion.button>
+            
             <p className="text-xs md:text-sm text-muted-foreground text-center">
-              By submitting, you agree to all terms and conditions stated above
+              {isSubmitting 
+                ? 'Please wait, do not close this page or click again...'
+                : 'By submitting, you agree to all terms and conditions stated above'
+              }
             </p>
           </motion.div>
+          </fieldset>
         </motion.form>
       </div>
     </div>
