@@ -602,7 +602,6 @@ export default function RKMRegistration() {
   ];
 
   const cities = [
-    { name: 'Lucknow', date: '18 Feb', sports: ['Cricket'] },
     { name: 'Delhi', date: '21 Feb', sports: ['Cricket', 'Badminton'] },
     { name: 'Mumbai', date: '21 Feb', sports: ['Badminton'] },
     { name: 'Jaipur', date: '22 Feb', sports: ['Cricket'] },
