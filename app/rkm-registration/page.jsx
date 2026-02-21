@@ -1,14 +1,9 @@
 'use client';
 
-<<<<<<< HEAD
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, CheckCircle, Shield, Calendar, User, Trophy, LogIn, Lock, AlertCircle } from 'lucide-react';
-=======
+
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, CheckCircle, Shield, Calendar, User, Trophy, Loader2 } from 'lucide-react';
->>>>>>> a9ad3229532f7c738a7243fb0e0d905898518d01
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, CheckCircle, Shield, Calendar, User, Trophy, LogIn, Lock, AlertCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { rkmAuth, rkmGoogleProvider } from '@/lib/Rkm-firebase';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
