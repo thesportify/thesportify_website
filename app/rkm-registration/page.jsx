@@ -8,6 +8,11 @@ import Link from 'next/link';
 import { rkmAuth, rkmGoogleProvider } from '@/lib/Rkm-firebase';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 
+// ─── REGISTRATION STATUS ────────────────────────────────────────────────────
+// Set to true to close registrations and show the closed banner
+const REGISTRATION_CLOSED = true;
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function RKMRegistration() {
   // Authentication State
   const [user, setUser] = useState(null);
@@ -615,6 +620,130 @@ export default function RKMRegistration() {
 
 
 
+  // ── Registration Closed — shown FIRST, no auth needed ──────────────────
+  if (REGISTRATION_CLOSED) {
+    return (
+      <div className="h-screen bg-black flex flex-col items-center justify-center relative overflow-hidden px-4">
+        {/* Subtle background glows */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-red-600/10 blur-[120px]" />
+          <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-[350px] h-[350px] rounded-full bg-orange-500/8 blur-[100px]" />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.55, ease: 'easeOut' }}
+          className="relative z-10 w-full max-w-md"
+        >
+          {/* Gradient top bar */}
+          <div className="h-1 w-full rounded-t-2xl bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400" />
+
+          <div className="bg-[#0d0d0d] border border-white/10 rounded-b-2xl shadow-2xl px-6 py-5 md:px-8 md:py-7 text-center">
+
+            {/* Logo */}
+            <motion.img
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.25, type: 'spring', stiffness: 180 }}
+              src="/RKM2.png"
+              alt="RKM 2026"
+              className="mx-auto w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-lg mb-3"
+            />
+
+            {/* Status badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full bg-red-500/15 border border-red-500/30 text-red-400 text-[10px] md:text-xs font-bold tracking-widest uppercase"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+              Registrations Closed
+            </motion.div>
+
+            {/* Title */}
+            <motion.h1
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-xl md:text-2xl font-bold text-white mb-1 tracking-tight"
+            >
+              Rashtriya Khel Mahotsav 2026
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.44 }}
+              className="text-sm font-semibold text-gray-300 mb-2"
+            >
+              Thank you for your interest!
+            </motion.p>
+
+            {/* Message */}
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.48 }}
+              className="text-xs md:text-sm text-gray-500 leading-relaxed mb-4"
+            >
+              Registrations for <span className="text-orange-400 font-semibold">RKM 2026</span> are now officially closed.
+              We've received an overwhelming response and are excited to welcome all participants.
+              Stay tuned to our official channels for updates on venue, schedule &amp; match details.
+            </motion.p>
+
+            {/* Divider */}
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent mb-4" />
+
+            {/* Info pills */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.54 }}
+              className="flex flex-wrap justify-center gap-2 mb-5"
+            >
+              <span className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] md:text-xs text-gray-400">
+                <Calendar className="w-3 h-3 text-orange-400" />
+                Feb – Mar 2026
+              </span>
+              <span className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] md:text-xs text-gray-400">
+                <Trophy className="w-3 h-3 text-yellow-400" />
+                Cricket &amp; Badminton
+              </span>
+              <span className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] md:text-xs text-gray-400">
+                <User className="w-3 h-3 text-green-400" />
+                IIT Madras BS Students
+              </span>
+            </motion.div>
+
+            {/* CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-3"
+            >
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[hsl(var(--flame))] to-orange-500 hover:from-orange-500 hover:to-yellow-500 text-white font-semibold text-sm shadow-lg hover:shadow-orange-500/30 transition-all duration-300 hover:scale-105"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Home
+              </Link>
+              <Link
+                href="/helpdesk"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-gray-300 hover:text-white font-semibold text-sm transition-all duration-300"
+              >
+                Help Desk
+              </Link>
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+  // ──────────────────────────────────────────────────────────────────────────
   if (submitted) {
     return (
       <div className="h-screen bg-background flex items-center justify-center px-3 md:px-4 py-4 overflow-hidden">
