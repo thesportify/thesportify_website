@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { teamMembers } from "../lib/data";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Github,
   Linkedin,
@@ -9,10 +9,16 @@ import {
   Menu,
   X,
   Flame,
+  ChevronDown,
+  Calendar,
 } from "lucide-react";
 import Image from "next/image";
 
-export default function TeamMembersCarousel() {
+export default function TeamMembersCarousel({ teamMembersByYear = {} }) {
+  const years = Object.keys(teamMembersByYear).sort((a, b) => b.localeCompare(a));
+  const [selectedYear, setSelectedYear] = useState("2025-26");
+  const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
+
   // Updated category order - split Core into Founders and Secretaries
   const categoryOrder = [
     "Secretaries",
@@ -142,8 +148,8 @@ export default function TeamMembersCarousel() {
   const categoryNavRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Filter members by active category
-  const filteredMembers = teamMembers.filter((member) => {
+  // Filter members by active category and selected year
+  const filteredMembers = (teamMembersByYear[selectedYear] || []).filter((member) => {
     const mappedCategory = coreMapping(member);
     const normalizedCategory = mappedCategory && mappedCategory.toLowerCase();
     const displayCategory =
@@ -318,7 +324,44 @@ export default function TeamMembersCarousel() {
               </span>
             </button>
 
-            <div className="flex items-center">
+            <div className="flex items-center gap-4">
+              {/* Year Selector for Mobile */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white"
+                >
+                  <Calendar size={14} className="text-[#ff5a00]" />
+                  <span>{selectedYear}</span>
+                  <ChevronDown size={14} className="text-gray-400" />
+                </button>
+                <AnimatePresence>
+                  {isYearDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 mt-2 min-w-[140px] bg-gray-900 border border-white/10 rounded-xl p-1 shadow-2xl z-[100]"
+                    >
+                      {years.map((year) => (
+                        <button
+                          key={year}
+                          onClick={() => {
+                            setSelectedYear(year);
+                            setIsYearDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
+                            selectedYear === year ? "bg-[#ff5a00]/20 text-white" : "text-gray-400"
+                          }`}
+                        >
+                          {year} Council
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <span className="text-white font-bold text-sm bg-gradient-to-r from-[#ff5a00] to-[#ffb700] bg-clip-text text-transparent">
                 {activeCategory}
               </span>
@@ -350,65 +393,117 @@ export default function TeamMembersCarousel() {
             </div>
           </div>
 
-          {/* Desktop horizontal scrolling categories with enhanced scroll logic */}
-          <div className="hidden md:flex items-center justify-center relative px-8">
-            {/* Left scroll button - visible only when content is scrollable to the left */}
-            <button
-              onClick={scrollLeft}
-              disabled={!scrollState.canScrollLeft}
-              className={`absolute left-0 z-10 bg-gray-900/80 text-white rounded-full p-1 backdrop-blur-sm shadow-lg transform transition-all duration-200 ${scrollState.canScrollLeft
-                ? "opacity-100 hover:bg-gray-800 hover:scale-110 cursor-pointer"
-                : "opacity-0 pointer-events-none"
-                }`}
-              aria-label="Scroll left"
-            >
-              <ChevronLeft size={20} />
-            </button>
+          {/* Desktop horizontal scrolling categories + Year Dropdown */}
+          <div className="hidden md:flex items-center justify-between relative px-4 h-14">
+            {/* Categories Scroller Container */}
+            <div className="flex-1 flex items-center justify-center relative px-8 overflow-hidden">
+              {/* Left scroll button */}
+              <button
+                onClick={scrollLeft}
+                disabled={!scrollState.canScrollLeft}
+                className={`absolute left-0 z-10 bg-gray-900/80 text-white rounded-full p-1 backdrop-blur-sm shadow-lg transform transition-all duration-200 ${scrollState.canScrollLeft
+                  ? "opacity-100 hover:bg-gray-800 hover:scale-110 cursor-pointer"
+                  : "opacity-0 pointer-events-none"
+                  }`}
+                aria-label="Scroll left"
+              >
+                <ChevronLeft size={20} />
+              </button>
 
-            {/* Categories container with scroll event handler */}
-            <div
-              ref={scrollContainerRef}
-              onScroll={handleScroll}
-              className="flex items-center justify-start overflow-x-auto py-2 scrollbar-hide w-full"
-              style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none'
-              }}
-            >
-              <div className="flex items-center space-x-2 px-4">
-                {categoryOrder.map((category) => (
-                  <button
-                    key={category}
-                    data-category={category}
-                    onClick={() => setActiveCategory(category)}
-                    className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 relative ${activeCategory === category
-                      ? "active-category bg-gradient-to-r from-[#ff5a00] to-[#ffb700] text-white shadow-lg shadow-orange-900/30 scale-105"
-                      : "text-gray-300 hover:text-white hover:bg-gray-800/50"
-                      }`}
-                  >
-                    <span className="relative z-10">{category}</span>
+              {/* Categories container */}
+              <div
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+                className="flex items-center justify-start overflow-x-auto py-2 scrollbar-hide w-full"
+                style={{
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none'
+                }}
+              >
+                <div className="flex items-center space-x-2 px-4">
+                  {categoryOrder.map((category) => (
+                    <button
+                      key={category}
+                      data-category={category}
+                      onClick={() => setActiveCategory(category)}
+                      className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 relative ${activeCategory === category
+                        ? "active-category bg-gradient-to-r from-[#ff5a00] to-[#ffb700] text-white shadow-lg shadow-orange-900/30 scale-105"
+                        : "text-gray-300 hover:text-white hover:bg-gray-800/50"
+                        }`}
+                    >
+                      <span className="relative z-10">{category}</span>
 
-                    {/* Enhanced underline indicator for active category */}
-                    {activeCategory === category && (
-                      <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-[#ff5a00] to-[#ffb700]"></span>
-                    )}
-                  </button>
-                ))}
+                      {/* Enhanced underline indicator for active category */}
+                      {activeCategory === category && (
+                        <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-[#ff5a00] to-[#ffb700]"></span>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* Right scroll button */}
+              <button
+                onClick={scrollRight}
+                disabled={!scrollState.canScrollRight}
+                className={`absolute right-0 z-10 bg-gray-900/80 text-white rounded-full p-1 backdrop-blur-sm shadow-lg transform transition-all duration-200 ${scrollState.canScrollRight
+                  ? "opacity-100 hover:bg-gray-800 hover:scale-110 cursor-pointer"
+                  : "opacity-0 pointer-events-none"
+                  }`}
+                aria-label="Scroll right"
+              >
+                <ChevronRight size={20} />
+              </button>
             </div>
 
-            {/* Right scroll button - visible only when content is scrollable to the right */}
-            <button
-              onClick={scrollRight}
-              disabled={!scrollState.canScrollRight}
-              className={`absolute right-0 z-10 bg-gray-900/80 text-white rounded-full p-1 backdrop-blur-sm shadow-lg transform transition-all duration-200 ${scrollState.canScrollRight
-                ? "opacity-100 hover:bg-gray-800 hover:scale-110 cursor-pointer"
-                : "opacity-0 pointer-events-none"
-                }`}
-              aria-label="Scroll right"
-            >
-              <ChevronRight size={20} />
-            </button>
+            {/* Year Dropdown on the Right */}
+            <div className="relative ml-4">
+              <button
+                onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
+                onBlur={() => setTimeout(() => setIsYearDropdownOpen(false), 200)}
+                className="group flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 backdrop-blur-md hover:border-orange-500/30"
+              >
+                <Calendar size={16} className="text-[#ff5a00]" />
+                <span className="text-white text-sm font-medium">{selectedYear}</span>
+                <motion.div
+                  animate={{ rotate: isYearDropdownOpen ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ChevronDown size={16} className="text-gray-400 group-hover:text-white" />
+                </motion.div>
+              </button>
+
+              <AnimatePresence>
+                {isYearDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute top-full mt-2 right-0 min-w-[180px] bg-[#121212]/95 border border-white/10 rounded-xl p-1 shadow-2xl backdrop-blur-xl z-[100]"
+                  >
+                    {years.map((year) => (
+                      <button
+                        key={year}
+                        onClick={() => {
+                          setSelectedYear(year);
+                          setIsYearDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 text-xs ${
+                          selectedYear === year
+                            ? "bg-gradient-to-r from-[#ff5a00]/20 to-[#ffe808]/10 text-white"
+                            : "text-gray-400 hover:text-white hover:bg-white/5"
+                        }`}
+                      >
+                        <span>{year} Council</span>
+                        {selectedYear === year && (
+                          <div className="w-1 h-1 rounded-full bg-[#ff5a00] shadow-[0_0_8px_#ff5a00]" />
+                        )}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>
