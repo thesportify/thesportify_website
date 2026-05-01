@@ -21,6 +21,7 @@ const navLinks = [
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -55,6 +56,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link
             href="/"
+            onClick={() => setOpen(false)}
             className="flex items-center space-x-2 
              outline-none ring-0 focus:outline-none focus:ring-0 
              active:outline-none active:ring-0 
@@ -102,7 +104,7 @@ const Navbar = () => {
             </nav>
 
             {/* Mobile Navigation */}
-            <Sheet>
+            <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-black/20 focus:outline-none">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle menu</span>
@@ -113,6 +115,7 @@ const Navbar = () => {
                     <Link
                       key={link.path}
                       href={link.path}
+                      onClick={() => setOpen(false)}
                       className={`text-lg font-medium transition-all duration-300 relative ${
                         pathname === link.path
                           ? "text-transparent bg-clip-text bg-[linear-gradient(90deg,#ff0000,#ff5a00,#ff9a00,#ffce00,#ffe808)]"
