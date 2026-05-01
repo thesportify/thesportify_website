@@ -7,9 +7,8 @@ import featEve3 from '../assets/Featured-events/Event-3.jpg';
 import featureBG from '../assets/FeaturedBG.jpg';
 import Image from "next/image";
 import Link from "next/link";
-import { db } from "@/lib/firebase";
+import { db, hasFirebaseConfig } from "@/lib/firebase";
 import { collection, query, getDocs, where } from "firebase/firestore";
-import { Loader2 } from "lucide-react";
 
 const fallbackFeaturedEvents = [
   {
@@ -45,10 +44,13 @@ const fallbackFeaturedEvents = [
 
 export default function FeaturedEvents() {
   const sectionRef = useRef(null);
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState(fallbackFeaturedEvents);
 
   useEffect(() => {
+    if (!hasFirebaseConfig) {
+      return;
+    }
+
     const fetchEvents = async () => {
       try {
         const q = query(
@@ -67,12 +69,11 @@ export default function FeaturedEvents() {
           return rightTime - leftTime;
         });
 
-        setEvents(sortedEvents.length > 0 ? sortedEvents : fallbackFeaturedEvents);
+        if (sortedEvents.length > 0) {
+          setEvents(sortedEvents);
+        }
       } catch (error) {
         console.error("Error fetching events:", error);
-        setEvents(fallbackFeaturedEvents);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -125,11 +126,7 @@ export default function FeaturedEvents() {
           </p>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-12 w-12 text-orange-500 animate-spin" />
-          </div>
-        ) : events.length === 0 ? (
+        {events.length === 0 ? (
           <div className="flex justify-center items-center h-40 scroll-reveal">
             <p className="text-2xl font-bold text-gray-500 animate-pulse">
               Events Coming Soon
