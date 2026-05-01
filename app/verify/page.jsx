@@ -67,7 +67,7 @@ export default function VerifyPage() {
 
                     <div className="mt-8 text-center">
                         <p className="text-sm text-gray-500">
-                            Having trouble? Contact <a href="mailto:support@sportify.org" className="text-orange-400 hover:underline">support@sportify.org</a>
+                            Having trouble? Contact <a href="mailto:thesportify.society@study.iitm.ac.in" className="text-orange-400 hover:underline">thesportify.society@study.iitm.ac.in</a>
                         </p>
                     </div>
                 </div>

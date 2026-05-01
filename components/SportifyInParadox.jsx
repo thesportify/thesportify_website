@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Music } from 'lucide-react';
 import { MdSportsCricket } from "react-icons/md";
@@ -10,39 +11,39 @@ import { FaRunning, FaVolleyballBall, FaLaptopCode, FaFutbol } from "react-icons
 const EVENTS = [
   {
     id: 1,
-    title: 'IPL Auction Showdown 4.0',
-    category: 'Strategy & Bidding',
-    description: 'Experience the thrill of a real-world cricket auction. Build your dream team with smart bidding strategies.',
-    icon: <MdSportsCricket />,
-    image: '/events/cricket.png',
-    color: 'from-[#ff5a00] to-[#ff9a00]',
-    link: '#', 
-  },
-  {
-    id: 2,
     title: 'Paradox Badminton League',
-    category: 'Physical Sport',
-    description: 'Smash your way to glory! Compete against the best in high-intensity singles and doubles matches.',
+    category: 'One Court. One Battle. One Champion.',
+    description: 'The Paradox Badminton League is a high-intensity inter-house badminton tournament where precision meets pressure. With short-format matches, every rally matters and every shot has consequences. Players rely on footwork, control, and quick thinking to stay ahead. There’s no time to recover here - only to adapt, respond, and execute.',
     icon: <GiShuttlecock />,
     image: '/events/badminton.png',
     color: 'from-[#ff9a00] to-[#ffce00]',
     link: '#', 
   },
   {
+    id: 2,
+    title: 'Paradox Premier League',
+    category: 'Dribble. Dash. Dominate.',
+    description: 'The Paradox Premier League brings fast-paced, structured football where teamwork defines the game. With 7-a-side gameplay, quick transitions, sharp passing, and disciplined defending are essential. Every moment creates an opportunity, and every mistake can change the outcome. Teams that stay organized, focused, and clinical will take control.',
+    icon: <FaFutbol />,
+    image: '/events/football.png',
+    color: 'from-orange-500 to-[#ff9a00]',
+    link: '#',
+  },
+  {
     id: 3,
-    title: 'Zumba Workshop',
-    category: 'Fitness & Fun',
-    description: 'Groove to the beats, burn calories, and experience the ultimate dance fitness party.',
-    icon: <Music />,
-    image: '/events/zumba.png',
-    color: 'from-[#ffce00] to-[#ffe808]',
+    title: 'VolleyVibes',
+    category: 'Spike the Rivalry',
+    description: 'VolleyVibes is an inter-house Volleyball tournament built on rhythm, communication, and control. Every rally demands sharp reflexes, quick decisions, and seamless teamwork - from precise sets to powerful finishes. Momentum can shift in seconds, and consistency becomes your biggest strength. Stay sharp. Stay ready. Stay in the game.',
+    icon: <FaVolleyballBall />,
+    image: '/events/volleyball.png',
+    color: 'from-yellow-400 to-[#ffe808]',
     link: '#',
   },
   {
     id: 4,
     title: 'Kampus Run',
-    category: 'Miles with Purpose',
-    description: 'Lace up your running shoes. Join the campus marathon dedicated to fitness and a greater cause.',
+    category: 'Miles With Purpose.',
+    description: 'Kampus Run is more than a race - it’s a step towards better mental and physical well-being. With a 3 KM fun run and a 5 KM competitive run, participants can choose their pace and purpose. It’s about taking a break from routine, finding your rhythm, and finishing with a sense of clarity. Whether you compete or just run, every step counts. Run for your mind. Run for yourself.',
     icon: <FaRunning />,
     image: '/events/run.png',
     color: 'from-amber-400 to-yellow-400',
@@ -50,29 +51,29 @@ const EVENTS = [
   },
   {
     id: 5,
-    title: 'Paradox Champions League',
-    category: 'Football',
-    description: 'The ultimate football showdown. Bring your A-game, score goals, and claim the championship.',
-    icon: <FaFutbol />,
-    image: '/events/football.png',
-    color: 'from-orange-500 to-[#ff9a00]',
-    link: '#',
+    title: 'IPL Auction Showdown',
+    category: 'Bid. Strategize. Conquer.',
+    description: 'The IPL Auction Showdown places you in the role of a team owner, where building the right squad is the real challenge. With a fixed budget and competitive bidding, every decision shapes your team’s strength. Balancing risk, timing your bids, and adapting to the room are what set the best apart. It’s not about luck - it’s about thinking ahead.',
+    icon: <MdSportsCricket />,
+    image: '/events/cricket.png',
+    color: 'from-[#ff5a00] to-[#ff9a00]',
+    link: '#', 
   },
   {
     id: 6,
-    title: 'VolleyVibes',
-    category: 'Volleyball',
-    description: 'Serve, set, and spike! Dive into the action-packed volleyball tournament and dominate the court.',
-    icon: <FaVolleyballBall />,
-    image: '/events/volleyball.png',
-    color: 'from-yellow-400 to-[#ffe808]',
+    title: 'The Burn Club (Zumba Workshop)',
+    category: 'Zumba. Sweat. Repeat.',
+    description: 'The Burn Club is a high-energy Zumba session designed to help you reset and recharge. With music, movement, and an open atmosphere, it’s about letting go of stress and enjoying the moment. No pressure, no judgment - just movement, energy, and a better state of mind when you walk out.',
+    icon: <Music />,
+    image: '/events/zumba.png',
+    color: 'from-[#ffce00] to-[#ffe808]',
     link: '#',
   },
   {
     id: 7,
-    title: 'Tech Event',
-    category: 'Innovation & Skill',
-    description: 'Showcase your technical prowess. Compete, innovate, and solve real-world problems in our flagship tech contest.',
+    title: 'ECHO//PROMETHEUS',
+    category: 'Twelve sleuths. Four Destinations. One answer.',
+    description: 'ECHO // PROMETHEUS is a multi-stage technical investigation where teams move through challenges in cryptography, coding, cybersecurity, and live deduction. Each act builds on the last, pushing you to analyse, adapt, and connect the pieces under pressure. It’s not just about solving problems - it’s about solving the entire story.',
     icon: <FaLaptopCode />,
     image: '/events/tech.png',
     color: 'from-orange-400 to-yellow-400',
@@ -119,17 +120,16 @@ export default function SportifyInParadox() {
             transition={{ duration: 0.6 }}
           >
             <span className="inline-block py-1 px-3 rounded-full bg-white/5 border border-white/10 text-gray-300 text-sm font-semibold tracking-wider mb-4 uppercase">
-              7 Flagship Events
+              7 events. One stage.
             </span>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6 tracking-tight">
-              Sportify in{' '}
+              Paradox 2026 |{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0000] via-[#ff5a00] to-[#ffe808]">
-                Paradox
+                Sportify Events
               </span>
             </h2>
-            <p className="text-gray-400 text-lg md:text-xl leading-relaxed">
-              Experience a mind-blowing lineup of sports, strategy, and tech events.
-              Find your arena and register directly below.
+            <p className="text-gray-400 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto">
+              From high-intensity sports to strategy and energy-driven experiences.
             </p>
           </motion.div>
         </div>
@@ -212,7 +212,7 @@ export default function SportifyInParadox() {
                       alt={activeEvent.title}
                       animate={{ scale: [1, 1.05, 1] }}
                       transition={{ repeat: Infinity, duration: 15, ease: "easeInOut" }}
-                      className="absolute inset-0 w-full h-full object-contain lg:object-cover opacity-70 mix-blend-screen z-0"
+                      className={`absolute inset-0 w-full h-full object-contain lg:object-cover ${activeEvent.id === 4 ? 'lg:object-top' : 'lg:object-center'} opacity-70 mix-blend-screen z-0`}
                    />
 
                    {/* Solid gradient overlay for text readability and branding */}
@@ -244,9 +244,26 @@ export default function SportifyInParadox() {
                      </a>
                    </div>
                 </motion.div>
-             </AnimatePresence>
-          </div>
-          
+              </AnimatePresence>
+           </div>
+           
+           {/* View All Events Button */}
+           <div className="flex justify-center items-center mt-12 md:mt-16 w-full">
+             <Link href="/events">
+               <motion.button
+                 whileHover={{ scale: 1.05 }}
+                 whileTap={{ scale: 0.95 }}
+                 className="group relative px-8 py-4 bg-transparent overflow-hidden rounded-full border border-orange-500/50 hover:border-orange-400 transition-colors"
+               >
+                 <div className="absolute inset-0 bg-gradient-to-r from-orange-600/20 to-yellow-500/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out z-0" />
+                 <span className="relative z-10 flex items-center gap-3 text-white font-bold text-lg tracking-wide uppercase">
+                   View All Events
+                   <ArrowRight className="w-5 h-5 text-orange-400 group-hover:text-yellow-400 transition-colors group-hover:translate-x-1" />
+                 </span>
+               </motion.button>
+             </Link>
+           </div>
+
         </div>
       </div>
     </section>

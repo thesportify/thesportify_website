@@ -23,6 +23,7 @@ const fallbackFeaturedEvents = [
   },
   {
     id: "featured-2",
+    title: "Ultimate Sports Quiz",
     date: "5 June - 6 June, 2025",
     description:
       "Get ready to put your sports knowledge to the ultimate test! The Ultimate Sports Quiz at Paradox’25 is a thrilling challenge for sports enthusiasts, testing knowledge of legendary moments, records, and tricky questions.",
@@ -153,7 +154,7 @@ export default function FeaturedEvents() {
                   <div className="w-full md:w-2/5 h-[24rem] sm:h-[32rem] md:h-auto relative flex items-center justify-center bg-black">
                     <Image
                       src={imageSrc}
-                      alt={event.title}
+                      alt={event.title || "Featured Event"}
                       width={500}
                       height={500}
                       className="object-contain w-full h-full transition-all duration-300 rounded-lg p-2"
