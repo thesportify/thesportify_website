@@ -25,10 +25,10 @@ const EVENTS_DATA = [
   },
   {
     id: 2,
-    title: 'Paradox Premier League',
+    title: 'Paradox Champions League',
     category: 'Dribble. Dash. Dominate.',
     filterType: 'Sports',
-    description: 'The Paradox Premier League brings fast-paced, structured football where teamwork defines the game. With 7-a-side gameplay, quick transitions, sharp passing, and disciplined defending are essential. Every moment creates an opportunity, and every mistake can change the outcome. Teams that stay organized, focused, and clinical will take control.',
+    description: 'The Paradox Champions League brings fast-paced, structured football where teamwork defines the game. With 7-a-side gameplay, quick transitions, sharp passing, and disciplined defending are essential. Every moment creates an opportunity, and every mistake can change the outcome. Teams that stay organized, focused, and clinical will take control.',
     poster: '/events/pcl.jpeg',
     color: 'from-orange-500 to-[#ff9a00]',
     icon: <FaFutbol className="w-6 h-6" />,
