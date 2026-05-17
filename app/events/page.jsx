@@ -10,6 +10,16 @@ import { GiShuttlecock } from "react-icons/gi";
 import { FaRunning, FaVolleyballBall, FaLaptopCode, FaFutbol } from "react-icons/fa";
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
+import bg1 from "@/assets/PasteveBG1.jpeg";
+import bg2 from "@/assets/PasteveBG2.jpeg";
+
+const Reflection = ({ children }) => (
+  <div className="relative overflow-hidden group/refl w-full h-full flex items-center justify-center">
+    {children}
+    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+    <div className="absolute -inset-full top-0 z-50 block bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover/refl:opacity-100 group-hover/refl:animate-shimmer" />
+  </div>
+);
 
 const EVENTS_DATA = [
   {
@@ -21,7 +31,7 @@ const EVENTS_DATA = [
     poster: '/events/poster/Badminton_.png',
     color: 'from-[#ff9a00] to-[#ffce00]',
     icon: <GiShuttlecock className="w-6 h-6" />,
-    link: 'https://www.iitmparadox.org/events/sports/87', 
+    link: 'https://www.iitmparadox.org/events/sports/87',
   },
   {
     id: 2,
@@ -65,7 +75,7 @@ const EVENTS_DATA = [
     poster: '/events/poster/IPL Auction_.png',
     color: 'from-[#ff5a00] to-[#ff9a00]',
     icon: <MdSportsCricket className="w-6 h-6" />,
-    link: 'https://www.iitmparadox.org/events/sports/76', 
+    link: 'https://www.iitmparadox.org/events/sports/76',
   },
   {
     id: 6,
@@ -96,14 +106,14 @@ const CATEGORIES = ["All", "Sports", "Fitness", "Strategy", "Technical"];
 const Marquee = () => {
   return (
     <div className="absolute top-1/2 left-0 w-full overflow-hidden -translate-y-1/2 opacity-5 pointer-events-none z-0 rotate-[-4deg] scale-110">
-      <motion.div 
+      <motion.div
         animate={{ x: [0, -2000] }}
         transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
         className="flex whitespace-nowrap"
       >
         {[...Array(6)].map((_, i) => (
-          <span 
-            key={i} 
+          <span
+            key={i}
             className="text-[120px] md:text-[180px] font-black px-8 uppercase"
             style={{ WebkitTextStroke: '2px white', color: 'transparent' }}
           >
@@ -128,6 +138,8 @@ const EventCard = ({ event, index }) => {
     });
   };
 
+  const bgImage = index % 2 === 0 ? bg1 : bg2;
+
   return (
     <motion.div
       ref={cardRef}
@@ -137,62 +149,106 @@ const EventCard = ({ event, index }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.5, delay: index * 0.05 }}
-      className="group relative rounded-[2rem] overflow-hidden bg-[#0a0a0a] border border-white/5 hover:border-orange-500/40 transition-all duration-500 flex flex-col h-full shadow-[0_0_0_rgba(0,0,0,0)] hover:shadow-[0_20px_50px_rgba(255,90,0,0.15)]"
+      style={{
+        backgroundImage: `url(${bgImage.src})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+      className="group relative rounded-[1.25rem] sm:rounded-[1.75rem] overflow-hidden border border-white/10 hover:border-orange-500/40 transition-all duration-500 flex flex-row h-[300px] sm:h-[400px] lg:h-[430px] shadow-[0_0_0_rgba(0,0,0,0)] hover:shadow-[0_20px_50px_rgba(255,90,0,0.15)] w-full mx-auto items-stretch gap-3 sm:gap-5 p-2 sm:p-5"
     >
       {/* Interactive Spotlight Effect */}
-      <div 
+      <div
         className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-30 mix-blend-screen"
         style={{
           background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 120, 0, 0.15), transparent 40%)`
         }}
       />
-      
-      {/* Changed aspect ratio to better display posters completely, removed heavy dark overlays */}
-      <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] overflow-hidden bg-black rounded-t-[2rem]">
-        <Image 
-           src={event.poster}
-           alt={event.title}
-           fill
-           className={`object-contain object-top group-hover:scale-105 transition-all duration-700 ease-out`}
-        />
-        {/* Subtle gradient just to ensure the badge text is readable, no heavy black shadow */}
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/50 to-transparent z-10" />
-        
-        {/* Floating Category Badge */}
-        <div className="absolute top-5 right-5 z-20">
-          <div className="relative">
-             <div className="absolute inset-0 bg-black/50 blur-md rounded-full" />
-             <span className={`relative flex items-center gap-1.5 px-4 py-2 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-full bg-gradient-to-r ${event.color} text-black shadow-[0_0_20px_rgba(255,90,0,0.4)]`}>
-                <Sparkles className="w-3 h-3" />
-                {event.category}
-             </span>
+
+      {/* Poster on Left for Mobile, and Tablets/Desktops */}
+      <div className="relative w-[50%] h-full overflow-hidden rounded-xl sm:rounded-2xl flex-shrink-0 bg-black">
+        <Reflection>
+          <div className="relative w-full h-full">
+            <Image
+              src={event.poster}
+              alt={event.title}
+              width={500}
+              height={500}
+              className="w-full h-full object-cover object-top group-hover:scale-105 transition-all duration-700 ease-out"
+            />
+            {/* Subtle gradient just to ensure the badge text is readable, no heavy black shadow */}
+            <div className="absolute inset-x-0 top-0 h-16 sm:h-24 bg-gradient-to-b from-black/50 to-transparent z-10" />
+
+            {/* Decorative corner accents on image */}
+            <div className="absolute top-0 left-0 w-12 h-12 pointer-events-none">
+              <div className="absolute top-2 left-2 w-2 h-2 border-t border-l border-white/30" />
+            </div>
+            <div className="absolute top-0 right-0 w-12 h-12 pointer-events-none">
+              <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-white/30" />
+            </div>
+            <div className="absolute bottom-0 left-0 w-12 h-12 pointer-events-none">
+              <div className="absolute bottom-2 left-2 w-2 h-2 border-b border-l border-white/30" />
+            </div>
+            <div className="absolute bottom-0 right-0 w-12 h-12 pointer-events-none">
+              <div className="absolute bottom-2 right-2 w-2 h-2 border-b border-r border-white/30" />
+            </div>
           </div>
-        </div>
+        </Reflection>
       </div>
 
-      <div className="relative p-6 sm:p-8 flex flex-col flex-grow z-20 bg-[#0a0a0a]">
-         {/* Floating Icon Container */}
-         <div className={`w-14 h-14 rounded-2xl mb-6 flex items-center justify-center bg-gradient-to-br ${event.color} text-black shadow-[0_10px_30px_rgba(255,90,0,0.3)] transform group-hover:-translate-y-2 group-hover:rotate-12 group-hover:scale-110 transition-all duration-500`}>
+      {/* Content Section - Perfectly spaced to align elements horizontally */}
+      <div className="relative p-3 sm:p-5 lg:p-7 flex flex-col justify-between w-[50%] h-full flex-shrink-0 z-20 backdrop-blur-md bg-gray-950/70 rounded-xl sm:rounded-2xl border border-white/5 overflow-hidden">
+        {/* Fancy animated corners */}
+        <div className="absolute top-0 left-0 w-12 h-12 pointer-events-none">
+          <div className="absolute top-0 left-0 w-0.5 h-12 bg-gradient-to-b from-[#ff5a00] to-transparent transform origin-top-left transition-all duration-500 group-hover:h-24" />
+          <div className="absolute top-0 left-0 w-12 h-0.5 bg-gradient-to-r from-[#ff5a00] to-transparent transform origin-top-left transition-all duration-500 group-hover:w-24" />
+        </div>
+        <div className="absolute bottom-0 right-0 w-12 h-12 pointer-events-none">
+          <div className="absolute bottom-0 right-0 w-0.5 h-12 bg-gradient-to-t from-[#ffe808] to-transparent transform origin-bottom-right transition-all duration-500 group-hover:h-24" />
+          <div className="absolute bottom-0 right-0 w-12 h-0.5 bg-gradient-to-l from-[#ffe808] to-transparent transform origin-bottom-right transition-all duration-500 group-hover:w-24" />
+        </div>
+
+        <div className="flex flex-col flex-grow overflow-hidden">
+          {/* Floating Icon Container - Hidden on mobile to save considerable vertical space */}
+          <div className={`hidden sm:flex w-10 h-10 lg:w-11 lg:h-11 rounded-xl mb-2 sm:mb-3.5 items-center justify-center bg-gradient-to-br ${event.color} text-black shadow-[0_10px_30px_rgba(255,90,0,0.3)] transform group-hover:-translate-y-2 group-hover:rotate-12 group-hover:scale-110 transition-all duration-500 flex-shrink-0`}>
             {event.icon}
-         </div>
-         
-         <h3 className="text-2xl sm:text-3xl font-black text-white mb-4 tracking-tight drop-shadow-lg group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-orange-300 transition-colors duration-300">
+          </div>
+
+          <h3 className="text-base sm:text-xl lg:text-2xl font-black text-white mb-1 sm:mb-2.5 tracking-tight drop-shadow-lg group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-orange-300 transition-colors duration-300 flex-shrink-0">
             {event.title}
-         </h3>
-         
-         <p className="text-gray-400 text-sm sm:text-base leading-relaxed mb-8 flex-grow">
+          </h3>
+
+          <p className="text-gray-400 text-[9px] sm:text-[11px] lg:text-sm leading-relaxed mb-1 overflow-y-auto pr-2 flex-grow custom-scrollbar">
             {event.description}
-         </p>
-         
-         <Link href={event.link} target="_blank" rel="noopener noreferrer" className="mt-auto block relative z-30">
-            <button className={`relative w-full py-4 rounded-xl flex items-center justify-center gap-3 overflow-hidden bg-white/5 border border-white/10 group/btn transition-all duration-300 hover:border-transparent`}>
-              <div className={`absolute inset-0 bg-gradient-to-r ${event.color} opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300`} />
-              <span className="relative z-10 text-white group-hover/btn:text-black font-extrabold text-sm uppercase tracking-wider transition-colors duration-300">
-                Register Now
+          </p>
+
+          {/* Glowing Cyberpunk Scroll Helper Indicator */}
+          <div className="hidden sm:flex items-center gap-1.5 text-[9px] lg:text-[10px] text-orange-500/60 font-bold uppercase tracking-widest mt-1 mb-1.5 animate-pulse select-none flex-shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_8px_#ff5a00]" />
+            Scroll to read details
+          </div>
+
+          {/* Slogan/Category Tagline rendered in the empty space as a premium oval pop-up pill (All Screens) */}
+          <div className="mt-1 mb-2 flex justify-start flex-shrink-0">
+            <div className="relative">
+              <div className="absolute inset-0 bg-black/40 blur-sm rounded-full" />
+              <span className={`relative flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[8px] sm:text-[10px] font-black uppercase tracking-widest rounded-full bg-gradient-to-r ${event.color} text-black shadow-[0_0_15px_rgba(255,90,0,0.4)] border border-white/10`}>
+                <Sparkles className="w-2 h-2 sm:w-2.5 sm:h-2.5 flex-shrink-0" />
+                {event.category}
               </span>
-              <ArrowRight className="relative z-10 w-5 h-5 text-white group-hover/btn:text-black group-hover/btn:translate-x-1 transition-all duration-300" />
-            </button>
-         </Link>
+            </div>
+          </div>
+        </div>
+
+        <Link href={event.link} target="_blank" rel="noopener noreferrer" className="block relative z-30 w-full mt-auto flex-shrink-0">
+          <button className={`relative w-full py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl flex items-center justify-center gap-1.5 sm:gap-2.5 overflow-hidden bg-white/5 border border-white/10 sm:border-white/10 group/btn transition-all duration-300 hover:border-transparent`}>
+            <div className={`absolute inset-0 bg-gradient-to-r ${event.color} opacity-100 sm:opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300`} />
+            <span className="relative z-10 text-black sm:text-white group-hover/btn:text-black font-black text-[10px] sm:text-xs lg:text-sm uppercase tracking-wider transition-colors duration-300">
+              Register Now
+            </span>
+            <ArrowRight className="relative z-10 w-4 h-4 sm:w-5 sm:h-5 text-black sm:text-white group-hover/btn:text-black group-hover/btn:translate-x-1 transition-all duration-300" />
+          </button>
+        </Link>
       </div>
     </motion.div>
   );
@@ -202,15 +258,15 @@ export default function EventsPage() {
   const [activeFilter, setActiveFilter] = useState("All");
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 1000], [0, 150]);
-  
-  const filteredEvents = activeFilter === "All" 
-    ? EVENTS_DATA 
+
+  const filteredEvents = activeFilter === "All"
+    ? EVENTS_DATA
     : EVENTS_DATA.filter(event => event.filterType === activeFilter);
 
   return (
     <main className="min-h-screen bg-black flex flex-col selection:bg-orange-500/30">
       <Navbar />
-      
+
       {/* Cinematic Hero Section */}
       <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden flex items-center justify-center min-h-[60vh]">
         {/* Hyped Infinite Marquee Background */}
@@ -218,87 +274,86 @@ export default function EventsPage() {
 
         {/* Dynamic Glow Ambience */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-           <motion.div style={{ y: y1 }} className="absolute top-0 left-1/4 w-[40rem] h-[40rem] bg-orange-600/15 rounded-full blur-[150px] mix-blend-screen" />
-           <motion.div style={{ y: y1 }} className="absolute bottom-0 right-1/4 w-[40rem] h-[40rem] bg-yellow-500/10 rounded-full blur-[150px] mix-blend-screen" />
-           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03]" />
-           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black" />
+          <motion.div style={{ y: y1 }} className="absolute top-0 left-1/4 w-[40rem] h-[40rem] bg-orange-600/15 rounded-full blur-[150px] mix-blend-screen" />
+          <motion.div style={{ y: y1 }} className="absolute bottom-0 right-1/4 w-[40rem] h-[40rem] bg-yellow-500/10 rounded-full blur-[150px] mix-blend-screen" />
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black" />
         </div>
 
         <div className="container relative z-10 mx-auto px-6 text-center max-w-5xl">
-           <motion.div
-             initial={{ opacity: 0, scale: 0.9, y: 20 }}
-             animate={{ opacity: 1, scale: 1, y: 0 }}
-             transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
-           >
-             <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-orange-400 text-sm font-black tracking-widest uppercase mb-8 shadow-[0_0_30px_rgba(255,90,0,0.2)] backdrop-blur-md">
-               <CalendarDays className="w-4 h-4" />
-               7 events. One stage.
-             </div>
-             
-             <h1 className="text-6xl md:text-8xl lg:text-[7rem] font-black text-white leading-[1.1] tracking-tighter mb-8 drop-shadow-2xl">
-                Paradox 2026<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0000] via-[#ff5a00] to-[#ffe808] filter drop-shadow-[0_0_20px_rgba(255,90,0,0.5)]">
-                   Sportify Events
-                </span>
-             </h1>
-             
-             <p className="text-gray-300 text-lg md:text-2xl leading-relaxed max-w-3xl mx-auto font-medium">
-                From high-intensity sports to strategy and energy-driven experiences.
-             </p>
-           </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
+          >
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-orange-400 text-sm font-black tracking-widest uppercase mb-8 shadow-[0_0_30px_rgba(255,90,0,0.2)] backdrop-blur-md">
+              <CalendarDays className="w-4 h-4" />
+              7 events. One stage.
+            </div>
+
+            <h1 className="text-6xl md:text-8xl lg:text-[7rem] font-black text-white leading-[1.1] tracking-tighter mb-8 drop-shadow-2xl">
+              Paradox 2026<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0000] via-[#ff5a00] to-[#ffe808] filter drop-shadow-[0_0_20px_rgba(255,90,0,0.5)]">
+                Sportify Events
+              </span>
+            </h1>
+
+            <p className="text-gray-300 text-lg md:text-2xl leading-relaxed max-w-3xl mx-auto font-medium">
+              From high-intensity sports to strategy and energy-driven experiences.
+            </p>
+          </motion.div>
         </div>
       </section>
 
       {/* Interactive Filter & Grid Section */}
       <section className="relative pb-32 px-4 sm:px-6 lg:px-12 z-10 -mt-10">
-         <div className="max-w-[1400px] mx-auto">
-            
-            {/* Filter Bar */}
-            <motion.div 
-               initial={{ opacity: 0, y: 20 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ delay: 0.3 }}
-               className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12 lg:mb-16"
-            >
-               <div className="flex items-center gap-2 text-white font-bold uppercase tracking-widest text-sm">
-                  <Filter className="w-5 h-5 text-orange-500" />
-                  Filter Events
-               </div>
-               
-               <div className="flex flex-wrap justify-center gap-3">
-                  {CATEGORIES.map((cat) => (
-                     <button
-                        key={cat}
-                        onClick={() => setActiveFilter(cat)}
-                        className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 ${
-                           activeFilter === cat 
-                           ? 'bg-gradient-to-r from-orange-600 to-yellow-500 text-black shadow-[0_0_20px_rgba(255,90,0,0.4)] scale-105'
-                           : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'
-                        }`}
-                     >
-                        {cat}
-                     </button>
-                  ))}
-               </div>
-            </motion.div>
+        <div className="max-w-[99vw] mx-auto">
 
-            {/* Events Grid */}
-            <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
-               <AnimatePresence mode="popLayout">
-                  {filteredEvents.map((event, index) => (
-                     <EventCard key={event.id} event={event} index={index} />
-                  ))}
-               </AnimatePresence>
-            </motion.div>
-            
-            {/* Empty State */}
-            {filteredEvents.length === 0 && (
-               <div className="py-20 text-center">
-                  <h3 className="text-2xl text-gray-400 font-bold">No events found for this category.</h3>
-               </div>
-            )}
-            
-         </div>
+          {/* Filter Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12 lg:mb-16"
+          >
+            <div className="flex items-center gap-2 text-white font-bold uppercase tracking-widest text-sm">
+              <Filter className="w-5 h-5 text-orange-500" />
+              Filter Events
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-3">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveFilter(cat)}
+                  className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 ${activeFilter === cat
+                      ? 'bg-gradient-to-r from-orange-600 to-yellow-500 text-black shadow-[0_0_20px_rgba(255,90,0,0.4)] scale-105'
+                      : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'
+                    }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Events Grid */}
+          <motion.div layout className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 justify-items-center">
+            <AnimatePresence mode="popLayout">
+              {filteredEvents.map((event, index) => (
+                <EventCard key={event.id} event={event} index={index} />
+              ))}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Empty State */}
+          {filteredEvents.length === 0 && (
+            <div className="py-20 text-center">
+              <h3 className="text-2xl text-gray-400 font-bold">No events found for this category.</h3>
+            </div>
+          )}
+
+        </div>
       </section>
 
       <Footer />
