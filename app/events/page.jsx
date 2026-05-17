@@ -166,7 +166,7 @@ const EventCard = ({ event, index }) => {
       />
 
       {/* Poster on Left for Mobile, and Tablets/Desktops */}
-      <div className="relative w-[50%] h-full overflow-hidden rounded-xl sm:rounded-2xl flex-shrink-0 bg-black">
+      <div className="relative w-[50%] h-full overflow-hidden flex-shrink-0 bg-black">
         <Reflection>
           <div className="relative w-full h-full">
             <Image
@@ -174,24 +174,8 @@ const EventCard = ({ event, index }) => {
               alt={event.title}
               width={500}
               height={500}
-              className="w-full h-full object-cover object-top group-hover:scale-105 transition-all duration-700 ease-out"
+              className="w-full h-full object-contain object-center transition-all duration-300"
             />
-            {/* Subtle gradient just to ensure the badge text is readable, no heavy black shadow */}
-            <div className="absolute inset-x-0 top-0 h-16 sm:h-24 bg-gradient-to-b from-black/50 to-transparent z-10" />
-
-            {/* Decorative corner accents on image */}
-            <div className="absolute top-0 left-0 w-12 h-12 pointer-events-none">
-              <div className="absolute top-2 left-2 w-2 h-2 border-t border-l border-white/30" />
-            </div>
-            <div className="absolute top-0 right-0 w-12 h-12 pointer-events-none">
-              <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-white/30" />
-            </div>
-            <div className="absolute bottom-0 left-0 w-12 h-12 pointer-events-none">
-              <div className="absolute bottom-2 left-2 w-2 h-2 border-b border-l border-white/30" />
-            </div>
-            <div className="absolute bottom-0 right-0 w-12 h-12 pointer-events-none">
-              <div className="absolute bottom-2 right-2 w-2 h-2 border-b border-r border-white/30" />
-            </div>
           </div>
         </Reflection>
       </div>
@@ -210,7 +194,7 @@ const EventCard = ({ event, index }) => {
 
         <div className="flex flex-col flex-grow overflow-hidden">
           {/* Floating Icon Container - Hidden on mobile to save considerable vertical space */}
-          <div className={`hidden sm:flex w-10 h-10 lg:w-11 lg:h-11 rounded-xl mb-2 sm:mb-3.5 items-center justify-center bg-gradient-to-br ${event.color} text-black shadow-[0_10px_30px_rgba(255,90,0,0.3)] transform group-hover:-translate-y-2 group-hover:rotate-12 group-hover:scale-110 transition-all duration-500 flex-shrink-0`}>
+          <div className={`hidden sm:flex w-10 h-10 lg:w-11 lg:h-11 rounded-xl mb-2 sm:mb-3.5 items-center justify-center bg-gradient-to-br ${event.color} text-black shadow-[0_10px_30px_rgba(255,90,0,0.2)] transition-all duration-300 flex-shrink-0`}>
             {event.icon}
           </div>
 
