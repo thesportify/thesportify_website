@@ -24,6 +24,9 @@ export function SheetContent({ children, className = "", side = "right", ...prop
         } ${sideStyles[side]} ${className}`}
         {...props}
       >
+        <Dialog.Title className="sr-only">Navigation Menu</Dialog.Title>
+        <Dialog.Description className="sr-only">Access site links and navigation</Dialog.Description>
+        
         <div className="flex flex-col space-y-2">
           <div className="flex items-center justify-end">
             <Dialog.Close asChild>

@@ -128,3 +128,23 @@
     @apply outline-none ring-0 shadow-none;
   }
 }
+
+/* Custom Premium Cyberpunk Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.01);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff5a00, #ffe808);
+  border-radius: 9999px;
+  box-shadow: 0 0 8px rgba(255, 90, 0, 0.4);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ff7e00, #fff200);
+}

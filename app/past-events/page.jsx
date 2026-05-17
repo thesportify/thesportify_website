@@ -5,14 +5,12 @@ import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import EventsList from "@/components/pastEventsList"
 import { pastEvents as staticPastEvents } from "@/lib/data";
-import { db } from "@/lib/firebase";
+import { db, hasFirebaseConfig } from "@/lib/firebase";
 import { collection, query, orderBy, getDocs, where } from "firebase/firestore";
-import { Loader2 } from "lucide-react";
 import RkmEventHighlight from "@/components/RkmEventHighlight";
 
 export default function PastEventsPage() {
   const [events, setEvents] = useState(staticPastEvents);
-  const [loading, setLoading] = useState(true);
 
   // Scroll to the top of the page whenever the route changes
   useEffect(() => {
@@ -20,6 +18,10 @@ export default function PastEventsPage() {
   }, []) // Dependency array ensures this happens on route change
 
   useEffect(() => {
+    if (!hasFirebaseConfig) {
+      return;
+    }
+
     const fetchEvents = async () => {
       try {
         const q = query(
@@ -38,8 +40,6 @@ export default function PastEventsPage() {
         console.error("Error fetching events:", error);
         // On error, keep static events
         setEvents(staticPastEvents);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -72,13 +72,7 @@ export default function PastEventsPage() {
         <RkmEventHighlight />
 
         {/* Events List */}
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-12 w-12 text-orange-500 animate-spin" />
-          </div>
-        ) : (
-          <EventsList events={events} />
-        )}
+        <EventsList events={events} />
       </div>
       <Footer />
     </main>

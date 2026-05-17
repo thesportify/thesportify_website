@@ -13,6 +13,16 @@ import bg2 from "../assets/PasteveBG2.jpeg";
 import Image from "next/image";
 import "./pastEventsList.css";
 
+const createParticles = () =>
+  Array.from({ length: 10 }, (_, i) => ({
+    id: i,
+    size: Math.random() * 2 + 1,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    opacity: Math.random() * 0.5 + 0.3,
+    duration: Math.random() * 10 + 15,
+  }));
+
 // Enhanced wavy border with multiple layers
 const WavyBorder = () => (
   <div className="relative w-full h-20 overflow-hidden opacity-70">
@@ -48,20 +58,7 @@ const Reflection = ({ children }) => (
 
 // Decorative animated particle component
 const ParticleField = () => {
-  const [particles, setParticles] = useState(null);
-  useEffect(() => {
-    particles.setParticles(
-      Array(10)
-        .fill()
-        .map((_, i) => ({
-          id: i,
-          size: Math.random() * 2 + 1,
-          x: Math.random() * 100,
-          y: Math.random() * 100,
-          opacity: Math.random() * 0.5 + 0.3,
-        }))
-    )
-  });
+  const [particles] = useState(() => createParticles());
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -76,7 +73,7 @@ const ParticleField = () => {
             top: `${particle.y}%`,
             opacity: particle.opacity,
             animationDelay: `${particle.id * 0.5}s`,
-            animationDuration: `${Math.random() * 10 + 15}s`,
+            animationDuration: `${particle.duration}s`,
           }}
         />
       ))}
@@ -105,16 +102,11 @@ const HolographicIcon = ({ icon: Icon, color = "text-white" }) => (
 );
 
 export default function EventsList({ events }) {
-  const [displayedEvents, setDisplayedEvents] = useState([]);
   const [activeIndex, setActiveIndex] = useState(null);
   const containerRef = useRef(null);
+  const displayedEvents = events || [];
 
   useEffect(() => {
-    if (events && events.length > 0) {
-      // Load all events at once instead of batches
-      setDisplayedEvents(events);
-    }
-
     // Add scroll event listener for spotlight effect
     const handleScroll = () => {
       if (!containerRef.current) return;
@@ -127,8 +119,8 @@ export default function EventsList({ events }) {
         const inViewport =
           rect.top < windowHeight * 0.8 && rect.bottom > windowHeight * 0.2;
 
-        if (inViewport && activeIndex !== index) {
-          setActiveIndex(index);
+        if (inViewport) {
+          setActiveIndex((currentIndex) => (currentIndex === index ? currentIndex : index));
         }
       });
     };

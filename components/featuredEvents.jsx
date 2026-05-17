@@ -1,25 +1,62 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react";
+import featEve1 from '../assets/Featured-events/Event-1.jpg';
+import featEve2 from '../assets/Featured-events/Event-2.png';
+import featEve3 from '../assets/Featured-events/Event-3.jpg';
 import featureBG from '../assets/FeaturedBG.jpg';
 import Image from "next/image";
 import Link from "next/link";
-import { db } from "@/lib/firebase";
-import { collection, query, orderBy, getDocs, where } from "firebase/firestore";
-import { Loader2 } from "lucide-react";
+import { db, hasFirebaseConfig } from "@/lib/firebase";
+import { collection, query, getDocs, where } from "firebase/firestore";
+
+const fallbackFeaturedEvents = [
+  {
+    id: "featured-1",
+    title: "Ultimate IPL Auction",
+    date: "24 April - 27 April, 2025",
+    description:
+      "Participants stepped into the shoes of franchise owners, bidding strategically to build their dream teams under a fixed budget. The event was filled with intense bidding wars, clever tactics, and loads of cricket.",
+    image: featEve1,
+    link: "#",
+    tags: ["Cricket", "Auction", "Strategy", "Teamwork"],
+  },
+  {
+    id: "featured-2",
+    title: "Ultimate Sports Quiz",
+    date: "5 June - 6 June, 2025",
+    description:
+      "Get ready to put your sports knowledge to the ultimate test! The Ultimate Sports Quiz at Paradox’25 is a thrilling challenge for sports enthusiasts, testing knowledge of legendary moments, records, and tricky questions.",
+    image: featEve2,
+    link: "#",
+    tags: ["Quiz", "Sports", "Trivia"],
+  },
+  {
+    id: "featured-3",
+    title: "The Pavilion - Episode 2",
+    date: "13 May, 2025",
+    description:
+      "Prof. Mahesh Panchagnula from IIT Madras discussed how technology, data science, and AI are transforming sports analytics and athletic performance in Episode 2 of The Pavilion.",
+    image: featEve3,
+    link: "#",
+    tags: ["Technology", "AI", "Sports Analytics"],
+  },
+];
 
 export default function FeaturedEvents() {
   const sectionRef = useRef(null);
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState(fallbackFeaturedEvents);
 
   useEffect(() => {
+    if (!hasFirebaseConfig) {
+      return;
+    }
+
     const fetchEvents = async () => {
       try {
         const q = query(
           collection(db, "events"),
-          where("eventType", "==", "featured"),
-          orderBy("createdAt", "desc")
+          where("eventType", "==", "featured")
         );
         const querySnapshot = await getDocs(q);
         const fetchedEvents = querySnapshot.docs.map(doc => ({
@@ -27,12 +64,17 @@ export default function FeaturedEvents() {
           ...doc.data()
         }));
 
-        setEvents(fetchedEvents);
+        const sortedEvents = [...fetchedEvents].sort((left, right) => {
+          const leftTime = left.createdAt?.seconds ?? 0;
+          const rightTime = right.createdAt?.seconds ?? 0;
+          return rightTime - leftTime;
+        });
+
+        if (sortedEvents.length > 0) {
+          setEvents(sortedEvents);
+        }
       } catch (error) {
         console.error("Error fetching events:", error);
-        setEvents([]);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -85,11 +127,7 @@ export default function FeaturedEvents() {
           </p>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-12 w-12 text-orange-500 animate-spin" />
-          </div>
-        ) : events.length === 0 ? (
+        {events.length === 0 ? (
           <div className="flex justify-center items-center h-40 scroll-reveal">
             <p className="text-2xl font-bold text-gray-500 animate-pulse">
               Events Coming Soon
@@ -104,6 +142,7 @@ export default function FeaturedEvents() {
                 : event.description || "";
 
               const imageSrc = event.image || "/placeholder.svg";
+              const isStaticImage = typeof imageSrc !== "string";
 
               return (
                 <div
@@ -115,7 +154,7 @@ export default function FeaturedEvents() {
                   <div className="w-full md:w-2/5 h-[24rem] sm:h-[32rem] md:h-auto relative flex items-center justify-center bg-black">
                     <Image
                       src={imageSrc}
-                      alt={event.title}
+                      alt={event.title || "Featured Event"}
                       width={500}
                       height={500}
                       className="object-contain w-full h-full transition-all duration-300 rounded-lg p-2"
