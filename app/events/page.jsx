@@ -18,10 +18,10 @@ const EVENTS_DATA = [
     category: 'One Court. One Battle. One Champion.',
     filterType: 'Sports',
     description: 'The Paradox Badminton League is a high-intensity inter-house badminton tournament where precision meets pressure. With short-format matches, every rally matters and every shot has consequences. Players rely on footwork, control, and quick thinking to stay ahead. There’s no time to recover here - only to adapt, respond, and execute.',
-    poster: '/events/pbl.jpeg',
+    poster: '/events/poster/Badminton_.png',
     color: 'from-[#ff9a00] to-[#ffce00]',
     icon: <GiShuttlecock className="w-6 h-6" />,
-    link: '#', 
+    link: 'https://www.iitmparadox.org/events/sports/87', 
   },
   {
     id: 2,
@@ -29,10 +29,10 @@ const EVENTS_DATA = [
     category: 'Dribble. Dash. Dominate.',
     filterType: 'Sports',
     description: 'The Paradox Champions League brings fast-paced, structured football where teamwork defines the game. With 7-a-side gameplay, quick transitions, sharp passing, and disciplined defending are essential. Every moment creates an opportunity, and every mistake can change the outcome. Teams that stay organized, focused, and clinical will take control.',
-    poster: '/events/pcl.jpeg',
+    poster: '/events/poster/footbal.png',
     color: 'from-orange-500 to-[#ff9a00]',
     icon: <FaFutbol className="w-6 h-6" />,
-    link: '#',
+    link: 'https://www.iitmparadox.org/events/sports/78',
   },
   {
     id: 3,
@@ -40,10 +40,10 @@ const EVENTS_DATA = [
     category: 'Spike the Rivalry',
     filterType: 'Sports',
     description: 'VolleyVibes is an inter-house Volleyball tournament built on rhythm, communication, and control. Every rally demands sharp reflexes, quick decisions, and seamless teamwork - from precise sets to powerful finishes. Momentum can shift in seconds, and consistency becomes your biggest strength. Stay sharp. Stay ready. Stay in the game.',
-    poster: '/events/volleyball.png',
+    poster: '/events/poster/Volleyball_.png',
     color: 'from-yellow-400 to-[#ffe808]',
     icon: <FaVolleyballBall className="w-6 h-6" />,
-    link: '#',
+    link: 'https://www.iitmparadox.org/events/sports/83',
   },
   {
     id: 4,
@@ -51,10 +51,10 @@ const EVENTS_DATA = [
     category: 'Miles With Purpose.',
     filterType: 'Fitness',
     description: 'Kampus Run is more than a race - it’s a step towards better mental and physical well-being. With a 3 KM fun run and a 5 KM competitive run, participants can choose their pace and purpose. It’s about taking a break from routine, finding your rhythm, and finishing with a sense of clarity. Whether you compete or just run, every step counts. Run for your mind. Run for yourself.',
-    poster: '/events/run.png',
+    poster: '/events/poster/kampus_run.png',
     color: 'from-amber-400 to-yellow-400',
     icon: <FaRunning className="w-6 h-6" />,
-    link: '#',
+    link: 'https://www.iitmparadox.org/events/sports/75',
   },
   {
     id: 5,
@@ -62,10 +62,10 @@ const EVENTS_DATA = [
     category: 'Bid. Strategize. Conquer.',
     filterType: 'Strategy',
     description: 'The IPL Auction Showdown places you in the role of a team owner, where building the right squad is the real challenge. With a fixed budget and competitive bidding, every decision shapes your team’s strength. Balancing risk, timing your bids, and adapting to the room are what set the best apart. It’s not about luck - it’s about thinking ahead.',
-    poster: '/events/cricket.png',
+    poster: '/events/poster/IPL Auction_.png',
     color: 'from-[#ff5a00] to-[#ff9a00]',
     icon: <MdSportsCricket className="w-6 h-6" />,
-    link: '#', 
+    link: 'https://www.iitmparadox.org/events/sports/76', 
   },
   {
     id: 6,
@@ -73,10 +73,10 @@ const EVENTS_DATA = [
     category: 'Zumba. Sweat. Repeat.',
     filterType: 'Fitness',
     description: 'The Burn Club is a high-energy Zumba session designed to help you reset and recharge. With music, movement, and an open atmosphere, it’s about letting go of stress and enjoying the moment. No pressure, no judgment - just movement, energy, and a better state of mind when you walk out.',
-    poster: '/events/Burn_club.jpeg',
+    poster: '/events/poster/Zumba.png',
     color: 'from-[#ffce00] to-[#ffe808]',
     icon: <Music className="w-6 h-6" />,
-    link: '#',
+    link: 'https://www.iitmparadox.org/events/sports/79',
   },
   {
     id: 7,
@@ -84,10 +84,10 @@ const EVENTS_DATA = [
     category: 'Twelve sleuths. Four Destinations. One answer.',
     filterType: 'Technical',
     description: 'ECHO // PROMETHEUS is a multi-stage technical investigation where teams move through challenges in cryptography, coding, cybersecurity, and live deduction. Each act builds on the last, pushing you to analyse, adapt, and connect the pieces under pressure. It’s not just about solving problems - it’s about solving the entire story.',
-    poster: '/events/tech.png',
+    poster: '/events/poster/ECHO.png',
     color: 'from-orange-400 to-yellow-400',
     icon: <FaLaptopCode className="w-6 h-6" />,
-    link: '#',
+    link: 'https://www.iitmparadox.org/events/technicals/60',
   },
 ];
 
@@ -184,7 +184,7 @@ const EventCard = ({ event, index }) => {
             {event.description}
          </p>
          
-         <Link href={event.link} className="mt-auto block relative z-30">
+         <Link href={event.link} target="_blank" rel="noopener noreferrer" className="mt-auto block relative z-30">
             <button className={`relative w-full py-4 rounded-xl flex items-center justify-center gap-3 overflow-hidden bg-white/5 border border-white/10 group/btn transition-all duration-300 hover:border-transparent`}>
               <div className={`absolute inset-0 bg-gradient-to-r ${event.color} opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300`} />
               <span className="relative z-10 text-white group-hover/btn:text-black font-extrabold text-sm uppercase tracking-wider transition-colors duration-300">
