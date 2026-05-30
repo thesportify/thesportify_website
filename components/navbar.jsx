@@ -12,7 +12,7 @@ const navLinks = [
   //{ name: "Home", path: "/" },
   { name: "Events", path: "/events" },
   { name: "Past Events", path: "/past-events" },
-  { name: "The Podium", path: "/the-podium" },
+  { name: "Chronicle", path: "/chronicle" },
   { name: "Verification", path: "/verify" },
   { name: "Team", path: "/team" },
   { name: "Helpdesk", path: "/helpdesk" },

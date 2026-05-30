@@ -155,11 +155,10 @@ const NewsletterComponent = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentEdition(index)}
-                    className={`h-2 rounded-full transition-all duration-300 focus:outline-none ${
-                      index === currentEdition
+                    className={`h-2 rounded-full transition-all duration-300 focus:outline-none ${index === currentEdition
                         ? "bg-linear-to-r from-red-500 via-orange-400 to-yellow-400 w-8"
                         : "bg-gray-700 hover:bg-gray-600 w-2"
-                    }`}
+                      }`}
                     aria-label={`Go to edition ${index + 1}`}
                   ></button>
                 ))}
@@ -173,7 +172,7 @@ const NewsletterComponent = () => {
           className="lg:col-span-7 bg-gray-900/80 backdrop-blur-md rounded-3xl shadow-xl border border-gray-800 overflow-hidden hover:border-gray-700 transition-all duration-300 flex flex-col"
           style={{
             backgroundColor: "rgba(17, 24, 39, 0.6)",
-            border: "2px solid rgba(31, 41, 55, 1)", 
+            border: "2px solid rgba(31, 41, 55, 1)",
           }}
         >
           {/* Header bar */}
