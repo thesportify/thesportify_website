@@ -67,6 +67,7 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
 
   const [activeCategory, setActiveCategory] = useState(categoryOrder[0]);
   const [activeMemberIndex, setActiveMemberIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState(1); // 1 = going right (next), -1 = going left (prev)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const scrollContainerRef = useRef(null);
 
@@ -138,6 +139,7 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
   // Reset active member index when category or year changes
   useEffect(() => {
     setActiveMemberIndex(0);
+    setSlideDirection(1);
   }, [activeCategory, selectedYear]);
 
   // Clamped/safe active member index to prevent out-of-bounds errors during category switches
@@ -145,12 +147,14 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
 
   const nextMember = () => {
     if (safeActiveIndex < filteredMembers.length - 1) {
+      setSlideDirection(1);
       setActiveMemberIndex(safeActiveIndex + 1);
     }
   };
 
   const prevMember = () => {
     if (safeActiveIndex > 0) {
+      setSlideDirection(-1);
       setActiveMemberIndex(safeActiveIndex - 1);
     }
   };
@@ -386,7 +390,7 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
               </button>
             )}
 
-            <AnimatePresence mode="popLayout">
+            <AnimatePresence mode="popLayout" custom={slideDirection}>
               {/* Previous Member (Left Bench) */}
               {safeActiveIndex > 0 && (
                 <motion.div
@@ -394,7 +398,7 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
                   initial={{ opacity: 0, x: -280, scale: 0.75, rotateY: 35 }}
                   animate={{ opacity: 0.4, x: -260, scale: 0.8, rotateY: 20 }}
                   exit={{ opacity: 0, x: -280, scale: 0.75, rotateY: 35 }}
-                  transition={{ type: "spring", stiffness: 220, damping: 25 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   onClick={prevMember}
                   className="absolute cursor-pointer hidden md:block select-none pointer-events-auto"
                 >
@@ -416,11 +420,12 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
 
               {/* Active Spotlight Card (Center Pitch) */}
               <motion.div
-                key={`active-${safeActiveIndex}`}
-                initial={{ opacity: 0, x: 0, scale: 0.9, rotateY: 0 }}
+                key={`active-${activeCategory}-${selectedYear}-${safeActiveIndex}`}
+                custom={slideDirection}
+                initial={(dir) => ({ opacity: 0, x: dir * 200, scale: 0.88, rotateY: dir * -12 })}
                 animate={{ opacity: 1, x: 0, scale: 1.02, rotateY: 0 }}
-                exit={{ opacity: 0, x: 0, scale: 0.9, rotateY: 0 }}
-                transition={{ type: "spring", stiffness: 240, damping: 22 }}
+                exit={(dir) => ({ opacity: 0, x: dir * -200, scale: 0.88, rotateY: dir * 12 })}
+                transition={{ type: "spring", stiffness: 400, damping: 32 }}
                 className="absolute z-20 flex flex-col items-center"
               >
                 <div className="relative w-[300px] sm:w-[325px] aspect-[3/4] bg-[#0a0f1d] border-2 border-[#ffce00] rounded-3xl p-5 overflow-hidden shadow-[0_0_55px_rgba(255,206,0,0.15)] group transition-all duration-300 flex flex-col justify-between">
@@ -479,7 +484,7 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
                   initial={{ opacity: 0, x: 280, scale: 0.75, rotateY: -35 }}
                   animate={{ opacity: 0.4, x: 260, scale: 0.8, rotateY: -20 }}
                   exit={{ opacity: 0, x: 280, scale: 0.75, rotateY: -35 }}
-                  transition={{ type: "spring", stiffness: 220, damping: 25 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   onClick={nextMember}
                   className="absolute cursor-pointer hidden md:block select-none pointer-events-auto"
                 >
@@ -512,7 +517,10 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
             {filteredMembers.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setActiveMemberIndex(index)}
+                onClick={() => {
+                  setSlideDirection(index > safeActiveIndex ? 1 : -1);
+                  setActiveMemberIndex(index);
+                }}
                 className={`transition-all duration-300 rounded-full h-1.5 ${
                   index === safeActiveIndex
                     ? "bg-gradient-to-r from-[#ff5a00] to-[#ffb700] w-6"
@@ -525,70 +533,78 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
         )}
       </div>
 
-      {/* Active Member HUD Detail Panel */}
+      {/* Active Member HUD Detail Panel — Animated */}
       {filteredMembers.length > 0 && (
         <div className="max-w-xl mx-auto mt-4 px-6 text-center z-10 relative pb-20">
-          <div className="bg-gradient-to-b from-[#0a0f1d] to-black border border-gray-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
-            
-            <div className="space-y-5 relative z-10">
-              <div className="flex items-center justify-center space-x-2">
-                <Sparkles className="h-4 w-4 text-[#ffce00] animate-pulse" />
-                <span className="text-[#ffce00] text-xs font-black tracking-widest uppercase font-mono">
-                  ACTIVE PLAYER BIO & STATS
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-center space-x-2 bg-black/40 border border-gray-900/60 rounded-xl py-2.5 px-4 text-center">
-                <div className="flex-1 border-r border-gray-900/60">
-                  <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">DIVISION</p>
-                  <p className="text-xs text-white font-extrabold uppercase tracking-wide mt-0.5">{activeCategory}</p>
+          <AnimatePresence mode="popLayout">
+            <motion.div
+              key={`hud-${activeCategory}-${selectedYear}-${safeActiveIndex}`}
+              initial={{ opacity: 0, y: 20, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -15, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="bg-gradient-to-b from-[#0a0f1d] to-black border border-gray-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden"
+            >
+              <div className="space-y-5 relative z-10">
+                <div className="flex items-center justify-center space-x-2">
+                  <Sparkles className="h-4 w-4 text-[#ffce00] animate-pulse" />
+                  <span className="text-[#ffce00] text-xs font-black tracking-widest uppercase font-mono">
+                    ACTIVE PLAYER BIO & STATS
+                  </span>
                 </div>
-                <div className="flex-1 border-r border-gray-900/60">
-                  <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">COUNCIL</p>
-                  <p className="text-xs text-white font-extrabold uppercase tracking-wide mt-0.5">{selectedYear}</p>
+                
+                <div className="flex items-center justify-center space-x-2 bg-black/40 border border-gray-900/60 rounded-xl py-2.5 px-4 text-center">
+                  <div className="flex-1 border-r border-gray-900/60">
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">DIVISION</p>
+                    <p className="text-xs text-white font-extrabold uppercase tracking-wide mt-0.5">{activeCategory}</p>
+                  </div>
+                  <div className="flex-1 border-r border-gray-900/60">
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">COUNCIL</p>
+                    <p className="text-xs text-white font-extrabold uppercase tracking-wide mt-0.5">{selectedYear}</p>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">STATUS</p>
+                    <p className="text-xs text-emerald-400 font-extrabold uppercase tracking-wide mt-0.5">ACTIVE ROSTER</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">STATUS</p>
-                  <p className="text-xs text-emerald-400 font-extrabold uppercase tracking-wide mt-0.5">ACTIVE ROSTER</p>
-                </div>
-              </div>
 
-              {/* Social CTA Action buttons */}
-              <div className="flex space-x-3 pt-1">
-                {activeMember.linkedin && (
-                  <a
-                    href={activeMember.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-[#ffce00] to-[#ffaa00] hover:from-[#ffe808] hover:to-[#ffce00] text-black text-xs font-black uppercase py-3.5 px-4 rounded-xl transition-all duration-300 shadow-md hover:scale-[1.02]"
-                    aria-label={activeMember.linkedin.includes("linktr.ee") ? `${activeMember.name}'s Linktree` : `${activeMember.name}'s LinkedIn`}
-                  >
-                    {activeMember.linkedin.includes("linktr.ee") ? (
-                      <>
-                        <Link2 className="h-4 w-4 stroke-[3px]" />
-                        <span>Linktree</span>
-                      </>
-                    ) : (
-                      <>
-                        <Linkedin className="h-4 w-4 stroke-[3px]" />
-                        <span>LinkedIn</span>
-                      </>
-                    )}
-                  </a>
-                )}
-                {activeMember.email && (
-                  <a
-                    href={`mailto:${activeMember.email}`}
-                    className="flex-1 flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white text-xs font-black uppercase py-3.5 px-4 rounded-xl transition-all duration-300 hover:scale-[1.02]"
-                    aria-label={`Email ${activeMember.name}`}
-                  >
-                    <Mail className="h-4 w-4 text-[#ffce00]" />
-                    <span>Email</span>
-                  </a>
-                )}
+                {/* Social CTA Action buttons */}
+                <div className="flex space-x-3 pt-1">
+                  {activeMember.linkedin && (
+                    <a
+                      href={activeMember.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-[#ffce00] to-[#ffaa00] hover:from-[#ffe808] hover:to-[#ffce00] text-black text-xs font-black uppercase py-3.5 px-4 rounded-xl transition-all duration-300 shadow-md hover:scale-[1.02]"
+                      aria-label={activeMember.linkedin.includes("linktr.ee") ? `${activeMember.name}'s Linktree` : `${activeMember.name}'s LinkedIn`}
+                    >
+                      {activeMember.linkedin.includes("linktr.ee") ? (
+                        <>
+                          <Link2 className="h-4 w-4 stroke-[3px]" />
+                          <span>Linktree</span>
+                        </>
+                      ) : (
+                        <>
+                          <Linkedin className="h-4 w-4 stroke-[3px]" />
+                          <span>LinkedIn</span>
+                        </>
+                      )}
+                    </a>
+                  )}
+                  {activeMember.email && (
+                    <a
+                      href={`mailto:${activeMember.email}`}
+                      className="flex-1 flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white text-xs font-black uppercase py-3.5 px-4 rounded-xl transition-all duration-300 hover:scale-[1.02]"
+                      aria-label={`Email ${activeMember.name}`}
+                    >
+                      <Mail className="h-4 w-4 text-[#ffce00]" />
+                      <span>Email</span>
+                    </a>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       )}
 
