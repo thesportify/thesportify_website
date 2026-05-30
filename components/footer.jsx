@@ -73,13 +73,30 @@ export default function Footer() {
               <li className="flex items-start md:justify-end">
                 
               </li>
-              <li className="flex items-center md:justify-end">
-                <Phone className="h-5 w-5 mr-2 text-[#ff9a00]" />
-                <span>+91 9878449480, +91 7870825906</span>
+              <li className="flex flex-col sm:flex-row gap-2 mt-2 md:justify-end">
+                <a
+                  href="tel:+919878449480"
+                  className="inline-flex items-center bg-white/5 hover:bg-[#ff9a00]/10 border border-white/10 hover:border-[#ff9a00]/40 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg transition-all duration-300 text-xs font-semibold shadow-sm hover:scale-[1.02]"
+                >
+                  <Phone className="h-3.5 w-3.5 mr-2 text-[#ff9a00]" />
+                  +91 9878449480
+                </a>
+                <a
+                  href="tel:+917870825906"
+                  className="inline-flex items-center bg-white/5 hover:bg-[#ff9a00]/10 border border-white/10 hover:border-[#ff9a00]/40 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg transition-all duration-300 text-xs font-semibold shadow-sm hover:scale-[1.02]"
+                >
+                  <Phone className="h-3.5 w-3.5 mr-2 text-[#ff9a00]" />
+                  +91 7870825906
+                </a>
               </li>
-              <li className="flex items-center md:justify-end">
-                <Mail className="h-5 w-5 mr-2 text-[#ff9a00]" />
-                <span>thesportify.society@study.iitm.ac.in</span>
+              <li className="flex mt-2 md:justify-end">
+                <a
+                  href="mailto:thesportify.society@study.iitm.ac.in"
+                  className="inline-flex items-center bg-white/5 hover:bg-[#ff9a00]/10 border border-white/10 hover:border-[#ff9a00]/40 text-gray-300 hover:text-white px-4 py-2 rounded-lg transition-all duration-300 text-xs font-semibold shadow-sm hover:scale-[1.02]"
+                >
+                  <Mail className="h-3.5 w-3.5 mr-2 text-[#ff9a00]" />
+                  thesportify.society@study.iitm.ac.in
+                </a>
               </li>
             </ul>
           </div>
