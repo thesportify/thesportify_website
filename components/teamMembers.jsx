@@ -18,37 +18,15 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
-const departmentStats = {
-  "secretaries": [
-    { label: "LDR", name: "Leadership", level: "LEGENDARY" },
-    { label: "EXC", name: "Execution", level: "ELITE" },
-    { label: "ORG", name: "Organization", level: "MASTER" }
-  ],
-  "women's wing": [
-    { label: "INC", name: "Inclusivity", level: "ELITE" },
-    { label: "MNG", name: "Management", level: "MASTER" },
-    { label: "OUT", name: "Outreach", level: "ADVANCED" }
-  ],
-  "events & operations": [
-    { label: "OPS", name: "Operations", level: "ELITE" },
-    { label: "LOG", name: "Logistics", level: "MASTER" },
-    { label: "CRD", name: "Coordination", level: "ADVANCED" }
-  ],
-  "tech & analytics": [
-    { label: "DEV", name: "Platform Dev", level: "EXCEPTIONAL" },
-    { label: "SYS", name: "Reliability", level: "MISSION CRITICAL" },
-    { label: "ANA", name: "Automation", level: "ADVANCED" }
-  ],
-  "pr & outreach": [
-    { label: "CMY", name: "Community", level: "MASTER" },
-    { label: "PUB", name: "Publicity", level: "ELITE" },
-    { label: "OUT", name: "Outreach", level: "ADVANCED" }
-  ],
-  "design & media": [
-    { label: "CRV", name: "Creative", level: "ELITE" },
-    { label: "MED", name: "Media", level: "MASTER" },
-    { label: "DSG", name: "Design", level: "ADVANCED" }
-  ]
+const getLinkedinUrl = (url) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  if (url.startsWith("www.") || url.startsWith("linkedin.com") || url.startsWith("linktr.ee")) {
+    return `https://${url}`;
+  }
+  return `https://linkedin.com/in/${url}`;
 };
 
 export default function TeamMembers({ teamMembersByYear = {} }) {
@@ -57,7 +35,7 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
 
   const categoryOrder = [
-    "Secretaries",
+    "Secretariat",
     "Women's Wing",
     "Events & Operations",
     "Tech & Analytics",
@@ -133,7 +111,8 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
   // Filter members
   const filteredMembers = (teamMembersByYear[selectedYear] || []).filter((member) => {
     const category = member.category ? member.category.toLowerCase() : "";
-    return category === activeCategory.toLowerCase();
+    const filterCat = activeCategory === "Secretariat" ? "secretaries" : activeCategory.toLowerCase();
+    return category === filterCat;
   });
 
   // Reset active member index when category or year changes
@@ -159,14 +138,8 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
     }
   };
 
-  // Get current active member and stats
+  // Get current active member
   const activeMember = filteredMembers[safeActiveIndex] || {};
-  const activeCategoryKey = activeCategory.toLowerCase();
-  const currentStats = departmentStats[activeCategoryKey] || [
-    { label: "PLY", name: "Playmaker", level: "EXPERT" },
-    { label: "ENG", name: "Energy", level: "ELITE" },
-    { label: "WRK", name: "Workrate", level: "MASTER" }
-  ];
 
   return (
     <div className="w-full flex flex-col bg-transparent">
@@ -428,7 +401,7 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
                 transition={{ type: "spring", stiffness: 400, damping: 32 }}
                 className="absolute z-20 flex flex-col items-center"
               >
-                <div className="relative w-[300px] sm:w-[325px] aspect-[3/4] bg-[#0a0f1d] border-2 border-[#ffce00] rounded-3xl p-5 overflow-hidden shadow-[0_0_55px_rgba(255,206,0,0.15)] group transition-all duration-300 flex flex-col justify-between">
+                <div className="relative w-[300px] sm:w-[325px] aspect-[3/4] bg-[#0a0f1d] border-2 border-[#ffce00] rounded-3xl p-4 overflow-hidden shadow-[0_0_55px_rgba(255,206,0,0.15)] group transition-all duration-300 flex flex-col">
                   
                   {/* Holographic light sweep */}
                   <div className="absolute -inset-[100%] bg-gradient-to-r from-transparent via-white/10 to-transparent -rotate-45 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out pointer-events-none"></div>
@@ -439,22 +412,18 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
                   <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-[#ffce00] rounded-bl-3xl"></div>
                   <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-[#ffce00] rounded-br-3xl"></div>
 
-                  {/* FUT Stats Shield */}
-                  <div className="absolute top-3 left-3 bg-[#0a0f1d]/90 border-2 border-[#ffce00] rounded-2xl p-2.5 flex flex-col items-center space-y-1.5 shadow-[0_0_20px_rgba(255,206,0,0.35)] z-20 w-11 font-mono">
-                    <Trophy className="h-4 w-4 text-[#ffce00] animate-pulse" />
-                    <div className="h-[2px] w-6 bg-gradient-to-r from-orange-500 to-[#ffce00] rounded-full"></div>
-                    <div className="flex flex-col space-y-1.5 text-center">
-                      {currentStats.map((stat, idx) => (
-                        <div key={idx} className="flex flex-col items-center leading-none">
-                          <span className="text-[#ff9a00] uppercase text-[7px] font-black">{stat.label}</span>
-                          <span className="text-white text-[8px] font-black uppercase mt-0.5">{stat.level.substring(0, 3)}</span>
-                        </div>
-                      ))}
+                  {/* Premium Position Badge */}
+                  {activeMember.position && (
+                    <div className="absolute top-6 left-6 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full z-20 flex items-center gap-1.5 shadow-md">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#ff5a00] animate-pulse shadow-[0_0_8px_#ff5a00]" />
+                      <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">
+                        {activeMember.position}
+                      </span>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Photo Frame */}
-                  <div className="relative w-full h-[74%] rounded-2xl overflow-hidden border-2 border-[#ffce00]/40 shadow-[0_0_20px_rgba(255,206,0,0.1)] bg-slate-900">
+                  {/* Photo Frame - Takes full height of the card frame */}
+                  <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-[#ffce00]/40 shadow-[0_0_20px_rgba(255,206,0,0.15)] bg-slate-900">
                     <Image
                       src={activeMember.image || "/placeholder.svg"}
                       alt={activeMember.name}
@@ -463,16 +432,6 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
                       className="object-cover object-top scale-100 group-hover:scale-[1.03] transition-transform duration-700 ease-out"
                       priority
                     />
-                  </div>
-
-                  {/* Name & Title Plate below the image - perfectly aligned at the bottom */}
-                  <div className="flex flex-col items-center justify-center text-center pb-1">
-                    <h3 className="text-lg sm:text-xl font-black text-white tracking-wide uppercase drop-shadow-md">
-                      {activeMember.name}
-                    </h3>
-                    <p className="text-[#ffce00] text-[10px] sm:text-xs font-extrabold uppercase tracking-widest mt-0.5">
-                      {activeMember.position}
-                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -533,73 +492,81 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
         )}
       </div>
 
-      {/* Active Member HUD Detail Panel — Animated */}
+      {/* Premium Active Member Profile Details — Animated */}
       {filteredMembers.length > 0 && (
-        <div className="max-w-xl mx-auto mt-4 px-6 text-center z-10 relative pb-20">
+        <div className="max-w-4xl mx-auto mt-8 px-6 z-10 relative pb-24 text-center md:text-left">
           <AnimatePresence mode="popLayout">
             <motion.div
-              key={`hud-${activeCategory}-${selectedYear}-${safeActiveIndex}`}
-              initial={{ opacity: 0, y: 20, scale: 0.96 }}
+              key={`profile-details-${activeCategory}-${selectedYear}-${safeActiveIndex}`}
+              initial={{ opacity: 0, y: 15, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -15, scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="bg-gradient-to-b from-[#0a0f1d] to-black border border-gray-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden"
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="relative backdrop-blur-xl bg-white/[0.02] border border-white/10 rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
             >
-              <div className="space-y-5 relative z-10">
-                <div className="flex items-center justify-center space-x-2">
-                  <Sparkles className="h-4 w-4 text-[#ffce00] animate-pulse" />
-                  <span className="text-[#ffce00] text-xs font-black tracking-widest uppercase font-mono">
-                    ACTIVE PLAYER BIO & STATS
-                  </span>
-                </div>
-                
-                <div className="flex items-center justify-center space-x-2 bg-black/40 border border-gray-900/60 rounded-xl py-2.5 px-4 text-center">
-                  <div className="flex-1 border-r border-gray-900/60">
-                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">DIVISION</p>
-                    <p className="text-xs text-white font-extrabold uppercase tracking-wide mt-0.5">{activeCategory}</p>
-                  </div>
-                  <div className="flex-1 border-r border-gray-900/60">
-                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">COUNCIL</p>
-                    <p className="text-xs text-white font-extrabold uppercase tracking-wide mt-0.5">{selectedYear}</p>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">STATUS</p>
-                    <p className="text-xs text-emerald-400 font-extrabold uppercase tracking-wide mt-0.5">ACTIVE ROSTER</p>
-                  </div>
+              {/* Subtle background glow */}
+              <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#ff5a00]/5 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-[#ffce00]/5 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                {/* Left Side: Name and Title */}
+                <div className="space-y-1">
+                  <h3 className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 tracking-tight uppercase">
+                    {activeMember.name}
+                  </h3>
+                  <p className="text-[#ffce00] text-xs font-black uppercase tracking-widest">
+                    {activeMember.position}
+                  </p>
                 </div>
 
-                {/* Social CTA Action buttons */}
-                <div className="flex space-x-3 pt-1">
-                  {activeMember.linkedin && (
-                    <a
-                      href={activeMember.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-[#ffce00] to-[#ffaa00] hover:from-[#ffe808] hover:to-[#ffce00] text-black text-xs font-black uppercase py-3.5 px-4 rounded-xl transition-all duration-300 shadow-md hover:scale-[1.02]"
-                      aria-label={activeMember.linkedin.includes("linktr.ee") ? `${activeMember.name}'s Linktree` : `${activeMember.name}'s LinkedIn`}
-                    >
-                      {activeMember.linkedin.includes("linktr.ee") ? (
-                        <>
-                          <Link2 className="h-4 w-4 stroke-[3px]" />
-                          <span>Linktree</span>
-                        </>
-                      ) : (
-                        <>
-                          <Linkedin className="h-4 w-4 stroke-[3px]" />
-                          <span>LinkedIn</span>
-                        </>
+                {/* Right Side: Metadata Capsules & Socials */}
+                <div className="flex flex-col items-center md:items-end gap-4">
+                  {/* Metadata Capsules */}
+                  <div className="flex flex-wrap items-center justify-center md:justify-end gap-2.5">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.03] border border-white/5 rounded-full text-[10px] text-gray-300 font-bold uppercase tracking-wider">
+                      <Calendar size={12} className="text-[#ff5a00]" />
+                      <span>{selectedYear} Council</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.03] border border-white/5 rounded-full text-[10px] text-gray-300 font-bold uppercase tracking-wider">
+                      <Sparkles size={12} className="text-[#ffce00]" />
+                      <span>{activeCategory}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.03] border border-white/5 rounded-full text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]" />
+                      <span>Active Member</span>
+                    </div>
+                  </div>
+
+                  {/* Social action buttons */}
+                  {(activeMember.linkedin || activeMember.email) && (
+                    <div className="flex items-center gap-4">
+                      {activeMember.linkedin && (
+                        <a
+                          href={getLinkedinUrl(activeMember.linkedin)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group relative flex items-center justify-center w-11 h-11 rounded-full bg-white/[0.03] border border-white/10 text-gray-400 hover:text-white transition-all duration-300 hover:scale-110 hover:border-[#ffce00]/40 shadow-lg"
+                          aria-label={activeMember.linkedin.includes("linktr.ee") ? `${activeMember.name}'s Linktree` : `${activeMember.name}'s LinkedIn`}
+                        >
+                          <div className="absolute inset-0 rounded-full bg-[#ffce00]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm animate-pulse" />
+                          {activeMember.linkedin.includes("linktr.ee") ? (
+                            <Link2 className="h-4.5 w-4.5 stroke-[2px] transition-transform duration-300" />
+                          ) : (
+                            <Linkedin className="h-4.5 w-4.5 stroke-[2px] transition-transform duration-300" />
+                          )}
+                        </a>
                       )}
-                    </a>
-                  )}
-                  {activeMember.email && (
-                    <a
-                      href={`mailto:${activeMember.email}`}
-                      className="flex-1 flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white text-xs font-black uppercase py-3.5 px-4 rounded-xl transition-all duration-300 hover:scale-[1.02]"
-                      aria-label={`Email ${activeMember.name}`}
-                    >
-                      <Mail className="h-4 w-4 text-[#ffce00]" />
-                      <span>Email</span>
-                    </a>
+                      {activeMember.email && (
+                        <a
+                          href={`mailto:${activeMember.email}`}
+                          className="group relative flex items-center justify-center w-11 h-11 rounded-full bg-white/[0.03] border border-white/10 text-gray-400 hover:text-white transition-all duration-300 hover:scale-110 hover:border-[#ff5a00]/40 shadow-lg"
+                          aria-label={`Email ${activeMember.name}`}
+                        >
+                          <div className="absolute inset-0 rounded-full bg-[#ff5a00]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm animate-pulse" />
+                          <Mail className="h-4.5 w-4.5 stroke-[2px] transition-transform duration-300" />
+                        </a>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
