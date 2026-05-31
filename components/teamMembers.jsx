@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -8,18 +10,52 @@ import {
   ChevronRight,
   Menu,
   X,
-  Flame,
-  ChevronDown,
   Calendar,
+  ChevronDown,
+  Link2,
+  Trophy,
+  Sparkles,
 } from "lucide-react";
 import Image from "next/image";
 
-export default function TeamMembersCarousel({ teamMembersByYear = {} }) {
+const departmentStats = {
+  "secretaries": [
+    { label: "LDR", name: "Leadership", level: "LEGENDARY" },
+    { label: "EXC", name: "Execution", level: "ELITE" },
+    { label: "ORG", name: "Organization", level: "MASTER" }
+  ],
+  "women's wing": [
+    { label: "INC", name: "Inclusivity", level: "ELITE" },
+    { label: "MNG", name: "Management", level: "MASTER" },
+    { label: "OUT", name: "Outreach", level: "ADVANCED" }
+  ],
+  "events & operations": [
+    { label: "OPS", name: "Operations", level: "ELITE" },
+    { label: "LOG", name: "Logistics", level: "MASTER" },
+    { label: "CRD", name: "Coordination", level: "ADVANCED" }
+  ],
+  "tech & analytics": [
+    { label: "DEV", name: "Platform Dev", level: "EXCEPTIONAL" },
+    { label: "SYS", name: "Reliability", level: "MISSION CRITICAL" },
+    { label: "ANA", name: "Automation", level: "ADVANCED" }
+  ],
+  "pr & outreach": [
+    { label: "CMY", name: "Community", level: "MASTER" },
+    { label: "PUB", name: "Publicity", level: "ELITE" },
+    { label: "OUT", name: "Outreach", level: "ADVANCED" }
+  ],
+  "design & media": [
+    { label: "CRV", name: "Creative", level: "ELITE" },
+    { label: "MED", name: "Media", level: "MASTER" },
+    { label: "DSG", name: "Design", level: "ADVANCED" }
+  ]
+};
+
+export default function TeamMembers({ teamMembersByYear = {} }) {
   const years = Object.keys(teamMembersByYear).sort((a, b) => b.localeCompare(a));
   const [selectedYear, setSelectedYear] = useState("2025-26");
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
 
-  // Updated category order - split Core into Founders and Secretaries
   const categoryOrder = [
     "Secretaries",
     "Women's Wing",
@@ -27,459 +63,148 @@ export default function TeamMembersCarousel({ teamMembersByYear = {} }) {
     "Tech & Analytics",
     "PR & Outreach",
     "Design & Media",
-
-    /*"Sponsorship",
-    "Research & Publication",
-    "Content & Documentation",
-    "Social Media",*/
   ];
 
-  // Create normalized category mapping
-  const categoryMapping = {};
-  categoryOrder.forEach((category) => {
-    categoryMapping[category.toLowerCase()] = category;
-  });
-
-  // Special mapping for Core members to Founders or Secretaries
-  const coreMapping = (member) => {
-    return member.category;
-  };
-
-  // State for active category and active member index
   const [activeCategory, setActiveCategory] = useState(categoryOrder[0]);
   const [activeMemberIndex, setActiveMemberIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [slideDirection, setSlideDirection] = useState(1); // 1 = going right (next), -1 = going left (prev)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [parallaxOffset, setParallaxOffset] = useState(0);
-  // Refs for scrolling functionality
   const scrollContainerRef = useRef(null);
+
   const [scrollState, setScrollState] = useState({
     canScrollLeft: false,
-    canScrollRight: true
+    canScrollRight: true,
   });
 
-  // Calculate if we can scroll in either direction
   const updateScrollButtons = () => {
     if (!scrollContainerRef.current) return;
-
     const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-
     setScrollState({
       canScrollLeft: scrollLeft > 1,
-      canScrollRight: scrollLeft < scrollWidth - clientWidth - 1
+      canScrollRight: scrollLeft < scrollWidth - clientWidth - 1,
     });
   };
 
-  // Initialize scroll state
   useEffect(() => {
     updateScrollButtons();
-    window.addEventListener('resize', updateScrollButtons);
-
-    return () => {
-      window.removeEventListener('resize', updateScrollButtons);
-    };
+    window.addEventListener("resize", updateScrollButtons);
+    return () => window.removeEventListener("resize", updateScrollButtons);
   }, []);
 
-  // Smooth scroll to the active category
+  // Center active category on change
   useEffect(() => {
     if (!scrollContainerRef.current) return;
-
     const container = scrollContainerRef.current;
     const activeElement = container.querySelector(`[data-category="${activeCategory}"]`);
-
     if (!activeElement) return;
 
-    // Calculate the position to center the element
     const containerRect = container.getBoundingClientRect();
     const elementRect = activeElement.getBoundingClientRect();
-
-    const leftPosition = elementRect.left + window.scrollX;
-    const containerLeftPosition = containerRect.left + window.scrollX;
-
-    const elementCenter = leftPosition + elementRect.width / 2;
-    const containerCenter = containerLeftPosition + containerRect.width / 2;
-    const scrollAmount = elementCenter - containerCenter;
+    const scrollAmount = (elementRect.left + elementRect.width / 2) - (containerRect.left + containerRect.width / 2);
 
     container.scrollBy({
       left: scrollAmount,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
 
-    // Update scroll buttons after scrolling
     setTimeout(updateScrollButtons, 300);
   }, [activeCategory]);
 
-  // Scroll handlers
   const scrollLeft = () => {
-    if (!scrollContainerRef.current || !scrollState.canScrollLeft) return;
-
+    if (!scrollContainerRef.current) return;
     const container = scrollContainerRef.current;
-    const scrollAmount = container.clientWidth * 0.8;
-
     container.scrollBy({
-      left: -scrollAmount,
-      behavior: 'smooth'
+      left: -container.clientWidth * 0.6,
+      behavior: "smooth",
     });
-
-    // Update scroll buttons after scrolling
     setTimeout(updateScrollButtons, 300);
   };
 
   const scrollRight = () => {
-    if (!scrollContainerRef.current || !scrollState.canScrollRight) return;
-
+    if (!scrollContainerRef.current) return;
     const container = scrollContainerRef.current;
-    const scrollAmount = container.clientWidth * 0.8;
-
     container.scrollBy({
-      left: scrollAmount,
-      behavior: 'smooth'
+      left: container.clientWidth * 0.6,
+      behavior: "smooth",
     });
-
-    // Update scroll buttons after scrolling
     setTimeout(updateScrollButtons, 300);
   };
 
-  // Handle container scroll events
-  const handleScroll = () => {
-    updateScrollButtons();
-  };
-  const carouselRef = useRef(null);
-  const categoryNavRef = useRef(null);
-  const containerRef = useRef(null);
-
-  // Filter members by active category and selected year
+  // Filter members
   const filteredMembers = (teamMembersByYear[selectedYear] || []).filter((member) => {
-    const mappedCategory = coreMapping(member);
-    const normalizedCategory = mappedCategory && mappedCategory.toLowerCase();
-    const displayCategory =
-      categoryMapping[normalizedCategory] ||
-      (mappedCategory &&
-        mappedCategory.charAt(0).toUpperCase() +
-        mappedCategory.slice(1).toLowerCase());
-
-    return displayCategory === activeCategory;
+    const category = member.category ? member.category.toLowerCase() : "";
+    return category === activeCategory.toLowerCase();
   });
 
-  // Reset active member index when category changes
+  // Reset active member index when category or year changes
   useEffect(() => {
     setActiveMemberIndex(0);
-    // Close mobile menu when category changes
-    setIsMobileMenuOpen(false);
-  }, [activeCategory]);
+    setSlideDirection(1);
+  }, [activeCategory, selectedYear]);
 
-  // Handle scroll events for parallax effect
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!containerRef.current) return;
+  // Clamped/safe active member index to prevent out-of-bounds errors during category switches
+  const safeActiveIndex = Math.min(activeMemberIndex, Math.max(0, filteredMembers.length - 1));
 
-      const scrollTop = window.scrollY;
-      const containerTop = containerRef.current.offsetTop;
-      const containerHeight = containerRef.current.offsetHeight;
-
-      // Calculate parallax effect based on scroll position relative to container
-      if (
-        scrollTop > containerTop - window.innerHeight &&
-        scrollTop < containerTop + containerHeight
-      ) {
-        const relativePosition =
-          scrollTop - (containerTop - window.innerHeight);
-        const parallaxValue = relativePosition * 0.1; // Adjust speed factor as needed
-        setParallaxOffset(parallaxValue);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Scroll active category into view when it changes
-  useEffect(() => {
-    if (categoryNavRef.current) {
-      const activeButton =
-        categoryNavRef.current.querySelector(".active-category");
-      if (activeButton) {
-        const navScroll = categoryNavRef.current;
-        const buttonRect = activeButton.getBoundingClientRect();
-        const navRect = navScroll.getBoundingClientRect();
-
-        // Calculate scroll position to center the button
-        const scrollLeft =
-          activeButton.offsetLeft -
-          navScroll.offsetLeft -
-          navRect.width / 2 +
-          buttonRect.width / 2;
-
-        navScroll.scrollTo({
-          left: scrollLeft,
-          behavior: "smooth",
-        });
-      }
-    }
-  }, [activeCategory]);
-
-  // Navigation functions with transition state
   const nextMember = () => {
-    if (isTransitioning || activeMemberIndex === filteredMembers.length - 1)
-      return;
-
-    setIsTransitioning(true);
-    setActiveMemberIndex((prevIndex) => prevIndex + 1);
-
-    setTimeout(() => setIsTransitioning(false), 500);
+    if (safeActiveIndex < filteredMembers.length - 1) {
+      setSlideDirection(1);
+      setActiveMemberIndex(safeActiveIndex + 1);
+    }
   };
 
   const prevMember = () => {
-    if (isTransitioning || activeMemberIndex === 0) return;
-
-    setIsTransitioning(true);
-    setActiveMemberIndex((prevIndex) => prevIndex - 1);
-
-    setTimeout(() => setIsTransitioning(false), 500);
-  };
-
-  // Function to select a specific member
-  const selectMember = (index) => {
-    if (isTransitioning || index === activeMemberIndex) return;
-
-    setIsTransitioning(true);
-    setActiveMemberIndex(index);
-    setTimeout(() => setIsTransitioning(false), 500);
-  };
-
-  // Calculate indices for carousel items
-  const getCarouselIndices = () => {
-    const total = filteredMembers.length;
-
-    // For mobile view, show fewer items
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
-    const visibleItems = isMobile ? 1 : 3;
-
-    if (total <= visibleItems)
-      return Array.from({ length: total }, (_, i) => i);
-
-    // Show only visibleItems with active in the middle
-    const indices = [];
-    const halfVisible = Math.floor(visibleItems / 2);
-
-    for (let i = -halfVisible; i <= halfVisible; i++) {
-      // Handle cases where we're at the edges
-      if (activeMemberIndex + i < 0 || activeMemberIndex + i >= total) continue;
-      indices.push(activeMemberIndex + i);
+    if (safeActiveIndex > 0) {
+      setSlideDirection(-1);
+      setActiveMemberIndex(safeActiveIndex - 1);
     }
-
-    // Add extra items for mobile if needed to maintain visibleItems
-    if (indices.length < visibleItems && total >= visibleItems) {
-      if (activeMemberIndex === 0) {
-        // At the start, add more from the right
-        for (let i = indices.length; i < visibleItems; i++) {
-          if (activeMemberIndex + i < total) {
-            indices.push(activeMemberIndex + i);
-          }
-        }
-      } else if (activeMemberIndex === total - 1) {
-        // At the end, add more from the left
-        for (let i = indices.length; i < visibleItems; i++) {
-          if (activeMemberIndex - i >= 0) {
-            indices.unshift(activeMemberIndex - i);
-          }
-        }
-      }
-    }
-
-    return indices;
   };
 
-  // Check if carousel is at start or end
-  const isFirstMember = activeMemberIndex === 0;
-  const isLastMember = activeMemberIndex === filteredMembers.length - 1;
-
-  // Get active member
-  const activeMember = filteredMembers[activeMemberIndex] || {};
+  // Get current active member and stats
+  const activeMember = filteredMembers[safeActiveIndex] || {};
+  const activeCategoryKey = activeCategory.toLowerCase();
+  const currentStats = departmentStats[activeCategoryKey] || [
+    { label: "PLY", name: "Playmaker", level: "EXPERT" },
+    { label: "ENG", name: "Energy", level: "ELITE" },
+    { label: "WRK", name: "Workrate", level: "MASTER" }
+  ];
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full min-h-screen flex flex-col bg-black mb-8"
-    >
-      {/* Enhanced Navbar with 3D effect and flame accent */}
-      <div className="w-full border-b border-orange-900/30 py-2 shadow-lg bg-gradient-to-b from-gray-900 to-black backdrop-blur-md relative">
-        {/* Subtle flame accents for navbar */}
-        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-orange-600/30 to-transparent"></div>
-        <div className="absolute -bottom-3 left-1/4 w-1 h-3 bg-gradient-to-b from-orange-500/40 to-transparent blur-sm"></div>
-        <div className="absolute -bottom-2 left-2/4 w-1 h-2 bg-gradient-to-b from-orange-500/30 to-transparent blur-sm"></div>
-        <div className="absolute -bottom-4 left-3/4 w-1 h-4 bg-gradient-to-b from-orange-500/50 to-transparent blur-sm"></div>
-
-        <div className="container mx-auto px-4">
-          {/* Mobile toggle button - Enhanced with flame icon */}
-          <div className="md:hidden flex justify-between items-center py-2">
+    <div className="w-full flex flex-col bg-transparent">
+      
+      {/* Category Navbar with glassmorphism */}
+      <div className="w-full border-b border-gray-900 py-3 bg-black/60 backdrop-blur-md sticky top-16 z-30">
+        <div className="container mx-auto px-4 flex items-center justify-between">
+          
+          {/* Mobile Categories Toggle */}
+          <div className="md:hidden flex justify-between items-center w-full">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-white p-2 border border-orange-900/40 rounded-lg flex items-center bg-black/30 shadow-inner shadow-orange-900/10"
-              aria-label="Toggle category menu"
+              className="text-white px-4 py-2 border border-gray-800 rounded-xl flex items-center bg-gray-950/80 shadow-md"
             >
-              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-              <span className="ml-2 text-sm font-medium">
-                {isMobileMenuOpen ? "Close" : "Categories"}
+              {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+              <span className="ml-2 text-xs font-semibold uppercase tracking-wider">
+                {activeCategory}
               </span>
             </button>
 
-            <div className="flex items-center gap-4">
-              {/* Year Selector for Mobile */}
-              <div className="relative">
-                <button
-                  onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white"
-                >
-                  <Calendar size={14} className="text-[#ff5a00]" />
-                  <span>{selectedYear}</span>
-                  <ChevronDown size={14} className="text-gray-400" />
-                </button>
-                <AnimatePresence>
-                  {isYearDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 min-w-[140px] bg-gray-900 border border-white/10 rounded-xl p-1 shadow-2xl z-[100]"
-                    >
-                      {years.map((year) => (
-                        <button
-                          key={year}
-                          onClick={() => {
-                            setSelectedYear(year);
-                            setIsYearDropdownOpen(false);
-                          }}
-                          className={`w-full text-left px-3 py-2 rounded-lg text-xs ${
-                            selectedYear === year ? "bg-[#ff5a00]/20 text-white" : "text-gray-400"
-                          }`}
-                        >
-                          {year} Council
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              <span className="text-white font-bold text-sm bg-gradient-to-r from-[#ff5a00] to-[#ffb700] bg-clip-text text-transparent">
-                {activeCategory}
-              </span>
-            </div>
-          </div>
-
-          {/* Mobile dropdown menu - Enhanced with glossy effect */}
-          <div className={`md:hidden ${isMobileMenuOpen ? "block" : "hidden"}`}>
-            <div className="py-2 bg-gradient-to-b from-gray-900 to-black rounded-lg shadow-xl my-2 max-h-80 overflow-y-auto border border-gray-800 relative">
-              {/* Corner accents for mobile menu */}
-              <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-orange-600/40 rounded-tl-lg"></div>
-              <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-orange-600/40 rounded-tr-lg"></div>
-
-              {categoryOrder.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => {
-                    setActiveCategory(category);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`block w-full text-left px-4 py-3 transition-all duration-300 ${activeCategory === category
-                    ? "bg-gradient-to-r from-[#ff5a00] to-[#ffb700] text-white"
-                    : "text-gray-300 hover:text-white hover:bg-gray-800/50"
-                    }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Desktop horizontal scrolling categories + Year Dropdown */}
-          <div className="hidden md:flex items-center justify-between relative px-4 h-14">
-            {/* Categories Scroller Container */}
-            <div className="flex-1 flex items-center justify-center relative px-8 overflow-hidden">
-              {/* Left scroll button */}
-              <button
-                onClick={scrollLeft}
-                disabled={!scrollState.canScrollLeft}
-                className={`absolute left-0 z-10 bg-gray-900/80 text-white rounded-full p-1 backdrop-blur-sm shadow-lg transform transition-all duration-200 ${scrollState.canScrollLeft
-                  ? "opacity-100 hover:bg-gray-800 hover:scale-110 cursor-pointer"
-                  : "opacity-0 pointer-events-none"
-                  }`}
-                aria-label="Scroll left"
-              >
-                <ChevronLeft size={20} />
-              </button>
-
-              {/* Categories container */}
-              <div
-                ref={scrollContainerRef}
-                onScroll={handleScroll}
-                className="flex items-center justify-start overflow-x-auto py-2 scrollbar-hide w-full"
-                style={{
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none'
-                }}
-              >
-                <div className="flex items-center space-x-2 px-4">
-                  {categoryOrder.map((category) => (
-                    <button
-                      key={category}
-                      data-category={category}
-                      onClick={() => setActiveCategory(category)}
-                      className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 relative ${activeCategory === category
-                        ? "active-category bg-gradient-to-r from-[#ff5a00] to-[#ffb700] text-white shadow-lg shadow-orange-900/30 scale-105"
-                        : "text-gray-300 hover:text-white hover:bg-gray-800/50"
-                        }`}
-                    >
-                      <span className="relative z-10">{category}</span>
-
-                      {/* Enhanced underline indicator for active category */}
-                      {activeCategory === category && (
-                        <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-[#ff5a00] to-[#ffb700]"></span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right scroll button */}
-              <button
-                onClick={scrollRight}
-                disabled={!scrollState.canScrollRight}
-                className={`absolute right-0 z-10 bg-gray-900/80 text-white rounded-full p-1 backdrop-blur-sm shadow-lg transform transition-all duration-200 ${scrollState.canScrollRight
-                  ? "opacity-100 hover:bg-gray-800 hover:scale-110 cursor-pointer"
-                  : "opacity-0 pointer-events-none"
-                  }`}
-                aria-label="Scroll right"
-              >
-                <ChevronRight size={20} />
-              </button>
-            </div>
-
-            {/* Year Dropdown on the Right */}
-            <div className="relative ml-4">
+            {/* Mobile Year Selector */}
+            <div className="relative">
               <button
                 onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
-                onBlur={() => setTimeout(() => setIsYearDropdownOpen(false), 200)}
-                className="group flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 backdrop-blur-md hover:border-orange-500/30"
+                className="flex items-center gap-1.5 px-3 py-2 bg-gray-950/80 border border-gray-800 rounded-xl text-xs text-white"
               >
-                <Calendar size={16} className="text-[#ff5a00]" />
-                <span className="text-white text-sm font-medium">{selectedYear}</span>
-                <motion.div
-                  animate={{ rotate: isYearDropdownOpen ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <ChevronDown size={16} className="text-gray-400 group-hover:text-white" />
-                </motion.div>
+                <Calendar size={14} className="text-[#ff5a00]" />
+                <span>{selectedYear}</span>
+                <ChevronDown size={14} className="text-gray-400" />
               </button>
-
+              
               <AnimatePresence>
                 {isYearDropdownOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute top-full mt-2 right-0 min-w-[180px] bg-[#121212]/95 border border-white/10 rounded-xl p-1 shadow-2xl backdrop-blur-xl z-[100]"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    className="absolute right-0 mt-2 min-w-[140px] bg-gray-950 border border-gray-800 rounded-xl p-1 shadow-2xl z-[100]"
                   >
                     {years.map((year) => (
                       <button
@@ -488,16 +213,103 @@ export default function TeamMembersCarousel({ teamMembersByYear = {} }) {
                           setSelectedYear(year);
                           setIsYearDropdownOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 text-xs ${
-                          selectedYear === year
-                            ? "bg-gradient-to-r from-[#ff5a00]/20 to-[#ffe808]/10 text-white"
-                            : "text-gray-400 hover:text-white hover:bg-white/5"
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                          selectedYear === year ? "bg-orange-500/20 text-[#ffce00]" : "text-gray-400 hover:text-white"
+                        }`}
+                      >
+                        {year} Council
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Desktop Categories Scroll & Year Dropdown */}
+          <div className="hidden md:flex items-center justify-between w-full relative">
+            <div className="flex-1 flex items-center justify-center relative px-8 overflow-hidden">
+              
+              {/* Left Arrow */}
+              <button
+                onClick={scrollLeft}
+                className={`absolute left-0 z-10 text-gray-400 hover:text-white rounded-full p-1.5 transition-all ${
+                  scrollState.canScrollLeft ? "opacity-100 hover:scale-110" : "opacity-30 pointer-events-none"
+                }`}
+                aria-label="Scroll categories left"
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              {/* Scroller */}
+              <div
+                ref={scrollContainerRef}
+                onScroll={updateScrollButtons}
+                className="flex items-center justify-start overflow-x-auto py-1 scrollbar-hide w-full"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              >
+                <div className="flex items-center space-x-2 px-2">
+                  {categoryOrder.map((category) => (
+                    <button
+                      key={category}
+                      data-category={category}
+                      onClick={() => setActiveCategory(category)}
+                      className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 relative ${
+                        activeCategory === category
+                          ? "bg-[#ffce00]/10 border border-[#ffce00]/30 text-[#ffce00] shadow-lg shadow-orange-500/5 scale-105"
+                          : "text-gray-400 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Arrow */}
+              <button
+                onClick={scrollRight}
+                className={`absolute right-0 z-10 text-gray-400 hover:text-white rounded-full p-1.5 transition-all ${
+                  scrollState.canScrollRight ? "opacity-100 hover:scale-110" : "opacity-30 pointer-events-none"
+                }`}
+                aria-label="Scroll categories right"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+
+            {/* Desktop Year Selector */}
+            <div className="relative ml-4">
+              <button
+                onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-950 border border-gray-800 rounded-xl text-xs text-white font-bold tracking-wider hover:border-orange-500/30 transition-all duration-300"
+              >
+                <Calendar size={14} className="text-[#ff5a00]" />
+                <span>{selectedYear} COUNCIL</span>
+                <ChevronDown size={14} className="text-gray-400" />
+              </button>
+
+              <AnimatePresence>
+                {isYearDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    className="absolute top-full mt-2 right-0 min-w-[160px] bg-gray-950 border border-gray-800 rounded-xl p-1 shadow-2xl z-[100]"
+                  >
+                    {years.map((year) => (
+                      <button
+                        key={year}
+                        onClick={() => {
+                          setSelectedYear(year);
+                          setIsYearDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                          selectedYear === year ? "bg-orange-500/20 text-[#ffce00]" : "text-gray-400 hover:text-white hover:bg-white/5"
                         }`}
                       >
                         <span>{year} Council</span>
-                        {selectedYear === year && (
-                          <div className="w-1 h-1 rounded-full bg-[#ff5a00] shadow-[0_0_8px_#ff5a00]" />
-                        )}
+                        {selectedYear === year && <div className="w-1 h-1 rounded-full bg-[#ffce00] shadow-[0_0_6px_#ffce00]" />}
                       </button>
                     ))}
                   </motion.div>
@@ -506,326 +318,295 @@ export default function TeamMembersCarousel({ teamMembersByYear = {} }) {
             </div>
           </div>
         </div>
+
+        {/* Mobile menu panel */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden w-full bg-black/95 border-b border-gray-900 mt-2 py-2 px-4 space-y-1 overflow-hidden"
+            >
+              {categoryOrder.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => {
+                    setActiveCategory(category);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`block w-full text-left px-4 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-colors ${
+                    activeCategory === category ? "bg-orange-500/20 text-[#ffce00]" : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Main Content: Carousel + Details - with enhanced parallax effect */}
-      <div
-        className="flex-1 flex flex-col items-center justify-center relative overflow-hidden py-6"
-        style={{
-          transform: `translateY(${parallaxOffset}px)`,
-          transition: "transform 0.1s ease-out",
-        }}
-      >
-        {/* Category Title with parallax counter-effect for depth */}
-        <div
-          className="w-full text-center"
-          style={{
-            transform: `translateY(${-parallaxOffset * 0.3}px)`,
-            transition: "transform 0.1s ease-out",
-          }}
-        >
-          <p className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#ff5a00] via-[#ffb700] to-[#ffe808] relative inline-block">
-            <Flame
-              size={20}
-              className="absolute -left-6 top-1/2 -translate-y-1/2 text-orange-500 animate-float-slow opacity-70"
-            />
-            {activeCategory} Team
-            <Flame
-              size={20}
-              className="absolute -right-6 top-1/2 -translate-y-1/2 text-orange-500 animate-float-medium opacity-70"
-            />
-          </p>
-          <div className="h-px w-64 mx-auto bg-gradient-to-r from-transparent via-[#ff8c14] to-transparent mt-2" />
-        </div>
+      {/* Title Header */}
+      <div className="w-full text-center py-10 relative">
+        <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight uppercase">
+          {selectedYear} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff5a00] to-[#ffce00]">{activeCategory}</span> Team
+        </h2>
+        <div className="h-[2px] w-20 mx-auto bg-gradient-to-r from-[#ff5a00] to-[#ffce00] mt-3 rounded-full" />
+      </div>
 
-        {/* Enhanced Carousel Section with additional flame effects and corner borders */}
-        <div className="w-full relative" style={{ height: "min(70vh, 480px)" }}>
-          {/* Navigation Arrows - Responsive size with enhanced flame effects */}
-          {!isFirstMember && (
-            <button
-              className="opacity-70 absolute left-2 sm:left-32 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-transparent via-gray-200 to-gray-200/80 backdrop-blur-sm p-2 sm:p-4 rounded-full text-gray-700 hover:bg-white hover:bg-opacity-80 transition-all hover:scale-105 sm:hover:scale-110 border border-gray-300/50 sm:border-2 hover:border-[#ff8c14] group shadow-sm sm:shadow-md"
-              onClick={prevMember}
-              disabled={isTransitioning}
-              aria-label="Previous team member"
-            >
-              <ChevronLeft size={20} className="stroke-2 text-gray-700 sm:hidden" />
-              <ChevronLeft size={28} className="stroke-2 text-gray-700 hidden sm:block" />
-              <div className="absolute -inset-1 bg-gradient-to-r from-orange-400/20 to-amber-400/20 rounded-full opacity-0 group-hover:opacity-100 blur-md transition-opacity"></div>
-            </button>
-          )}
+      {/* Stadium Court Spotlight Carousel */}
+      <div className="relative w-full py-8 overflow-hidden bg-transparent flex flex-col items-center">
+        
+        {/* Dynamic Overhead Spotlight Cone */}
+        <div className="absolute top-0 inset-x-0 h-full bg-[radial-gradient(ellipse_at_top,rgba(255,206,0,0.12),transparent_55%)] pointer-events-none z-0"></div>
 
-          {!isLastMember && (
-            <button
-              className="opacity-70 absolute right-2 sm:right-32 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-l from-transparent via-gray-200 to-gray-200/80 backdrop-blur-sm p-2 sm:p-4 rounded-full text-gray-700 hover:bg-white hover:bg-opacity-80 transition-all hover:scale-105 sm:hover:scale-110 border border-gray-300/50 sm:border-2 hover:border-[#ff8c14] group shadow-sm sm:shadow-md"
-              onClick={nextMember}
-              disabled={isTransitioning}
-              aria-label="Next team member"
-            >
-              <ChevronRight size={20} className="stroke-2 text-gray-700 sm:hidden" />
-              <ChevronRight size={28} className="stroke-2 text-gray-700 hidden sm:block" />
-              <div className="absolute -inset-1 bg-gradient-to-r from-amber-400/20 to-orange-400/20 rounded-full opacity-0 group-hover:opacity-100 blur-md transition-opacity"></div>
-            </button>
-          )}
+        {/* Ambient Stadium Beacon Glows */}
+        <div className="absolute top-10 left-10 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl animate-pulse pointer-events-none"></div>
+        <div className="absolute top-10 right-10 w-24 h-24 bg-yellow-500/5 rounded-full blur-2xl animate-pulse pointer-events-none"></div>
 
-          {/* Enhanced background with more flame effects */}
-          <div className="absolute inset-0 pointer-events-none">
-            {/* Base gradient background */}
-            <div className="absolute inset-0 bg-gradient-radial from-gray-900/30 to-black/0"></div>
+        {/* Card Court Field Showcase */}
+        {filteredMembers.length > 0 ? (
+          <div className="w-full relative flex items-center justify-center h-[460px] perspective-[1000px] z-10">
+            
+            {/* Arrow Navs */}
+            {activeMemberIndex > 0 && (
+              <button
+                onClick={prevMember}
+                className="absolute left-4 sm:left-12 z-30 p-3 bg-gradient-to-r from-transparent via-gray-900/60 to-gray-900/40 hover:bg-[#ffce00]/20 text-white rounded-full border border-gray-800 transition-all hover:scale-110 shadow-lg shadow-black/50 group"
+                aria-label="Previous roster member"
+              >
+                <ChevronLeft size={24} className="group-hover:text-[#ffce00] transition-colors" />
+              </button>
+            )}
 
-            {/* Additional flame elements in the background */}
-            <div className="absolute left-1/4 top-1/4 w-28 h-28 rounded-full bg-orange-500/5 blur-xl animate-pulse"></div>
-            <div className="absolute right-1/4 bottom-1/4 w-24 h-24 rounded-full bg-yellow-500/5 blur-xl animate-pulse-slow"></div>
+            {activeMemberIndex < filteredMembers.length - 1 && (
+              <button
+                onClick={nextMember}
+                className="absolute right-4 sm:right-12 z-30 p-3 bg-gradient-to-l from-transparent via-gray-900/60 to-gray-900/40 hover:bg-[#ffce00]/20 text-white rounded-full border border-gray-800 transition-all hover:scale-110 shadow-lg shadow-black/50 group"
+                aria-label="Next roster member"
+              >
+                <ChevronRight size={24} className="group-hover:text-[#ffce00] transition-colors" />
+              </button>
+            )}
 
-            {/* Top corners flame ornaments */}
-            <div className="absolute top-0 left-6 w-32 h-32 opacity-20 bg-gradient-to-b from-[#ff5a00] to-transparent rounded-full blur-xl"></div>
-            <div className="absolute top-0 right-6 w-24 h-24 opacity-15 bg-gradient-to-b from-[#ffb700] to-transparent rounded-full blur-xl"></div>
-
-            {/* Center subtle glow - activated when member is selected */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 opacity-5 bg-gradient-radial from-[#ff8c14] to-transparent rounded-full blur-xl"></div>
-
-            {/* Animated flame particles - enhanced with more particles */}
-            <div className="absolute top-1/4 left-1/3 w-3 h-3 opacity-30 bg-[#ffb700] rounded-full blur-md animate-float-slow"></div>
-            <div className="absolute top-1/3 right-1/4 w-2 h-2 opacity-20 bg-[#ff5a00] rounded-full blur-md animate-float-slower"></div>
-            <div className="absolute bottom-1/3 left-1/5 w-2 h-2 opacity-25 bg-[#ff8c14] rounded-full blur-md animate-float-medium"></div>
-            <div className="absolute bottom-1/4 right-1/3 w-3 h-3 opacity-20 bg-[#ffb700] rounded-full blur-md animate-float-fast"></div>
-
-            {/* Additional flame particles */}
-            <div className="absolute top-1/2 left-1/6 w-2 h-2 opacity-30 bg-[#ff5a00] rounded-full blur-md animate-float-random1"></div>
-            <div className="absolute top-2/3 right-1/5 w-1.5 h-1.5 opacity-25 bg-[#ffb700] rounded-full blur-md animate-float-random2"></div>
-
-            {/* Enhanced Edge flame line accents - made more prominent */}
-            <div className="absolute left-12 top-1/2 -translate-y-1/2 h-48 w-0.5 opacity-40 bg-gradient-to-b from-transparent via-[#ff5a00] to-transparent"></div>
-            <div className="absolute right-12 top-1/2 -translate-y-1/2 h-48 w-0.5 opacity-40 bg-gradient-to-b from-transparent via-[#ff5a00] to-transparent"></div>
-
-            {/* Enhanced Diagonal flame accents - made more prominent */}
-            <div className="absolute left-24 top-1/4 h-64 w-1 opacity-35 bg-gradient-to-b from-transparent via-[#ffb700] to-transparent transform rotate-45"></div>
-            <div className="absolute right-24 top-1/4 h-64 w-1 opacity-35 bg-gradient-to-b from-transparent via-[#ffb700] to-transparent transform -rotate-45"></div>
-          </div>
-
-          {/* Carousel */}
-          <div
-            ref={carouselRef}
-            className="absolute w-full h-full flex items-center justify-center"
-            style={{
-              transform: `translateY(${-parallaxOffset * 0.05}px)`,
-              transition: "transform 0.1s ease-out",
-            }}
-          >
-            {filteredMembers.length > 0 ? (
-              getCarouselIndices().map((index) => {
-                const member = filteredMembers[index];
-                const isActive = index === activeMemberIndex;
-
-                // Calculate position based on difference from active
-                const diff = index - activeMemberIndex;
-
-                // Adjust transforms for mobile vs desktop
-                const isMobile =
-                  typeof window !== "undefined" && window.innerWidth < 640;
-                const translateX = isMobile
-                  ? diff * 220 // Smaller spacing for mobile
-                  : diff * 280; // Original spacing for desktop
-
-                const scale = isActive
-                  ? isMobile
-                    ? 1
-                    : 1.1
-                  : isMobile
-                    ? 0.8
-                    : 0.7;
-                const zIndex = isActive ? 10 : 5 - Math.abs(diff);
-                const opacity = isActive ? 1 : Math.abs(diff) === 1 ? 0.5 : 0;
-
-                // Don't render items that are too far away
-                if (isMobile && Math.abs(diff) > 0) return null;
-                if (!isMobile && Math.abs(diff) > 1) return null;
-
-                return (
-                  <div
-                    key={index}
-                    onClick={() => selectMember(index)}
-                    className={`absolute cursor-pointer transition-all mb-10 duration-500 ease-out transform-gpu`}
-                    style={{
-                      transform: `translateX(${translateX}px) scale(${scale})`,
-                      zIndex,
-                      opacity,
-                    }}
-                  >
-                    {/* Active card glow effect - enhanced */}
-                    {isActive && (
-                      <div className="absolute -inset-4 bg-gradient-to-b from-[#ff5a00]/10 via-[#ffb700]/10 to-[#ff5a00]/10 rounded-2xl blur-xl opacity-70"></div>
-                    )}
-
-                    <div
-                      className={`rounded-xl overflow-hidden ${isActive
-                        ? "shadow-2xl shadow-orange-900/30"
-                        : "shadow-lg"
-                        } relative`}
-                      style={{
-                        width: isActive
-                          ? isMobile
-                            ? "220px"
-                            : "260px"
-                          : isMobile
-                            ? "180px"
-                            : "220px",
-                      }}
-                    >
-                      {/* Corner borders - Added for all cards but more prominent on active */}
-                      <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-orange-500/30 rounded-tl-lg"></div>
-                      <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-orange-500/30 rounded-tr-lg"></div>
-                      <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-orange-500/30 rounded-bl-lg"></div>
-                      <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-orange-500/30 rounded-br-lg"></div>
-
-                      {/* Image container - reduced heights and responsive */}
-                      <div
-                        className="relative"
-                        style={{
-                          height: isActive
-                            ? isMobile
-                              ? "320px"
-                              : "360px"
-                            : isMobile
-                              ? "280px"
-                              : "320px",
-                        }}
-                      >
-                        <Image
-                          src={member.image || "/placeholder.svg"}
-                          alt={member.name}
-                          fill
-                          className="w-full h-full object-cover object-top"
-                          loading="lazy"
-                        />
-
-                        {/* Enhanced gradient overlay with subtle flames at edges */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent">
-                          {/* Add subtle flame flickers at the edges for active card */}
-                          {isActive && (
-                            <>
-                              <div className="absolute bottom-0 left-0 w-10 h-32 bg-gradient-to-tr from-[#ff5a00]/20 to-transparent opacity-30 blur-md"></div>
-                              <div className="absolute bottom-0 right-0 w-10 h-32 bg-gradient-to-tl from-[#ffb700]/20 to-transparent opacity-30 blur-md"></div>
-
-                              {/* Additional flame accents for active card */}
-                              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-16 bg-gradient-to-b from-[#ff8c14]/20 to-transparent opacity-20 blur-md"></div>
-                              <div className="absolute top-8 left-8 w-2 h-2 bg-orange-500/40 rounded-full blur-sm animate-float-slow"></div>
-                              <div className="absolute top-6 right-10 w-1.5 h-1.5 bg-yellow-500/40 rounded-full blur-sm animate-float-medium"></div>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Active state indicators - improved with animated border */}
-                        {isActive && (
-                          <>
-                            <div className="absolute inset-0 ring-1 ring-[#ff8c14] ring-opacity-60 rounded-xl"></div>
-                            <div className="absolute -bottom-px left-8 right-8 h-px bg-gradient-to-r from-transparent via-[#ff8c14]/70 to-transparent"></div>
-
-                            {/* Animated border effect for active card */}
-                            <div className="absolute inset-0 border border-orange-500/20 rounded-xl animate-border-pulse"></div>
-                          </>
-                        )}
-
-                        {/* Bottom info panel - enhanced styling with corner accents */}
-                        <div
-                          className={`absolute bottom-0 left-0 right-0 p-3 sm:p-4 text-center transition-all duration-500 ${isActive
-                            ? "bg-gradient-to-t from-black via-black/90 to-transparent pt-10 sm:pt-12"
-                            : "bg-black/80"
-                            }`}
-                        >
-                          <h3
-                            className={`font-bold text-white transition-all duration-300 ${isActive
-                              ? "text-lg sm:text-xl mb-1"
-                              : "text-sm sm:text-base mb-0.5"
-                              }`}
-                          >
-                            {member.name}
-                          </h3>
-
-                          <p
-                            className={`font-medium transition-all duration-300 ${isActive
-                              ? "text-gray-200 text-xs sm:text-sm"
-                              : "text-gray-400 text-xs"
-                              }`}
-                          >
-                            {member.position}
-                          </p>
-
-                          {/* Social links - enhanced with better hover effects */}
-                          {isActive && (
-                            <div className="flex justify-center space-x-4 mt-2 sm:mt-3">
-                              {member.linkedin && (
-                                <a
-                                  href={member.linkedin}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-gray-300 hover:text-[#ff9a00] transition-all duration-200 hover:scale-125 group"
-                                  aria-label={`${member.name}'s LinkedIn`}
-                                >
-                                  <Linkedin className="h-4 w-4" />
-                                  <span className="absolute w-4 h-4 bg-orange-500/30 rounded-full opacity-0 group-hover:opacity-100 blur-sm -z-10 transition-opacity"></span>
-                                </a>
-                              )}
-                              {member.github && (
-                                <a
-                                  href={member.github}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-gray-300 hover:text-[#ff9a00] transition-all duration-200 hover:scale-125 group"
-                                  aria-label={`${member.name}'s GitHub`}
-                                >
-                                  <Github className="h-4 w-4" />
-                                  <span className="absolute w-4 h-4 bg-orange-500/30 rounded-full opacity-0 group-hover:opacity-100 blur-sm -z-10 transition-opacity"></span>
-                                </a>
-                              )}
-                              {member.email && (
-                                <a
-                                  href={`mailto:${member.email}`}
-                                  className="text-gray-300 hover:text-[#ff9a00] transition-all duration-200 hover:scale-125 group"
-                                  aria-label={`Email ${member.name}`}
-                                >
-                                  <Mail className="h-4 w-4" />
-                                  <span className="absolute w-4 h-4 bg-orange-500/30 rounded-full opacity-0 group-hover:opacity-100 blur-sm -z-10 transition-opacity"></span>
-                                </a>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
+            <AnimatePresence mode="popLayout" custom={slideDirection}>
+              {/* Previous Member (Left Bench) */}
+              {safeActiveIndex > 0 && (
+                <motion.div
+                  key={`prev-${safeActiveIndex - 1}`}
+                  initial={{ opacity: 0, x: -280, scale: 0.75, rotateY: 35 }}
+                  animate={{ opacity: 0.4, x: -260, scale: 0.8, rotateY: 20 }}
+                  exit={{ opacity: 0, x: -280, scale: 0.75, rotateY: 35 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  onClick={prevMember}
+                  className="absolute cursor-pointer hidden md:block select-none pointer-events-auto"
+                >
+                  <div className="w-[280px] aspect-[3/4] bg-[#0a0f1d] border border-orange-500/20 rounded-3xl p-4 opacity-75 overflow-hidden relative">
+                    <div className="relative w-full h-full rounded-2xl overflow-hidden bg-slate-900">
+                      <Image
+                        src={filteredMembers[safeActiveIndex - 1]?.image || "/placeholder.svg"}
+                        alt="Previous Member"
+                        fill
+                        sizes="240px"
+                        className="object-cover object-top grayscale"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-black/60"></div>
                     </div>
                   </div>
-                );
-              })
-            ) : (
-              <div className="text-center text-gray-400 bg-gray-900/50 p-6 rounded-xl">
-                No team members found in this category
-              </div>
-            )}
-          </div>
-        </div>
+                </motion.div>
+              )}
 
-        {/* Carousel Indicators - Redesigned and responsive */}
-        {filteredMembers.length > 0 && (
-          <div
-            className="flex justify-center mt-6 sm:mt-8 space-x-1.5 sm:space-x-2"
-            style={{
-              transform: `translateY(${-parallaxOffset * 0.15}px)`,
-              transition: "transform 0.1s ease-out",
-            }}
-          >
+              {/* Active Spotlight Card (Center Pitch) */}
+              <motion.div
+                key={`active-${activeCategory}-${selectedYear}-${safeActiveIndex}`}
+                custom={slideDirection}
+                initial={(dir) => ({ opacity: 0, x: dir * 200, scale: 0.88, rotateY: dir * -12 })}
+                animate={{ opacity: 1, x: 0, scale: 1.02, rotateY: 0 }}
+                exit={(dir) => ({ opacity: 0, x: dir * -200, scale: 0.88, rotateY: dir * 12 })}
+                transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                className="absolute z-20 flex flex-col items-center"
+              >
+                <div className="relative w-[300px] sm:w-[325px] aspect-[3/4] bg-[#0a0f1d] border-2 border-[#ffce00] rounded-3xl p-5 overflow-hidden shadow-[0_0_55px_rgba(255,206,0,0.15)] group transition-all duration-300 flex flex-col justify-between">
+                  
+                  {/* Holographic light sweep */}
+                  <div className="absolute -inset-[100%] bg-gradient-to-r from-transparent via-white/10 to-transparent -rotate-45 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out pointer-events-none"></div>
+
+                  {/* Corner accents */}
+                  <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-[#ffce00] rounded-tl-3xl"></div>
+                  <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-[#ffce00] rounded-tr-3xl"></div>
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-[#ffce00] rounded-bl-3xl"></div>
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-[#ffce00] rounded-br-3xl"></div>
+
+                  {/* FUT Stats Shield */}
+                  <div className="absolute top-3 left-3 bg-[#0a0f1d]/90 border-2 border-[#ffce00] rounded-2xl p-2.5 flex flex-col items-center space-y-1.5 shadow-[0_0_20px_rgba(255,206,0,0.35)] z-20 w-11 font-mono">
+                    <Trophy className="h-4 w-4 text-[#ffce00] animate-pulse" />
+                    <div className="h-[2px] w-6 bg-gradient-to-r from-orange-500 to-[#ffce00] rounded-full"></div>
+                    <div className="flex flex-col space-y-1.5 text-center">
+                      {currentStats.map((stat, idx) => (
+                        <div key={idx} className="flex flex-col items-center leading-none">
+                          <span className="text-[#ff9a00] uppercase text-[7px] font-black">{stat.label}</span>
+                          <span className="text-white text-[8px] font-black uppercase mt-0.5">{stat.level.substring(0, 3)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Photo Frame */}
+                  <div className="relative w-full h-[74%] rounded-2xl overflow-hidden border-2 border-[#ffce00]/40 shadow-[0_0_20px_rgba(255,206,0,0.1)] bg-slate-900">
+                    <Image
+                      src={activeMember.image || "/placeholder.svg"}
+                      alt={activeMember.name}
+                      fill
+                      sizes="(max-width: 640px) 100vw, 400px"
+                      className="object-cover object-top scale-100 group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+                      priority
+                    />
+                  </div>
+
+                  {/* Name & Title Plate below the image - perfectly aligned at the bottom */}
+                  <div className="flex flex-col items-center justify-center text-center pb-1">
+                    <h3 className="text-lg sm:text-xl font-black text-white tracking-wide uppercase drop-shadow-md">
+                      {activeMember.name}
+                    </h3>
+                    <p className="text-[#ffce00] text-[10px] sm:text-xs font-extrabold uppercase tracking-widest mt-0.5">
+                      {activeMember.position}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Next Member (Right Bench) */}
+              {safeActiveIndex < filteredMembers.length - 1 && (
+                <motion.div
+                  key={`next-${safeActiveIndex + 1}`}
+                  initial={{ opacity: 0, x: 280, scale: 0.75, rotateY: -35 }}
+                  animate={{ opacity: 0.4, x: 260, scale: 0.8, rotateY: -20 }}
+                  exit={{ opacity: 0, x: 280, scale: 0.75, rotateY: -35 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  onClick={nextMember}
+                  className="absolute cursor-pointer hidden md:block select-none pointer-events-auto"
+                >
+                  <div className="w-[280px] aspect-[3/4] bg-[#0a0f1d] border border-orange-500/20 rounded-3xl p-4 opacity-75 overflow-hidden relative">
+                    <div className="relative w-full h-full rounded-2xl overflow-hidden bg-slate-900">
+                      <Image
+                        src={filteredMembers[safeActiveIndex + 1]?.image || "/placeholder.svg"}
+                        alt="Next Member"
+                        fill
+                        sizes="240px"
+                        className="object-cover object-top grayscale"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-black/60"></div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ) : (
+          <div className="text-center text-gray-400 bg-[#090d16]/50 border border-gray-900 p-8 rounded-2xl max-w-md mx-auto my-12">
+            No team members found in this category
+          </div>
+        )}
+
+        {/* Carousel Indicators dots */}
+        {filteredMembers.length > 1 && (
+          <div className="flex justify-center space-x-2 mt-4 z-10 relative">
             {filteredMembers.map((_, index) => (
               <button
                 key={index}
-                onClick={() => selectMember(index)}
-                className={`transition-all duration-300 rounded-full ${index === activeMemberIndex
-                  ? "bg-gradient-to-r from-[#ff5a00] to-[#ffb700] w-5 sm:w-6 h-1.5"
-                  : "bg-gray-700 w-2 sm:w-2.5 h-1.5 hover:bg-gray-500"
-                  }`}
-                aria-label={`View team member ${index + 1}`}
+                onClick={() => {
+                  setSlideDirection(index > safeActiveIndex ? 1 : -1);
+                  setActiveMemberIndex(index);
+                }}
+                className={`transition-all duration-300 rounded-full h-1.5 ${
+                  index === safeActiveIndex
+                    ? "bg-gradient-to-r from-[#ff5a00] to-[#ffb700] w-6"
+                    : "bg-gray-800 w-2 hover:bg-gray-600"
+                }`}
+                aria-label={`View roster index ${index + 1}`}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Active Member HUD Detail Panel — Animated */}
+      {filteredMembers.length > 0 && (
+        <div className="max-w-xl mx-auto mt-4 px-6 text-center z-10 relative pb-20">
+          <AnimatePresence mode="popLayout">
+            <motion.div
+              key={`hud-${activeCategory}-${selectedYear}-${safeActiveIndex}`}
+              initial={{ opacity: 0, y: 20, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -15, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="bg-gradient-to-b from-[#0a0f1d] to-black border border-gray-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden"
+            >
+              <div className="space-y-5 relative z-10">
+                <div className="flex items-center justify-center space-x-2">
+                  <Sparkles className="h-4 w-4 text-[#ffce00] animate-pulse" />
+                  <span className="text-[#ffce00] text-xs font-black tracking-widest uppercase font-mono">
+                    ACTIVE PLAYER BIO & STATS
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-center space-x-2 bg-black/40 border border-gray-900/60 rounded-xl py-2.5 px-4 text-center">
+                  <div className="flex-1 border-r border-gray-900/60">
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">DIVISION</p>
+                    <p className="text-xs text-white font-extrabold uppercase tracking-wide mt-0.5">{activeCategory}</p>
+                  </div>
+                  <div className="flex-1 border-r border-gray-900/60">
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">COUNCIL</p>
+                    <p className="text-xs text-white font-extrabold uppercase tracking-wide mt-0.5">{selectedYear}</p>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">STATUS</p>
+                    <p className="text-xs text-emerald-400 font-extrabold uppercase tracking-wide mt-0.5">ACTIVE ROSTER</p>
+                  </div>
+                </div>
+
+                {/* Social CTA Action buttons */}
+                <div className="flex space-x-3 pt-1">
+                  {activeMember.linkedin && (
+                    <a
+                      href={activeMember.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-[#ffce00] to-[#ffaa00] hover:from-[#ffe808] hover:to-[#ffce00] text-black text-xs font-black uppercase py-3.5 px-4 rounded-xl transition-all duration-300 shadow-md hover:scale-[1.02]"
+                      aria-label={activeMember.linkedin.includes("linktr.ee") ? `${activeMember.name}'s Linktree` : `${activeMember.name}'s LinkedIn`}
+                    >
+                      {activeMember.linkedin.includes("linktr.ee") ? (
+                        <>
+                          <Link2 className="h-4 w-4 stroke-[3px]" />
+                          <span>Linktree</span>
+                        </>
+                      ) : (
+                        <>
+                          <Linkedin className="h-4 w-4 stroke-[3px]" />
+                          <span>LinkedIn</span>
+                        </>
+                      )}
+                    </a>
+                  )}
+                  {activeMember.email && (
+                    <a
+                      href={`mailto:${activeMember.email}`}
+                      className="flex-1 flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white text-xs font-black uppercase py-3.5 px-4 rounded-xl transition-all duration-300 hover:scale-[1.02]"
+                      aria-label={`Email ${activeMember.name}`}
+                    >
+                      <Mail className="h-4 w-4 text-[#ffce00]" />
+                      <span>Email</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      )}
 
       {/* Custom CSS to hide scrollbars */}
       <style jsx global>{`
@@ -845,74 +626,9 @@ export default function TeamMembersCarousel({ teamMembersByYear = {} }) {
           scroll-behavior: smooth;
         }
 
-        /* Add radial gradient support */
-        .bg-gradient-radial {
-          background-image: radial-gradient(var(--tw-gradient-stops));
-        }
-
-        /* Floating animation for flame particles */
-        @keyframes float-slow {
-          0%,
-          100% {
-            transform: translateY(0) translateX(0);
-          }
-          50% {
-            transform: translateY(-10px) translateX(5px);
-          }
-        }
-
-        @keyframes float-slower {
-          0%,
-          100% {
-            transform: translateY(0) translateX(0);
-          }
-          50% {
-            transform: translateY(-15px) translateX(-7px);
-          }
-        }
-
-        @keyframes float-medium {
-          0%,
-          100% {
-            transform: translateY(0) translateX(0);
-          }
-          50% {
-            transform: translateY(-7px) translateX(3px);
-          }
-        }
-
-        @keyframes float-fast {
-          0%,
-          100% {
-            transform: translateY(0) translateX(0);
-          }
-          50% {
-            transform: translateY(-5px) translateX(-2px);
-          }
-        }
-
-        .animate-float-slow {
-          animation: float-slow 8s ease-in-out infinite;
-        }
-
-        .animate-float-slower {
-          animation: float-slower 12s ease-in-out infinite;
-        }
-
-        .animate-float-medium {
-          animation: float-medium 6s ease-in-out infinite;
-        }
-
-        .animate-float-fast {
-          animation: float-fast 4s ease-in-out infinite;
-        }
-
-        /* Improve touch handling for mobile */
-        @media (max-width: 640px) {
-          .transform-gpu {
-            will-change: transform;
-            transform: translateZ(0);
-          }
+        /* Perspective utility */
+        .perspective-\\[1000px\\] {
+          perspective: 1000px;
         }
       `}</style>
     </div>
