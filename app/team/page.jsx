@@ -38,7 +38,7 @@ export default function TeamPage() {
             </div>
           </h1>
         </div>
-
+        {/*Koi yaha se purana data edit nahi karega , agar kiya tho wo bosdika bhen ka luada */}
         {/* Pass the entire teamMembersByYear object to the component */}
         <TeamMembers teamMembersByYear={teamMembersByYear} />
       </div>
