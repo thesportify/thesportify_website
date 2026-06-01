@@ -48,13 +48,13 @@ export default function TeamPage() {
       {/* Wall of Heroes / Hall of Fame Section - Cinematic Full-Width Design */}
       <section className="relative w-full py-24 mt-20 bg-transparent border-t border-gray-900/60 overflow-hidden">
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#ff5a00]/30 to-transparent"></div>
-        
+
         {/* Majestic Soft Ambient Glows */}
         <div className="absolute top-1/4 left-10 w-[500px] h-[500px] bg-[#ffce00]/5 rounded-full blur-[140px] pointer-events-none"></div>
         <div className="absolute bottom-1/4 right-10 w-[600px] h-[600px] bg-[#ff5a00]/5 rounded-full blur-[160px] pointer-events-none"></div>
 
         <div className="max-w-[1400px] mx-auto px-6 sm:px-12 md:px-16 lg:px-20 relative z-10">
-          
+
           {/* Header */}
           <div className="flex flex-col items-center mb-20 text-center">
             <div className="inline-flex items-center justify-center p-3 bg-gradient-to-br from-[#ffce00]/10 to-[#ff5a00]/10 rounded-2xl border border-[#ffce00]/30 mb-4 shadow-[0_0_20px_rgba(255,206,0,0.1)] animate-pulse">
@@ -74,23 +74,23 @@ export default function TeamPage() {
 
           {/* Full-width widescreen Spotlight Grid */}
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-10 xl:gap-12 items-stretch">
-            
+
             {/* Left Column - Large Collectible Trading Plaque */}
             <div className="xl:col-span-5 relative group flex flex-col justify-between">
               {/* Outer Neon Glow Border */}
               <div className="absolute inset-0 bg-gradient-to-br from-[#ffce00] via-[#ff5a00] to-[#ffe808] rounded-3xl opacity-20 group-hover:opacity-45 blur-md transition-opacity duration-500"></div>
-              
+
               {/* Card Container */}
               <div className="relative flex-1 flex flex-col justify-between bg-[#0a0f1d] border border-[#ffce00]/30 rounded-3xl p-6 md:p-8 overflow-hidden z-10 transition-transform duration-500 group-hover:-translate-y-1">
                 {/* Diagonal Holographic Sweep Line */}
                 <div className="absolute -inset-[100%] bg-gradient-to-r from-transparent via-white/5 to-transparent -rotate-45 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out"></div>
-                
+
                 {/* Tech Accents / Corner Borders */}
                 <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-[#ffce00] rounded-tl-3xl"></div>
                 <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-[#ffce00] rounded-tr-3xl"></div>
                 <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-[#ffce00] rounded-bl-3xl"></div>
                 <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-[#ffce00] rounded-br-3xl"></div>
-                
+
                 <div className="space-y-6 relative z-20">
                   {/* Plaque Header */}
                   <div className="flex items-center justify-between border-b border-gray-800/80 pb-4">
@@ -111,14 +111,14 @@ export default function TeamPage() {
                   {/* Photo Frame (Clean photo, no text overlay, no black gradient) */}
                   <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden border-2 border-[#ffce00]/80 shadow-[0_0_30px_rgba(255,206,0,0.15)] bg-slate-900 group-hover:border-[#ffce00] transition-colors duration-300">
                     <Image
-                      src="https://ik.imagekit.io/meth/%20NIKHIL%20KUMAR%20SHAH.webp?updatedAt=1762873843325"
+                      src="/nikhil_profile.png"
                       alt="Nikhil Kumar Shah"
                       fill
                       sizes="(max-width: 1024px) 100vw, 500px"
                       className="object-cover object-top scale-100 group-hover:scale-[1.03] transition-transform duration-700 ease-out"
                       priority
                     />
-                    
+
                     {/* Glowing Overlay border inside */}
                     <div className="absolute inset-0 border border-white/10 rounded-2xl pointer-events-none"></div>
                   </div>
@@ -188,11 +188,11 @@ export default function TeamPage() {
                     HALL OF FAME INDUCTEE
                   </span>
                 </div>
-                
+
                 <h3 className="text-3xl md:text-4xl font-black text-white tracking-tight uppercase leading-none">
                   PIONEER OF DIGITAL INFRASTRUCTURE
                 </h3>
-                
+
                 <p className="text-gray-300 text-sm md:text-base leading-relaxed font-normal">
                   Inducted onto the Wall of Heroes for exceptional engineering contributions to The Sportify Society. Designed core platform layouts, optimized database pipelines, managed web hosting infrastructure, and established automated operations. A central figure behind the digital capabilities of the 2025-2026 tenure.
                 </p>
@@ -206,7 +206,7 @@ export default function TeamPage() {
                   </h4>
                   <span className="text-[10px] text-[#ffce00] font-black uppercase font-mono tracking-wider">LEVEL: EXPERT ARCHITECT</span>
                 </div>
-                
+
                 <div className="space-y-5">
                   {/* Rating 1 */}
                   <div className="space-y-2">
@@ -289,7 +289,7 @@ export default function TeamPage() {
           </div>
         </div>
       </section>
-      
+
       <Footer />
     </main>
   );
