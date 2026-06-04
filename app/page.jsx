@@ -3,7 +3,8 @@
 import Hero from '../components/hero'
 import SportifyInParadox from '../components/SportifyInParadox'
 import RashtriyaKhelMahotsav from '../components/RashtriyaKhelMahotsav'
-import FeaturedEvents from '../components/featuredEvents'
+import ConstitutionPreview from '../components/ConstitutionPreview'
+import WebsiteFeaturesGame from '../components/WebsiteFeaturesGame'
 import JoinCommunity from '../components/joinCommunity'
 import Footer from '../components/footer'
 
@@ -13,7 +14,8 @@ export default function Home() {
       <Hero />
       <SportifyInParadox />
       <RashtriyaKhelMahotsav />
-      <FeaturedEvents />
+      <ConstitutionPreview />
+      <WebsiteFeaturesGame />
       <JoinCommunity />
       <Footer />
     </main>

@@ -5,13 +5,14 @@ import Image from "next/image";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import NewsletterComponent from "@/components/ThePodium";
+import ConstitutionSection from "@/components/ConstitutionSection";
 import TenureReportModal from "@/components/TenureReportModal";
 import podiumBG from "@/assets/PodiumBG.jpeg";
 
 // Import core leadership images
 // (using direct ImageKit URLs in component)
 
-import { Users, MapPin, Award, Trophy, Star, ChevronRight, Eye, Calendar, ChevronDown } from "lucide-react";
+import { Users, MapPin, Award, Trophy, Star, ChevronRight, Eye, Calendar, ChevronDown, Scroll } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const tenureReportsData = {
@@ -80,6 +81,7 @@ export default function ChroniclePage() {
 
   const tenureRef = useRef(null);
   const newsletterRef = useRef(null);
+  const constitutionRef = useRef(null);
 
   const activeReport = tenureReportsData[selectedTenure] || tenureReportsData["2025-26"];
 
@@ -90,8 +92,11 @@ export default function ChroniclePage() {
 
       const tenureTop = tenureRef.current?.offsetTop || 0;
       const newsletterTop = newsletterRef.current?.offsetTop || Infinity;
+      const constitutionTop = constitutionRef.current?.offsetTop || Infinity;
 
-      if (scrollPosition >= newsletterTop - 100) {
+      if (scrollPosition >= constitutionTop - 100) {
+        setActiveSection("constitution");
+      } else if (scrollPosition >= newsletterTop - 100) {
         setActiveSection("newsletter");
       } else {
         setActiveSection("tenure");
@@ -102,10 +107,26 @@ export default function ChroniclePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Hash route scroll listener
+  useEffect(() => {
+    if (window.location.hash === "#constitution") {
+      setTimeout(() => {
+        scrollToSection("constitution");
+      }, 500);
+    }
+  }, []);
+
   const scrollToSection = (sectionId) => {
     setActiveSection(sectionId);
-    const targetRef = sectionId === "tenure" ? tenureRef : newsletterRef;
-    if (targetRef.current) {
+    let targetRef;
+    if (sectionId === "tenure") {
+      targetRef = tenureRef;
+    } else if (sectionId === "newsletter") {
+      targetRef = newsletterRef;
+    } else if (sectionId === "constitution") {
+      targetRef = constitutionRef;
+    }
+    if (targetRef && targetRef.current) {
       const topOffset = targetRef.current.offsetTop - 100;
       window.scrollTo({
         top: topOffset,
@@ -150,29 +171,40 @@ export default function ChroniclePage() {
         </div>
 
         {/* Floating Sub-Navigation Menu */}
-        <div className="sticky top-20 z-40 flex justify-center mb-16">
-          <div className="bg-[#0b0f1d]/75 backdrop-blur-lg border border-gray-900 rounded-2xl p-1.5 shadow-2xl flex space-x-1.5">
+        <div className="sticky top-20 z-40 flex justify-center mb-16 px-2">
+          <div className="bg-[#0b0f1d]/75 backdrop-blur-lg border border-gray-900 rounded-2xl p-1 md:p-1.5 shadow-2xl flex space-x-1 sm:space-x-1.5 max-w-full md:max-w-xl lg:max-w-2xl">
             <button
               onClick={() => scrollToSection("tenure")}
-              className={`flex items-center space-x-2 py-2.5 px-6 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 ${
+              className={`flex items-center space-x-1.5 sm:space-x-2 py-2 px-2.5 sm:py-2.5 sm:px-4 md:px-6 rounded-xl text-[10px] sm:text-xs md:text-sm font-semibold transition-all duration-300 shrink-0 ${
                 activeSection === "tenure"
                   ? "bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 text-[#ff9a00] shadow-[0_0_15px_rgba(255,154,0,0.1)]"
                   : "text-gray-400 hover:text-white border border-transparent hover:bg-gray-900/30"
               }`}
             >
-              <Users className="h-4 w-4" />
-              <span>Tenure Reports</span>
+              <Users className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              <span>Tenures<span className="hidden sm:inline"> Reports</span></span>
             </button>
             <button
               onClick={() => scrollToSection("newsletter")}
-              className={`flex items-center space-x-2 py-2.5 px-6 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 ${
+              className={`flex items-center space-x-1.5 sm:space-x-2 py-2 px-2.5 sm:py-2.5 sm:px-4 md:px-6 rounded-xl text-[10px] sm:text-xs md:text-sm font-semibold transition-all duration-300 shrink-0 ${
                 activeSection === "newsletter"
                   ? "bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 text-[#ff9a00] shadow-[0_0_15px_rgba(255,154,0,0.1)]"
                   : "text-gray-400 hover:text-white border border-transparent hover:bg-gray-900/30"
               }`}
             >
-              <Trophy className="h-4 w-4" />
-              <span>The Podium Newsletter</span>
+              <Trophy className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              <span>The Podium<span className="hidden sm:inline"> Newsletter</span></span>
+            </button>
+            <button
+              onClick={() => scrollToSection("constitution")}
+              className={`flex items-center space-x-1.5 sm:space-x-2 py-2 px-2.5 sm:py-2.5 sm:px-4 md:px-6 rounded-xl text-[10px] sm:text-xs md:text-sm font-semibold transition-all duration-300 shrink-0 ${
+                activeSection === "constitution"
+                  ? "bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 text-[#ff9a00] shadow-[0_0_15px_rgba(255,154,0,0.1)]"
+                  : "text-gray-400 hover:text-white border border-transparent hover:bg-gray-900/30"
+              }`}
+            >
+              <Scroll className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              <span>Constitution<span className="hidden sm:inline"> (Sportify)</span></span>
             </button>
           </div>
         </div>
@@ -374,6 +406,23 @@ export default function ChroniclePage() {
           </div>
 
           <NewsletterComponent />
+        </section>
+
+        {/* Section 3: Sportify Constitution */}
+        <section id="constitution" ref={constitutionRef} className="space-y-8 scroll-mt-28 mb-16">
+          <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-gray-900 pb-4">
+            <div>
+              <h2 className="text-2xl font-bold flex items-center space-x-2 tracking-tight">
+                <Scroll className="h-6 w-6 text-[#ff9a00]" />
+                <span>SPORTIFY CONSTITUTION</span>
+              </h2>
+              <p className="text-xs md:text-sm text-gray-500 mt-1">
+                Official rules, roles, and administrative bylaws of the Sportify Sports Society.
+              </p>
+            </div>
+          </div>
+
+          <ConstitutionSection />
         </section>
 
       </div>

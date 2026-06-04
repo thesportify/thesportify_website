@@ -7,6 +7,7 @@ import { ArrowRight, Music } from 'lucide-react';
 import { MdSportsCricket } from "react-icons/md";
 import { GiShuttlecock } from "react-icons/gi";
 import { FaRunning, FaVolleyballBall, FaLaptopCode, FaFutbol } from "react-icons/fa";
+import paradoxBG from "../assets/stadium_orange_bg.png";
 
 const EVENTS = [
   {
@@ -86,7 +87,13 @@ export default function SportifyInParadox() {
   const activeEvent = EVENTS.find(e => e.id === activeEventId);
 
   return (
-    <section className="relative w-full bg-black py-16 md:py-24 overflow-hidden" id="sportify-in-paradox">
+    <section 
+      className="relative w-full py-16 md:py-24 overflow-hidden bg-cover bg-center border-b border-gray-900/50" 
+      id="sportify-in-paradox"
+      style={{
+        backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.88)), url(${paradoxBG.src})`,
+      }}
+    >
       
       {/* Preload all images invisibly to eliminate flickering and delays on click */}
       <div className="absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none -z-50">
