@@ -3,15 +3,16 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Trophy, 
-  Award, 
-  BookOpen, 
-  HelpCircle, 
-  ShieldAlert, 
   ChevronRight, 
   RotateCcw,
   Gamepad2,
-  Sparkles
+  Sparkles,
+  Archive,
+  Newspaper,
+  BadgeCheck,
+  Headphones,
+  Scale,
+  Shield
 } from "lucide-react";
 import Link from "next/link";
 import sportsBG from "../assets/stadium_neon_bg.png";
@@ -21,7 +22,7 @@ const featuresData = [
   {
     id: "chronicles",
     name: "Sportify Chronicles",
-    icon: BookOpen,
+    icon: Archive,
     targetName: "TOP LEFT BIN",
     diveState: "dive-left-top",
     description: "Our historical sports archive. View lists of leadership core committees, tenure records, and milestones that shaped the society.",
@@ -32,7 +33,7 @@ const featuresData = [
   {
     id: "newsletter",
     name: "The Podium Newsletter",
-    icon: Trophy,
+    icon: Newspaper,
     targetName: "TOP RIGHT BIN",
     diveState: "dive-right-top",
     description: "A monthly digital sports digest. Covers match reports, global sporting highlights, technology in sports, and community interviews.",
@@ -43,18 +44,18 @@ const featuresData = [
   {
     id: "certify",
     name: "Digital Certifications",
-    icon: Award,
+    icon: BadgeCheck,
     targetName: "DEAD CENTER",
     diveState: "jump-center",
     description: "Instant certificate generation. Generate, download, and verify official participation and coordination credentials for all Sportify events.",
     tagline: "Verifiable credentials for student athletes.",
-    link: "/certify",
+    link: "/verify",
     actionText: "Verify Certificates"
   },
   {
     id: "helpdesk",
     name: "Sports Helpdesk",
-    icon: HelpCircle,
+    icon: Headphones,
     targetName: "BOTTOM LEFT",
     diveState: "lunge-left-bottom",
     description: "Interactive community helpdesk. Submit general queries, get information on meetups, and request event coordination support.",
@@ -65,7 +66,7 @@ const featuresData = [
   {
     id: "grievance",
     name: "Grievance Portal",
-    icon: ShieldAlert,
+    icon: Scale,
     targetName: "BOTTOM RIGHT",
     diveState: "lunge-right-bottom",
     description: "Safe & structured grievance resolution. Includes dedicated reporting categories for general play concerns and women-focused Sportify Her safety guidelines.",
@@ -314,7 +315,7 @@ export default function WebsiteFeaturesGame() {
                 >
                   {/* Jersey and Arms */}
                   <div className="w-10 h-9 bg-orange-600 rounded-t-xl border-t-2 border-x-2 border-white flex items-center justify-center text-white shadow-lg relative">
-                    <ShieldAlert className="h-4 w-4 text-white/90" />
+                    <Shield className="h-4 w-4 text-white/90" />
                     {/* Glowing gloves */}
                     <div className="absolute -left-2.5 top-1.5 w-3 h-3 bg-yellow-400 rounded-full border border-white shadow animate-pulse" />
                     <div className="absolute -right-2.5 top-1.5 w-3 h-3 bg-yellow-400 rounded-full border border-white shadow animate-pulse" />
