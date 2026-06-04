@@ -25,10 +25,10 @@ const featuresData = [
     icon: Archive,
     targetName: "TOP LEFT BIN",
     diveState: "dive-left-top",
-    description: "Our historical sports archive. View lists of leadership core committees, tenure records, and milestones that shaped the society.",
-    tagline: "Explore our rich history of student athletics.",
+    description: "The historical commentary box is open! Walk down the hall of fame to review official leadership rosters, past team tenures, and the championship milestones that built our sports society.",
+    tagline: "Flip through the playbook of legends!",
     link: "/chronicle",
-    actionText: "Browse Chronicles"
+    actionText: "Step Into History"
   },
   {
     id: "newsletter",
@@ -36,10 +36,10 @@ const featuresData = [
     icon: Newspaper,
     targetName: "TOP RIGHT BIN",
     diveState: "dive-right-top",
-    description: "A monthly digital sports digest. Covers match reports, global sporting highlights, technology in sports, and community interviews.",
-    tagline: "Read athlete profiles and technical sports analyses.",
+    description: "Get the play-by-play analysis! Our monthly sports digest covers tactical global match reports, high-tech athletic developments, and exclusive post-match interviews with the stars.",
+    tagline: "Fresh match reports hot off the press!",
     link: "/chronicle#newsletter",
-    actionText: "Read Latest Edition"
+    actionText: "Read Match Report"
   },
   {
     id: "certify",
@@ -47,10 +47,10 @@ const featuresData = [
     icon: BadgeCheck,
     targetName: "DEAD CENTER",
     diveState: "jump-center",
-    description: "Instant certificate generation. Generate, download, and verify official participation and coordination credentials for all Sportify events.",
-    tagline: "Verifiable credentials for student athletes.",
+    description: "Check the official VAR review! Instantly generate, download, and verify your official participation badges and coordination credentials to prove you ran the extra mile for Sportify.",
+    tagline: "Claim your official player badges!",
     link: "/verify",
-    actionText: "Verify Certificates"
+    actionText: "Claim Your Badge"
   },
   {
     id: "helpdesk",
@@ -58,10 +58,10 @@ const featuresData = [
     icon: Headphones,
     targetName: "BOTTOM LEFT",
     diveState: "lunge-left-bottom",
-    description: "Interactive community helpdesk. Submit general queries, get information on meetups, and request event coordination support.",
-    tagline: "Quick answers for all sports activities.",
+    description: "Need a quick team huddle? Ask the coaching staff anything! Submit matchday queries, track local meetups, and get event coordination support from our dedicated referee desk.",
+    tagline: "Direct call to the referee room!",
     link: "/helpdesk",
-    actionText: "Open Helpdesk"
+    actionText: "Huddle With Staff"
   },
   {
     id: "grievance",
@@ -69,10 +69,10 @@ const featuresData = [
     icon: Scale,
     targetName: "BOTTOM RIGHT",
     diveState: "lunge-right-bottom",
-    description: "Safe & structured grievance resolution. Includes dedicated reporting categories for general play concerns and women-focused Sportify Her safety guidelines.",
-    tagline: "Ensuring clean play and fair sports environment.",
+    description: "VAR Check in progress! Submit official reports for fair play violations, safety concerns, or coordinate women-focused Sportify Her safety protocols. Clean play is the only play!",
+    tagline: "Blow the whistle on foul play!",
     link: "/grievance",
-    actionText: "File Query / Concern"
+    actionText: "Call a Foul"
   }
 ];
 
