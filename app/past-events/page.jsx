@@ -8,8 +8,67 @@ import { pastEvents as staticPastEvents } from "@/lib/data";
 import { db, hasFirebaseConfig } from "@/lib/firebase";
 import { collection, query, orderBy, getDocs, where } from "firebase/firestore";
 
+const isParadoxEvent = (e) => [
+  "event-pbl-2026",
+  "event-pcl-2026",
+  "event-volleyvibes-2026",
+  "event-kampusrun-2026",
+  "event-iplauction-2026",
+  "event-zumba-2026",
+  "event-echo-2026"
+].includes(e.id);
+
+const parseEventDate = (event) => {
+  if (event.isRKM || event.id === "event-rkm-2026") {
+    return new Date(2026, 1, 22); // 22 Feb 2026
+  }
+  const dateStr = event.date;
+  if (!dateStr) return new Date(0);
+
+  let year = 2025; // default fallback
+  const yearMatch = dateStr.match(/\b(202\d)\b/);
+  if (yearMatch) {
+    year = parseInt(yearMatch[1], 10);
+  }
+
+  const months = {
+    jan: 0, january: 0,
+    feb: 1, february: 1,
+    mar: 2, march: 2,
+    apr: 3, april: 3,
+    may: 4,
+    jun: 5, june: 5,
+    jul: 6, july: 6,
+    aug: 7, august: 7,
+    sep: 8, september: 8,
+    oct: 9, october: 9,
+    nov: 10, november: 10,
+    dec: 11, december: 11
+  };
+
+  let month = 0;
+  const lowerStr = dateStr.toLowerCase();
+  for (const [key, value] of Object.entries(months)) {
+    if (lowerStr.includes(key)) {
+      month = value;
+      break;
+    }
+  }
+
+  let day = 1;
+  const dayMatch = dateStr.match(/\b(\d{1,2})(?:st|nd|rd|th)?\b/);
+  if (dayMatch) {
+    day = parseInt(dayMatch[1], 10);
+  }
+
+  return new Date(year, month, day);
+};
+
 export default function PastEventsPage() {
-  const [events, setEvents] = useState(staticPastEvents);
+  const [events, setEvents] = useState(() => {
+    const filtered = staticPastEvents.filter(e => !isParadoxEvent(e));
+    return [...filtered].sort((a, b) => parseEventDate(b) - parseEventDate(a));
+  });
 
   // Scroll to the top of the page whenever the route changes
   useEffect(() => {
@@ -33,15 +92,14 @@ export default function PastEventsPage() {
           id: doc.id,
           ...doc.data()
         }));
-        // Extract Paradox events and place them at the absolute top
-        const paradoxEvents = staticPastEvents.filter(e => e.id.endsWith("-2026"));
-        const otherStaticEvents = staticPastEvents.filter(e => !e.id.endsWith("-2026"));
 
-        setEvents([...paradoxEvents, ...fetchedEvents, ...otherStaticEvents]);
+        const filteredStaticEvents = staticPastEvents.filter(e => !isParadoxEvent(e));
+        const combined = [...fetchedEvents, ...filteredStaticEvents];
+        setEvents(combined.sort((a, b) => parseEventDate(b) - parseEventDate(a)));
       } catch (error) {
         console.error("Error fetching events:", error);
-        // On error, keep static events (where Paradox events are already at the top)
-        setEvents(staticPastEvents);
+        const filtered = staticPastEvents.filter(e => !isParadoxEvent(e));
+        setEvents(filtered.sort((a, b) => parseEventDate(b) - parseEventDate(a)));
       }
     };
 

@@ -35,9 +35,6 @@ export default function MeetupsGallery() {
   const duplicatedMemories = [...MEMORIES, ...MEMORIES, ...MEMORIES];
 
   useEffect(() => {
-    // Disable GSAP horizontal auto-scroll loop on mobile viewports
-    if (window.innerWidth < 768) return;
-
     const track = trackRef.current;
     if (!track) return;
 
@@ -132,7 +129,7 @@ export default function MeetupsGallery() {
       <div className="w-full flex items-center relative overflow-hidden py-6">
         <div 
           ref={trackRef}
-          className="flex gap-6 md:gap-10 whitespace-nowrap will-change-transform overflow-x-auto md:overflow-x-visible snap-x snap-mandatory md:snap-none scrollbar-none w-full"
+          className="flex gap-6 md:gap-10 whitespace-nowrap will-change-transform overflow-visible scrollbar-none w-full"
         >
           {duplicatedMemories.map((item, idx) => {
             const isAnyHovered = hoveredIdx !== null;

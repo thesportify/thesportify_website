@@ -36,14 +36,10 @@ const Navbar = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] ${
-        isScrolled
-          ? "bg-[rgba(5,5,5,0.8)] backdrop-blur-[20px] py-2"
-          : "bg-transparent py-6"
-      }`}
+      className="fixed top-0 left-0 right-0 z-[9999] bg-[rgba(5,5,5,0.85)] backdrop-blur-[20px] py-3 shadow-[0_4px_30px_rgba(0,0,0,0.5)] border-b border-white/5"
     >
       {/* Thin orange bottom line */}
-      <div className={`absolute bottom-0 left-0 right-0 h-[1px] bg-[#FF7A00] transition-opacity duration-500 ${isScrolled ? 'opacity-30' : 'opacity-0'}`}></div>
+      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-[#FF7A00] opacity-30"></div>
 
       <div className="container mx-auto px-6 md:px-8 lg:px-12">
         <div className="flex items-center justify-between">
@@ -67,7 +63,7 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="flex items-center space-x-6">
-            <nav className="max-md:hidden md:flex items-center space-x-8">
+            <nav className="hidden md:flex items-center space-x-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
@@ -96,25 +92,60 @@ const Navbar = () => {
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle menu</span>
               </SheetTrigger>
-              <SheetContent side="right" className="bg-[#050505] text-white pt-10 border-l border-white/10">
-                <div className="flex flex-col space-y-8 mt-12">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.path}
-                      href={link.path}
-                      onClick={() => setOpen(false)}
-                      className={`text-2xl font-medium transition-colors duration-300 relative inline-block w-fit ${
-                        pathname === link.path ? "text-white" : "text-white/60 hover:text-white"
-                      }`}
-                    >
-                      {link.name}
-                      <span
-                        className={`absolute left-0 -bottom-2 h-[2px] bg-[#FF7A00] transition-all duration-500 ease-out ${
-                          pathname === link.path ? "w-full" : "w-0"
-                        }`}
-                      ></span>
-                    </Link>
-                  ))}
+              <SheetContent side="right" className="bg-[#050505]/95 backdrop-blur-xl text-white pt-12 pb-6 px-6 border-l border-white/10 w-full sm:max-w-sm overflow-y-auto h-full scrollbar-none">
+                <div className="flex flex-col justify-between min-h-[calc(100vh-96px)]">
+                  <div>
+                    {/* Branding inside menu */}
+                    <div className="flex items-center space-x-3 pb-6 border-b border-white/5 mb-4">
+                      <Image
+                        src={logo || "/placeholder.svg"}
+                        alt="Sportify Logo"
+                        className="w-8 h-8"
+                        width={32}
+                        height={32}
+                      />
+                      <span className="font-black text-lg tracking-wider text-white">
+                        SPORTIFY
+                      </span>
+                    </div>
+
+                    <nav className="flex flex-col space-y-1 mt-2">
+                      {navLinks.map((link) => {
+                        const isActive = pathname === link.path;
+                        return (
+                          <Link
+                            key={link.path}
+                            href={link.path}
+                            onClick={() => setOpen(false)}
+                            className={`group flex items-center justify-between py-3.5 px-2 border-b border-white/5 transition-all duration-300 outline-none ${
+                              isActive ? "text-[#FF7A00]" : "text-white/70 hover:text-white"
+                            }`}
+                          >
+                            <span className="text-base font-black uppercase tracking-widest group-hover:translate-x-1.5 transition-transform duration-300">
+                              {link.name}
+                            </span>
+                            <div className="flex items-center space-x-2">
+                              {isActive ? (
+                                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 bg-[#FF7A00]/10 border border-[#FF7A00]/30 text-[#FF7A00] rounded">
+                                  ACTIVE
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-mono text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  // GO
+                                </span>
+                              )}
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </nav>
+                  </div>
+
+                  {/* Footer in Drawer */}
+                  <div className="pt-6 border-t border-white/5 mt-6 text-[8px] font-mono text-gray-500 space-y-1">
+                    <div>SPORTIFY CONSOLE // MOBILE V2.5</div>
+                    <div>STATUS: ACTIVE // LIVE FEED OK</div>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>

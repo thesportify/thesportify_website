@@ -15,30 +15,18 @@ import PatnaImg from "../assets/RKM26 -Patna Chapter.jpg";
 
 const PHOTOS_DRIVE_LINK = "https://drive.google.com/drive/folders/1Jaz9kdMbLGtucr7fznjE6Hq92FhPlhcW?usp=drive_link";
 
-// Real geographic Lat/Lng coordinates for each active hub
+// Calibrated SVG coordinate positions inside the 774x792 viewBox for each offline chapter hub
 const CITIES = [
-  { id: "delhi", name: "Delhi", state: "Delhi", lat: 28.6139, lng: 77.2090, players: "150+", event: "Cricket & Badminton Playoffs", date: "21 Feb 2026", hasLine: true, images: [DelhiImg, JaipurImg, LucknowImg] },
-  { id: "lucknow", name: "Lucknow", state: "Uttar Pradesh", lat: 26.8467, lng: 80.9462, players: "80+", event: "Cricket Chapter Meetup", date: "18 Feb 2026", hasLine: true, images: [LucknowImg, PatnaImg, DelhiImg] },
-  { id: "mumbai", name: "Mumbai", state: "Maharashtra", lat: 19.0760, lng: 72.8777, players: "110+", event: "Badminton Regional Finals", date: "21 Feb 2026", hasLine: true, images: [MumbaiImg, HydBadImg, ChennaiImg] },
-  { id: "hyderabad", name: "Hyderabad", state: "Telangana", lat: 17.3850, lng: 78.4867, players: "130+", event: "Badminton Open", date: "22 Feb 2026", hasLine: true, images: [HydBadImg, MumbaiImg, ChennaiImg] },
-  { id: "kolkata", name: "Kolkata", state: "West Bengal", lat: 22.5726, lng: 88.3639, players: "100+", event: "Cricket Chapter Tournament", date: "22 Feb 2026", hasLine: true, images: [KolkataImg, ChennaiImg, MumbaiImg] },
-  { id: "bangalore", name: "Bangalore", state: "Karnataka", lat: 12.9716, lng: 77.5946, players: "95+", event: "Athletics & Tennis Meetup", date: "22 Feb 2026", hasLine: true, images: [ChennaiImg, HydBadImg, LucknowImg] },
-  { id: "chennai", name: "Chennai", state: "Tamil Nadu", lat: 13.0827, lng: 80.2707, players: "200+", event: "Host Hub Events & Trials", date: "22 Feb 2026", isHost: true, images: [ChennaiImg, HydBadImg, MumbaiImg] }
+  { id: "delhi", name: "Delhi", state: "Delhi", x: 233, y: 220, players: "150+", event: "Cricket & Badminton Playoffs", date: "21 Feb 2026", hasLine: true, images: [DelhiImg, JaipurImg, LucknowImg] },
+  { id: "lucknow", name: "Lucknow", state: "Uttar Pradesh", x: 298, y: 250, players: "80+", event: "Cricket Chapter Meetup", date: "18 Feb 2026", hasLine: true, images: [LucknowImg, PatnaImg, DelhiImg] },
+  { id: "mumbai", name: "Mumbai", state: "Maharashtra", x: 138, y: 475, players: "110+", event: "Badminton Regional Finals", date: "21 Feb 2026", hasLine: true, images: [MumbaiImg, HydBadImg, ChennaiImg] },
+  { id: "jaipur", name: "Jaipur", state: "Rajasthan", x: 200, y: 250, players: "60+", event: "Cricket Turf Meetup", date: "24 Nov 2025", hasLine: true, images: [JaipurImg, DelhiImg, LucknowImg] },
+  { id: "hyderabad", name: "Hyderabad", state: "Telangana", x: 282, y: 503, players: "130+", event: "Badminton Open", date: "22 Feb 2026", hasLine: true, images: [HydBadImg, MumbaiImg, ChennaiImg] },
+  { id: "kolkata", name: "Kolkata", state: "West Bengal", x: 525, y: 355, players: "100+", event: "Cricket Chapter Tournament", date: "22 Feb 2026", hasLine: true, images: [KolkataImg, ChennaiImg, MumbaiImg] },
+  { id: "chennai", name: "Chennai", state: "Tamil Nadu", x: 290, y: 638, players: "200+", event: "Host Hub Events & Trials", date: "22 Feb 2026", isHost: true, images: [ChennaiImg, HydBadImg, MumbaiImg] },
+  { id: "patna", name: "Patna", state: "Bihar", x: 450, y: 285, players: "85+", event: "Cricket Meetup", date: "25 Feb 2026", hasLine: true, images: [PatnaImg, KolkataImg, LucknowImg] }
 ];
 
-// Project Lat/Lng coordinates mathematically to local SVG viewBox space (0 0 774 792)
-const projectLatLng = (lat, lng) => {
-  const c1 = 20.89847544814191;
-  const c2 = 0.4175377485047101;
-  const c3 = -1392.997774257528;
-  const c4 = 0.27351013854194267;
-  const c5 = -26.859649866644336;
-  const c6 = 967.4418910324896;
-  return {
-    x: c1 * lng + c2 * lat + c3,
-    y: c4 * lng + c5 * lat + c6
-  };
-};
 
 const getBezierPath = (start, end) => {
   const midX = (start.x + end.x) / 2;
@@ -119,10 +107,10 @@ export default function RashtriyaKhelMahotsav() {
     return () => clearInterval(interval);
   }, [selectedMobileHub]);
 
-  // Map lat/lng coordinates to standard SVG coordinates
+  // Map predefined calibrated coordinate positions
   const projectedHubs = {};
   CITIES.forEach(c => {
-    projectedHubs[c.id] = projectLatLng(c.lat, c.lng);
+    projectedHubs[c.id] = { x: c.x, y: c.y };
   });
 
   const chennaiCoords = projectedHubs["chennai"];
@@ -154,10 +142,10 @@ export default function RashtriyaKhelMahotsav() {
           THE SPORTIFY NETWORK
         </span>
         <h2 className="text-4xl sm:text-6xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none mb-3">
-          ONE NATION.<br />
-          ONE SPIRIT.<br />
+          8 CHAPTERS.<br />
+          1 NATION.<br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] to-[#FFC107] drop-shadow-[0_2px_15px_rgba(255,122,0,0.25)]">
-            ONE COMMUNITY.
+            1 SPIRIT.
           </span>
         </h2>
         <p className="text-xs sm:text-sm text-gray-400 font-medium max-w-[600px] mx-auto mt-4 opacity-75 leading-relaxed">
@@ -422,6 +410,35 @@ export default function RashtriyaKhelMahotsav() {
           </a>
         </div>
       )}
+      {/* Visual Directory List */}
+      <div className="relative z-20 w-full max-w-4xl mx-auto px-6 mt-12 mb-6">
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+          {CITIES.map((hub) => {
+            const isHovered = hoveredHub?.id === hub.id;
+            return (
+              <button
+                key={hub.id}
+                onMouseEnter={() => !isMobile && setHoveredHub(hub)}
+                onMouseLeave={() => !isMobile && setHoveredHub(null)}
+                onClick={() => {
+                  if (isMobile) {
+                    setSelectedMobileHub(hub);
+                  } else {
+                    window.open(PHOTOS_DRIVE_LINK, "_blank");
+                  }
+                }}
+                className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold uppercase tracking-wider border transition-all duration-300 cursor-pointer outline-none ${
+                  isHovered
+                    ? "bg-gradient-to-r from-[#FF7A00] to-[#FFC107] border-orange-400 text-black shadow-[0_0_20px_rgba(255,122,0,0.3)] scale-105"
+                    : "bg-[#0b0b0b] border-white/10 text-gray-300 hover:border-orange-500/50 hover:text-white"
+                }`}
+              >
+                {hub.name}
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

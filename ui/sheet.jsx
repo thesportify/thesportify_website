@@ -14,9 +14,9 @@ export function SheetContent({ children, className = "", side = "right", ...prop
 
   return (
     <Dialog.Portal>
-      <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+      <Dialog.Overlay className="fixed inset-0 z-[99998] bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
       <Dialog.Content
-        className={`fixed z-50 gap-4 bg-black p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500 ${
+        className={`fixed z-[99999] gap-4 bg-black p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500 ${
           side === "right" ? "data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right" : 
           side === "left" ? "data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left" : 
           side === "top" ? "data-[state=open]:slide-in-from-top data-[state=closed]:slide-out-to-top" : 
