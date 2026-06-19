@@ -3,43 +3,37 @@
 
 @layer base {
   :root {
-    --flame: 15 100% 55%;
-    --flame-dark: 15 100% 45%;
-    --flame-light: 30 100% 60%;
-    --flame-gradient: linear-gradient(90deg, #ff0000, #ff5a00, #ff9a00, #ffce00, #ffe808);
-    --off-white: 0 0% 98%;
+    --background: #050505;
+    --background-secondary: #0B0B0B;
+    --brand-orange: #FF7A00;
+    --brand-gold: #FFC107;
+    --brand-white: #FFFFFF;
 
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --foreground: #FFFFFF;
+    --card: #0B0B0B;
+    --card-foreground: #FFFFFF;
+    --popover: #0B0B0B;
+    --popover-foreground: #FFFFFF;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --primary: #FF7A00;
+    --primary-foreground: #050505;
+    --secondary: #FFC107;
+    --secondary-foreground: #050505;
 
-    --primary: 222.2 84% 4.9%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 15 100% 55%;
-    --secondary-foreground: 210 40% 98%;
+    --muted: rgba(255, 255, 255, 0.15);
+    --muted-foreground: rgba(255, 255, 255, 0.6);
+    --accent: #FF7A00;
+    --accent-foreground: #FFFFFF;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 15 100% 55%;
-    /* Flame color for focus ring */
+    --border: rgba(255, 255, 255, 0.1);
+    --input: rgba(255, 255, 255, 0.1);
+    --ring: #FF7A00;
   }
 
   body {
     font-family: 'Montserrat', sans-serif;
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: var(--background);
+    color: var(--foreground);
     -webkit-tap-highlight-color: transparent;
   }
 

@@ -1,23 +1,23 @@
-// src/Home.jsx
-
 import Hero from '../components/hero'
-import SportifyInParadox from '../components/SportifyInParadox'
+import SpiritWall from '../components/SpiritWall'
 import RashtriyaKhelMahotsav from '../components/RashtriyaKhelMahotsav'
-import ConstitutionPreview from '../components/ConstitutionPreview'
-import WebsiteFeaturesGame from '../components/WebsiteFeaturesGame'
+import MeetupsGallery from '../components/MeetupGallery'
+import Playbook from '../components/Playbook'
 import JoinCommunity from '../components/joinCommunity'
 import Footer from '../components/footer'
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-black via-[#1a1a1a] to-black dark:bg-gray-950">
+    <main className="min-h-screen bg-[#050505] text-white overflow-hidden">
       <Hero />
-      <SportifyInParadox />
+      <SpiritWall />
       <RashtriyaKhelMahotsav />
-      <ConstitutionPreview />
-      <WebsiteFeaturesGame />
+      <MeetupsGallery />
+      <Playbook />
       <JoinCommunity />
       <Footer />
     </main>
   )
 }
+
+

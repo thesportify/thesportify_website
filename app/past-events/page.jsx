@@ -7,7 +7,6 @@ import EventsList from "@/components/pastEventsList"
 import { pastEvents as staticPastEvents } from "@/lib/data";
 import { db, hasFirebaseConfig } from "@/lib/firebase";
 import { collection, query, orderBy, getDocs, where } from "firebase/firestore";
-import RkmEventHighlight from "@/components/RkmEventHighlight";
 
 export default function PastEventsPage() {
   const [events, setEvents] = useState(staticPastEvents);
@@ -34,11 +33,14 @@ export default function PastEventsPage() {
           id: doc.id,
           ...doc.data()
         }));
-        // Merge dynamic events (first) with static events (last)
-        setEvents([...fetchedEvents, ...staticPastEvents]);
+        // Extract Paradox events and place them at the absolute top
+        const paradoxEvents = staticPastEvents.filter(e => e.id.endsWith("-2026"));
+        const otherStaticEvents = staticPastEvents.filter(e => !e.id.endsWith("-2026"));
+
+        setEvents([...paradoxEvents, ...fetchedEvents, ...otherStaticEvents]);
       } catch (error) {
         console.error("Error fetching events:", error);
-        // On error, keep static events
+        // On error, keep static events (where Paradox events are already at the top)
         setEvents(staticPastEvents);
       }
     };
@@ -67,9 +69,6 @@ export default function PastEventsPage() {
             </div>
           </div>
         </h1>
-
-        {/* RKM 2026 — Featured Past Event */}
-        <RkmEventHighlight />
 
         {/* Events List */}
         <EventsList events={events} />
