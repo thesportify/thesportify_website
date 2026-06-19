@@ -91,7 +91,6 @@ export default function ChroniclePage() {
   const constitutionRef = useRef(null);
   const tenureRef = useRef(null);
   const newsletterRef = useRef(null);
-  const archiveRef = useRef(null);
 
   const activeReport = tenureReportsData[selectedTenure] || tenureReportsData["2025-26"];
 
@@ -437,63 +436,7 @@ export default function ChroniclePage() {
           <NewsletterComponent />
         </section>
 
-        {/* Section 5: Archive */}
-        <section id="archive" ref={archiveRef} className="space-y-8 scroll-mt-28 mb-16 border-t border-white/5 pt-12">
-          <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-white/5 pb-4">
-            <div>
-              <h2 className="text-2xl font-bold flex items-center space-x-2 tracking-tight">
-                <Star className="h-6 w-6 text-[#FF7A00]" />
-                <span>SPORTIFY ARCHIVE</span>
-              </h2>
-              <p className="text-xs md:text-sm text-gray-500 mt-1">
-                Historical documentation, past event records, and resources from earlier tenures.
-              </p>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-[#0b0b0b]/60 border border-white/5 p-6 rounded-2xl hover:border-orange-500/20 transition-all duration-300">
-              <h4 className="font-bold text-white mb-2 uppercase text-sm">Media Archives</h4>
-              <p className="text-gray-400 text-xs leading-relaxed mb-4">
-                Access the complete high-resolution photo and video drive folders from all our chapters.
-              </p>
-              <a
-                href={PHOTOS_DRIVE_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs font-bold text-[#FF7A00] hover:underline flex items-center gap-1"
-              >
-                Open Google Drive &rarr;
-              </a>
-            </div>
-
-            <div className="bg-[#0b0b0b]/60 border border-white/5 p-6 rounded-2xl hover:border-orange-500/20 transition-all duration-300">
-              <h4 className="font-bold text-white mb-2 uppercase text-sm">Tenure Reports</h4>
-              <p className="text-gray-400 text-xs leading-relaxed mb-4">
-                View detailed administrative, operational, and financial reports from previous years.
-              </p>
-              <button
-                onClick={() => openReport("2025-26")}
-                className="text-xs font-bold text-[#FF7A00] hover:underline flex items-center gap-1 bg-transparent border-none p-0 cursor-pointer"
-              >
-                View 2025-26 Report &rarr;
-              </button>
-            </div>
-
-            <div className="bg-[#0b0b0b]/60 border border-white/5 p-6 rounded-2xl hover:border-orange-500/20 transition-all duration-300">
-              <h4 className="font-bold text-white mb-2 uppercase text-sm">Newsletter Archive</h4>
-              <p className="text-gray-400 text-xs leading-relaxed mb-4">
-                Browse through all published monthly editions of The Podium Sports Magazine.
-              </p>
-              <button
-                onClick={() => scrollToSection("newsletter")}
-                className="text-xs font-bold text-[#FF7A00] hover:underline flex items-center gap-1 bg-transparent border-none p-0 cursor-pointer"
-              >
-                Browse Newsletter &rarr;
-              </button>
-            </div>
-          </div>
-        </section>
 
       </div>
 

@@ -157,7 +157,10 @@ const ConstitutionSection = () => {
               </span>
               
               {/* Scrollable list of chapters */}
-              <div className="max-h-72 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+              <div 
+                className="max-h-72 overflow-y-auto space-y-2 pr-1 custom-scrollbar"
+                style={{ WebkitOverflowScrolling: "touch" }}
+              >
                 {chaptersData.map((item, index) => (
                   <button
                     key={index}
@@ -168,13 +171,13 @@ const ConstitutionSection = () => {
                         : "bg-black/30 border-transparent text-gray-400 hover:text-white hover:bg-gray-900/50"
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 w-full">
                       <Scroll className={`h-4 w-4 shrink-0 ${index === selectedChapter ? "text-orange-400" : "text-gray-500"}`} />
-                      <div className="truncate">
-                        <span className="text-[10px] block font-bold tracking-wider opacity-85 leading-none">
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[10px] block font-bold tracking-wider opacity-85 leading-none mb-1">
                           {item.chapter}
                         </span>
-                        <span className="text-xs font-semibold truncate block">
+                        <span className="text-xs font-semibold block whitespace-normal leading-tight">
                           {item.title}
                         </span>
                       </div>
