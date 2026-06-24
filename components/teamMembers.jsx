@@ -1,15 +1,14 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Github,
   Linkedin,
   Mail,
   ChevronDown,
-  ChevronUp,
+  ChevronLeft,
   ChevronRight,
   Calendar,
   Flame,
-  User,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -76,60 +75,49 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
     "Design & Media",
   ];
 
-  // Accordion open state: only one department remains open at a time. Secretaries is open by default
-  const [activeDept, setActiveDept] = useState("Secretaries");
-
-  const toggleDept = (dept) => {
-    const nextDept = activeDept === dept ? null : dept;
-    setActiveDept(nextDept);
-
-    // Auto-select department lead/first member on accordion change
-    if (nextDept) {
-      const deptMembers = allYearMembers.filter((m) => m.category === nextDept);
-      if (deptMembers.length > 0) {
-        setSelectedMember(deptMembers[0]);
-      }
-
-      // Auto-scroll selected department header into focus
-      setTimeout(() => {
-        const headerEl = document.getElementById(`dept-header-${nextDept.replace(/\s+/g, "-")}`);
-        if (headerEl) {
-          headerEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }
-      }, 100);
-    }
-  };
-
-  // Keep track of the active selected member
-  const [selectedMember, setSelectedMember] = useState(null);
-  const detailPanelRef = useRef(null);
+  const [selectedDept, setSelectedDept] = useState("Secretaries");
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isDeptDropdownOpen, setIsDeptDropdownOpen] = useState(false);
 
   // Filter members by selected year
   const allYearMembers = teamMembersByYear[selectedYear] || [];
 
-  // Set default active member when year changes
-  useEffect(() => {
-    if (allYearMembers.length > 0) {
-      setSelectedMember(allYearMembers[0]);
-    } else {
-      setSelectedMember(null);
-    }
-  }, [selectedYear, allYearMembers]);
+  // Filter members by active department
+  const filteredMembers = allYearMembers.filter(
+    (m) => m.category === selectedDept
+  );
 
-  // Expand the department accordion of the clicked member
-  const handleSelectMember = (member, dept) => {
-    setSelectedMember(member);
-    // Smooth scroll detailed panel into view on mobile
-    if (window.innerWidth < 768 && detailPanelRef.current) {
-      detailPanelRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+  // Reset active carousel index when department or year changes
+  useEffect(() => {
+    setActiveIndex(0);
+    setIsDeptDropdownOpen(false);
+  }, [selectedDept, selectedYear]);
+
+  const len = filteredMembers.length;
+
+  const handlePrev = () => {
+    if (len === 0) return;
+    setActiveIndex((prev) => (prev === 0 ? len - 1 : prev - 1));
   };
+
+  const handleNext = () => {
+    if (len === 0) return;
+    setActiveIndex((prev) => (prev === len - 1 ? 0 : prev + 1));
+  };
+
+  // Circular indices for 3D Cover Flow slots
+  const leftIndex = len > 1 ? (activeIndex - 1 + len) % len : null;
+  const rightIndex = len > 2 ? (activeIndex + 1) % len : (len === 2 && activeIndex === 0 ? 1 : null);
+
+  const centerMember = len > 0 ? filteredMembers[activeIndex] : null;
+  const leftMember = leftIndex !== null ? filteredMembers[leftIndex] : null;
+  const rightMember = rightIndex !== null ? filteredMembers[rightIndex] : null;
 
   return (
     <div className="w-full text-white bg-transparent">
       
-      {/* Year Selection bar */}
-      <div className="flex justify-between items-center mb-10 pb-4 border-b border-white/5">
+      {/* Year Selection & Section Title bar */}
+      <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/5">
         <div className="flex items-center gap-2">
           <Flame className="h-5 w-5 text-[#FF7A00] animate-pulse" />
           <span className="text-sm font-black uppercase tracking-widest text-[#FFC107] font-mono">
@@ -137,7 +125,7 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
           </span>
         </div>
 
-        {/* Desktop / Mobile Dropdown */}
+        {/* Year Dropdown */}
         <div className="relative">
           <button
             onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
@@ -179,196 +167,256 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
         </div>
       </div>
 
-      {allYearMembers.length > 0 ? (
-        /* Double Column Split-Pane Directory */
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-          
-          {/* LEFT COLUMN: Large High-Impact Highlight Card */}
-          <div ref={detailPanelRef} className="md:col-span-5 relative">
-            <AnimatePresence mode="wait">
-              {selectedMember && (
+      {/* Mobile Department Dropdown selector (visible on lg:hidden) */}
+      <div className="lg:hidden relative w-full max-w-[280px] mx-auto mb-8 z-50">
+        <button
+          onClick={() => setIsDeptDropdownOpen(!isDeptDropdownOpen)}
+          className="w-full flex items-center justify-between px-5 py-3 bg-[#0B0B0B]/90 border border-white/10 rounded-2xl text-xs text-white font-extrabold tracking-wider hover:border-orange-500/30 transition-all duration-300 focus:outline-none"
+        >
+          <span className="text-[#FFC107] uppercase tracking-widest">{selectedDept}</span>
+          <ChevronDown 
+            size={14} 
+            className={`text-gray-400 transition-transform duration-300 ${isDeptDropdownOpen ? "rotate-180" : ""}`} 
+          />
+        </button>
+
+        <AnimatePresence>
+          {isDeptDropdownOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.95 }}
+              className="absolute left-0 right-0 mt-2 bg-[#0B0B0B] border border-white/10 rounded-2xl p-1.5 shadow-2xl z-50 overflow-hidden"
+            >
+              {departments.map((dept) => {
+                const isActive = selectedDept === dept;
+                return (
+                  <button
+                    key={dept}
+                    onClick={() => {
+                      setSelectedDept(dept);
+                      setIsDeptDropdownOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-colors ${
+                      isActive 
+                        ? "bg-orange-500/20 text-[#FFC107]" 
+                        : "text-gray-400 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <span>{dept}</span>
+                    {isActive && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#FFC107] shadow-[0_0_6px_#FFC107]" />
+                    )}
+                  </button>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Horizontal Department Navigation Tab Bar (visible on lg:flex) */}
+      <div className="hidden lg:flex gap-2.5 mb-10 overflow-x-auto pb-3 pt-1 custom-scrollbar w-full justify-center select-none">
+        {departments.map((dept) => {
+          const isActive = selectedDept === dept;
+          return (
+            <button
+              key={dept}
+              onClick={() => setSelectedDept(dept)}
+              className={`flex-shrink-0 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all duration-300 border focus:outline-none ${
+                isActive
+                  ? "bg-gradient-to-r from-orange-500/20 to-yellow-500/20 border-orange-500/50 text-[#FFC107] shadow-[0_0_20px_rgba(255,122,0,0.15)]"
+                  : "bg-black/40 border-white/5 text-gray-400 hover:text-white hover:border-white/10"
+              }`}
+            >
+              {dept}
+            </button>
+          );
+        })}
+      </div>
+
+      {centerMember ? (
+        <div className="flex flex-col items-center select-none">
+          {/* Active Department Team Section Header Title */}
+          <h3 className="text-lg md:text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] to-[#FFC107] uppercase tracking-widest mb-6 flex items-center gap-2 drop-shadow-md">
+            <span>🔥</span>
+            <span>{selectedDept} Team</span>
+            <span>🔥</span>
+          </h3>
+
+          {/* 3D Cover Flow Carousel Container */}
+          <div 
+            className="flex items-center justify-center gap-4 sm:gap-6 md:gap-10 relative py-8 max-w-5xl mx-auto w-full"
+            style={{ perspective: "1200px" }}
+          >
+            {/* Left circular navigation button */}
+            <button
+              onClick={handlePrev}
+              className="flex-shrink-0 flex items-center justify-center w-11 h-11 md:w-12 md:h-12 rounded-full bg-black/45 border border-white/10 text-gray-400 hover:text-white hover:border-[#FF7A00]/50 hover:bg-[#FF7A00]/10 transition-all duration-300 shadow-md focus:outline-none z-40"
+              aria-label="Previous Member"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+
+            {/* Left Card Slot */}
+            <AnimatePresence mode="popLayout">
+              {leftMember && (
                 <motion.div
-                  key={selectedMember.id}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -15 }}
-                  transition={{ duration: 0.35, ease: "easeOut" }}
-                  className="bg-[#0B0B0B]/80 border border-white/10 rounded-[32px] p-6 md:p-8 flex flex-col justify-between items-center text-center shadow-2xl relative overflow-hidden backdrop-blur-md"
+                  key={`left-${leftMember.id}`}
+                  onClick={handlePrev}
+                  initial={{ opacity: 0, rotateY: 35, scale: 0.75 }}
+                  animate={{ opacity: 0.45, rotateY: 20, scale: 0.85 }}
+                  exit={{ opacity: 0, scale: 0.75 }}
+                  transition={{ duration: 0.45, ease: "easeInOut" }}
+                  className="hidden sm:block relative w-44 md:w-48 aspect-[3/4] rounded-2xl overflow-hidden border border-white/5 bg-[#0B0B0B]/85 cursor-pointer origin-right select-none shadow-xl hover:opacity-65 transition-opacity"
+                  style={{ transformStyle: "preserve-3d" }}
                 >
-                  {/* Subtle background glow */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#FF7A00]/5 rounded-full blur-[80px] pointer-events-none" />
-
-                  {/* Photo Frame (Widescreen styling with premium custom hover classes) */}
-                  <div className="relative w-full aspect-[4/5] max-w-[280px] rounded-3xl overflow-hidden border-2 border-white/10 bg-slate-900 group shadow-lg transition-all duration-500 hover:-translate-y-2 hover:border-[#FF7A00]/80 hover:shadow-[0_0_40px_rgba(255,122,0,0.25)]">
-                    <Image
-                      src={selectedMember.image || "/placeholder.svg"}
-                      alt={selectedMember.name}
-                      fill
-                      sizes="(max-width: 768px) 280px, 320px"
-                      className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
-                      unoptimized={typeof selectedMember.image === "string" && selectedMember.image.startsWith("data:")}
-                      priority
-                    />
-                  </div>
-
-                  {/* Details Information */}
-                  <div className="mt-6 space-y-3 z-10 w-full">
-                    <span className="text-[10px] md:text-[11px] uppercase tracking-widest text-[#FFC107] font-black bg-[#FF7A00]/10 px-3 py-1 rounded-md border border-[#FF7A00]/25 inline-block">
-                      {selectedMember.position}
+                  <Image
+                    src={leftMember.image || "/placeholder.svg"}
+                    alt={leftMember.name}
+                    fill
+                    sizes="200px"
+                    className="object-cover object-top pointer-events-none filter brightness-[0.6]"
+                    unoptimized={typeof leftMember.image === "string" && leftMember.image.startsWith("data:")}
+                  />
+                  {/* Text Overlay for Left Card */}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 to-transparent p-4 pt-10 flex flex-col justify-end text-center pointer-events-none">
+                    <h5 className="text-[11px] font-bold text-white uppercase tracking-wide truncate">
+                      {leftMember.name}
+                    </h5>
+                    <span className="text-[8px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5 font-mono">
+                      {leftMember.position}
                     </span>
-                    <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-wide">
-                      {selectedMember.name}
-                    </h3>
-                    <p className="text-gray-400 text-xs sm:text-sm leading-relaxed max-w-sm mx-auto font-medium">
-                      {getBio(selectedMember.name, selectedMember.category)}
-                    </p>
-                  </div>
-
-                  {/* Social Buttons Block */}
-                  <div className="flex gap-4 mt-6 border-t border-white/5 pt-6 w-full justify-center z-10">
-                    {selectedMember.linkedin && (
-                      <a
-                        href={selectedMember.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-[#FF7A00] hover:border-orange-500/40 hover:scale-110 shadow-md transition-all duration-300"
-                        title="LinkedIn Profile"
-                      >
-                        <Linkedin className="h-4.5 w-4.5" />
-                      </a>
-                    )}
-                    {selectedMember.email && (
-                      <a
-                        href={`mailto:${selectedMember.email}`}
-                        className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-[#FF7A00] hover:border-orange-500/40 hover:scale-110 shadow-md transition-all duration-300"
-                        title="Send Email"
-                      >
-                        <Mail className="h-4.5 w-4.5" />
-                      </a>
-                    )}
-                    {selectedMember.github && (
-                      <a
-                        href={selectedMember.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-[#FF7A00] hover:border-orange-500/40 hover:scale-110 shadow-md transition-all duration-300"
-                        title="GitHub Profile"
-                      >
-                        <Github className="h-4.5 w-4.5" />
-                      </a>
-                    )}
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
 
-          {/* RIGHT COLUMN: Vertical Roster organized by Departments */}
-          <div className="md:col-span-7 space-y-4">
-            {departments.map((dept) => {
-              const deptMembers = allYearMembers.filter(
-                (m) => m.category === dept
-              );
-              
-              if (deptMembers.length === 0) return null;
+            {/* Center High-Impact Highlight Card */}
+            <AnimatePresence mode="popLayout">
+              <motion.div
+                key={`center-${centerMember.id}`}
+                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                animate={{ opacity: 1, scale: 1.04, y: 0, rotateY: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                transition={{ duration: 0.45, ease: "easeOut" }}
+                className="relative w-56 sm:w-60 md:w-64 aspect-[3/4] rounded-3xl overflow-hidden border-2 border-[#FF7A00]/50 bg-slate-900 shadow-[0_0_35px_rgba(255,122,0,0.22)] z-30 select-none"
+              >
+                <Image
+                  src={centerMember.image || "/placeholder.svg"}
+                  alt={centerMember.name}
+                  fill
+                  sizes="(max-width: 768px) 240px, 300px"
+                  className="object-cover object-top pointer-events-none"
+                  unoptimized={typeof centerMember.image === "string" && centerMember.image.startsWith("data:")}
+                  priority
+                />
+              </motion.div>
+            </AnimatePresence>
 
-              const isExpanded = activeDept === dept;
-
-              return (
-                <div
-                  key={dept}
-                  className="bg-[#0B0B0B]/40 border border-white/5 rounded-2xl overflow-hidden shadow-lg transition-colors hover:border-white/10"
+            {/* Right Card Slot */}
+            <AnimatePresence mode="popLayout">
+              {rightMember && (
+                <motion.div
+                  key={`right-${rightMember.id}`}
+                  onClick={handleNext}
+                  initial={{ opacity: 0, rotateY: -35, scale: 0.75 }}
+                  animate={{ opacity: 0.45, rotateY: -20, scale: 0.85 }}
+                  exit={{ opacity: 0, scale: 0.75 }}
+                  transition={{ duration: 0.45, ease: "easeInOut" }}
+                  className="hidden sm:block relative w-44 md:w-48 aspect-[3/4] rounded-2xl overflow-hidden border border-white/5 bg-[#0B0B0B]/85 cursor-pointer origin-left select-none shadow-xl hover:opacity-65 transition-opacity"
+                  style={{ transformStyle: "preserve-3d" }}
                 >
-                  {/* Department Heading Button */}
-                  <button
-                    id={`dept-header-${dept.replace(/\s+/g, "-")}`}
-                    onClick={() => toggleDept(dept)}
-                    className="w-full px-6 py-4 flex justify-between items-center text-left bg-[#0B0B0B]/60 transition-colors focus:outline-none scroll-mt-24"
-                  >
-                    <span className="text-sm font-black uppercase tracking-widest text-[#FF7A00]">
-                      {dept}
+                  <Image
+                    src={rightMember.image || "/placeholder.svg"}
+                    alt={rightMember.name}
+                    fill
+                    sizes="200px"
+                    className="object-cover object-top pointer-events-none filter brightness-[0.6]"
+                    unoptimized={typeof rightMember.image === "string" && rightMember.image.startsWith("data:")}
+                  />
+                  {/* Text Overlay for Right Card */}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 to-transparent p-4 pt-10 flex flex-col justify-end text-center pointer-events-none">
+                    <h5 className="text-[11px] font-bold text-white uppercase tracking-wide truncate">
+                      {rightMember.name}
+                    </h5>
+                    <span className="text-[8px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5 font-mono">
+                      {rightMember.position}
                     </span>
-                    <span className="text-gray-400 transition-transform duration-300">
-                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                    </span>
-                  </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-                  {/* Accordion Member List */}
-                  <AnimatePresence initial={false}>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="overflow-hidden border-t border-white/5"
-                      >
-                        <div className="p-3 space-y-1.5">
-                          {deptMembers.map((member) => {
-                            const isSelected = selectedMember?.id === member.id;
-                            return (
-                              <div
-                                key={member.id}
-                                onClick={() => handleSelectMember(member, dept)}
-                                className={`w-full px-4 py-3 flex items-center justify-between rounded-xl cursor-pointer transition-all duration-300 group hover:-translate-y-[2px] ${
-                                  isSelected
-                                    ? "bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/40 shadow-[0_0_15px_rgba(255,122,0,0.12)]"
-                                    : "bg-transparent border border-transparent hover:border-white/5 hover:bg-white/5"
-                                }`}
-                              >
-                                <div className="flex items-center space-x-4">
-                                  {/* Small round avatar */}
-                                  <div className={`relative w-10 h-10 rounded-full overflow-hidden border transition-all duration-300 ${
-                                    isSelected ? "border-[#FFC107]" : "border-white/10 group-hover:border-orange-500/40"
-                                  }`}>
-                                    {member.image ? (
-                                      <Image
-                                        src={member.image}
-                                        alt={member.name}
-                                        fill
-                                        sizes="40px"
-                                        className="object-cover object-top"
-                                        unoptimized={typeof member.image === "string" && member.image.startsWith("data:")}
-                                      />
-                                    ) : (
-                                      <div className="w-full h-full bg-slate-800 flex items-center justify-center">
-                                        <User className="h-4 w-4 text-gray-500" />
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  <div>
-                                    <h4 className={`text-sm font-bold transition-colors ${
-                                      isSelected ? "text-white" : "text-gray-300 group-hover:text-white"
-                                    }`}>
-                                      {member.name}
-                                    </h4>
-                                    <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">
-                                      {member.position}
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <ChevronRight
-                                  size={14}
-                                  className={`transition-all duration-300 ${
-                                    isSelected
-                                      ? "text-[#FFC107] translate-x-0"
-                                      : "text-gray-600 group-hover:text-gray-400 group-hover:translate-x-1"
-                                  }`}
-                                />
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
+            {/* Right circular navigation button */}
+            <button
+              onClick={handleNext}
+              className="flex-shrink-0 flex items-center justify-center w-11 h-11 md:w-12 md:h-12 rounded-full bg-black/45 border border-white/10 text-gray-400 hover:text-white hover:border-[#FF7A00]/50 hover:bg-[#FF7A00]/10 transition-all duration-300 shadow-md focus:outline-none z-40"
+              aria-label="Next Member"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
           </div>
 
+          {/* Active Center Member Bio Details Underneath Card */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`details-${centerMember.id}`}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.4 }}
+              className="text-center mt-8 space-y-4 max-w-xl mx-auto px-4 z-10"
+            >
+              <div className="space-y-1">
+                <h4 className="text-xl md:text-2xl font-black text-white uppercase tracking-wide">
+                  {centerMember.name}
+                </h4>
+                <p className="text-[#FFC107] text-[11px] md:text-xs font-black uppercase tracking-widest font-mono">
+                  {centerMember.position}
+                </p>
+              </div>
+
+              <p className="text-gray-400 text-xs md:text-sm leading-relaxed max-w-md mx-auto font-medium">
+                {getBio(centerMember.name, centerMember.category)}
+              </p>
+
+              {/* Social links */}
+              <div className="flex gap-4 justify-center border-t border-white/5 pt-4" onClick={(e) => e.stopPropagation()}>
+                {centerMember.linkedin && (
+                  <a
+                    href={centerMember.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-[#FF7A00] hover:border-orange-500/40 hover:scale-110 shadow-md transition-all duration-300"
+                    title="LinkedIn Profile"
+                  >
+                    <Linkedin size={16} />
+                  </a>
+                )}
+                {centerMember.email && (
+                  <a
+                    href={`mailto:${centerMember.email}`}
+                    className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-[#FF7A00] hover:border-orange-500/40 hover:scale-110 shadow-md transition-all duration-300"
+                    title="Send Email"
+                  >
+                    <Mail size={16} />
+                  </a>
+                )}
+                {centerMember.github && (
+                  <a
+                    href={centerMember.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-[#FF7A00] hover:border-orange-500/40 hover:scale-110 shadow-md transition-all duration-300"
+                    title="GitHub Profile"
+                  >
+                    <Github size={16} />
+                  </a>
+                )}
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       ) : (
         <div className="text-center text-gray-500 bg-[#0B0B0B]/50 p-8 rounded-2xl border border-white/5">

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { MessageCircle, UserPlus, Users } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import Image from "next/image";
 import teamPhoto from "../assets/athlete_mixed_team.png";
 
@@ -146,14 +146,14 @@ export default function JoinCommunity() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.65, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row gap-5 items-center justify-center w-full max-w-2xl"
+          className="flex justify-center w-full"
         >
           {/* Become Member */}
           <a
             href={links.becomeMember}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-1/3"
+            className="w-full max-w-xs"
           >
             <motion.button
               whileHover={{ scale: 1.04 }}
@@ -162,40 +162,6 @@ export default function JoinCommunity() {
             >
               <UserPlus className="w-4 h-4 inline-block mr-2" />
               Become Member
-            </motion.button>
-          </a>
-
-          {/* Join WhatsApp */}
-          <a
-            href={links.joinWhatsapp}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-1/3"
-          >
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              className="w-full py-4.5 px-6 rounded-xl bg-[#0b0b0b] border border-white/10 hover:border-orange-500/40 text-white font-extrabold text-xs uppercase tracking-widest backdrop-blur-md shadow-xl cursor-pointer"
-            >
-              <MessageCircle className="w-4 h-4 inline-block mr-2 text-[#FF7A00]" />
-              Join WhatsApp
-            </motion.button>
-          </a>
-
-          {/* Join Community */}
-          <a
-            href={links.joinCommunity}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-1/3"
-          >
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              className="w-full py-4.5 px-6 rounded-xl bg-[#0b0b0b] border border-white/10 hover:border-orange-500/40 text-white font-extrabold text-xs uppercase tracking-widest backdrop-blur-md shadow-xl cursor-pointer"
-            >
-              <Users className="w-4 h-4 inline-block mr-2 text-[#FFC107]" />
-              Join Community
             </motion.button>
           </a>
         </motion.div>

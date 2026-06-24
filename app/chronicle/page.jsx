@@ -83,7 +83,7 @@ const tenureReportsData = {
 };
 
 export default function ChroniclePage() {
-  const [activeSection, setActiveSection] = useState("constitution");
+  const [activeSection, setActiveSection] = useState("tenure");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTenure, setSelectedTenure] = useState("2025-26");
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
@@ -180,21 +180,6 @@ export default function ChroniclePage() {
           <p className="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed font-medium">
             Documenting the journey of India&apos;s first student-led national sports community, one chapter, one event, and one memory at a time.
           </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <button
-              onClick={() => scrollToSection("constitution")}
-              className="px-6 py-3 bg-gradient-to-r from-[#FF7A00] to-[#FFC107] text-black font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all hover:scale-[1.02] border-none outline-none cursor-pointer"
-            >
-              Read Constitution
-            </button>
-            <button
-              onClick={() => scrollToSection("newsletter")}
-              className="px-6 py-3 bg-white/5 border border-white/10 hover:border-[#FF7A00]/40 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer outline-none"
-            >
-              View Publications
-            </button>
-          </div>
         </div>
       </section>
 
@@ -203,17 +188,6 @@ export default function ChroniclePage() {
         {/* Floating Sub-Navigation Menu */}
         <div className="sticky top-20 z-40 flex justify-center mb-16 px-2">
           <div className="bg-[#0b0f1d]/75 backdrop-blur-lg border border-white/5 rounded-2xl p-1 md:p-1.5 shadow-2xl flex flex-wrap justify-center gap-1 sm:gap-1.5 max-w-full">
-            <button
-              onClick={() => scrollToSection("constitution")}
-              className={`flex items-center space-x-1.5 sm:space-x-2 py-2 px-2.5 sm:py-2.5 sm:px-4 rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 shrink-0 ${
-                activeSection === "constitution"
-                  ? "bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 text-[#FF7A00] shadow-[0_0_15px_rgba(255,122,0,0.1)]"
-                  : "text-gray-400 hover:text-white border border-transparent hover:bg-gray-900/30"
-              }`}
-            >
-              <Scroll className="h-3.5 w-3.5" />
-              <span>Constitution</span>
-            </button>
             <button
               onClick={() => scrollToSection("tenure")}
               className={`flex items-center space-x-1.5 sm:space-x-2 py-2 px-2.5 sm:py-2.5 sm:px-4 rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 shrink-0 ${
@@ -224,6 +198,17 @@ export default function ChroniclePage() {
             >
               <Users className="h-3.5 w-3.5" />
               <span>Tenure Reports</span>
+            </button>
+            <button
+              onClick={() => scrollToSection("constitution")}
+              className={`flex items-center space-x-1.5 sm:space-x-2 py-2 px-2.5 sm:py-2.5 sm:px-4 rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 shrink-0 ${
+                activeSection === "constitution"
+                  ? "bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 text-[#FF7A00] shadow-[0_0_15px_rgba(255,122,0,0.1)]"
+                  : "text-gray-400 hover:text-white border border-transparent hover:bg-gray-900/30"
+              }`}
+            >
+              <Scroll className="h-3.5 w-3.5" />
+              <span>Constitution</span>
             </button>
             <button
               onClick={() => scrollToSection("newsletter")}
@@ -239,24 +224,7 @@ export default function ChroniclePage() {
           </div>
         </div>
 
-        {/* Section 2: Sportify Constitution */}
-        <section id="constitution" ref={constitutionRef} className="space-y-8 scroll-mt-28 mb-24 border-t border-white/5 pt-12">
-          <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-white/5 pb-4">
-            <div>
-              <h2 className="text-2xl font-bold flex items-center space-x-2 tracking-tight">
-                <Scroll className="h-6 w-6 text-[#FF7A00]" />
-                <span>SPORTIFY CONSTITUTION</span>
-              </h2>
-              <p className="text-xs md:text-sm text-gray-500 mt-1">
-                Official rules, roles, and administrative bylaws of the Sportify Sports Society.
-              </p>
-            </div>
-          </div>
-
-          <ConstitutionSection />
-        </section>
-
-        {/* Section 3: Tenure Reports */}
+        {/* Section 2: Tenure Reports */}
         <section ref={tenureRef} id="tenure" className="space-y-8 scroll-mt-28 mb-24 border-t border-white/5 pt-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-white/5 pb-4">
             <div>
@@ -417,6 +385,23 @@ export default function ChroniclePage() {
             </div>
 
           </div>
+        </section>
+
+        {/* Section 3: Sportify Constitution */}
+        <section id="constitution" ref={constitutionRef} className="space-y-8 scroll-mt-28 mb-24 border-t border-white/5 pt-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-white/5 pb-4">
+            <div>
+              <h2 className="text-2xl font-bold flex items-center space-x-2 tracking-tight">
+                <Scroll className="h-6 w-6 text-[#FF7A00]" />
+                <span>SPORTIFY CONSTITUTION</span>
+              </h2>
+              <p className="text-xs md:text-sm text-gray-500 mt-1">
+                Official rules, roles, and administrative bylaws of the Sportify Sports Society.
+              </p>
+            </div>
+          </div>
+
+          <ConstitutionSection />
         </section>
 
         {/* Section 4: The Podium Newsletter */}

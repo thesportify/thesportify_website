@@ -129,6 +129,10 @@ export default function RashtriyaKhelMahotsav() {
         .marker-pulse {
           animation: marker-pulse 2.5s ease-in-out infinite;
         }
+        @keyframes fadeInLabel {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
       `}</style>
 
       {/* Background Haze Overlay */}
@@ -141,13 +145,15 @@ export default function RashtriyaKhelMahotsav() {
         <span className="text-[10px] sm:text-xs font-black tracking-[0.3em] text-[#FF7A00] uppercase block mb-4 animate-pulse">
           THE SPORTIFY NETWORK
         </span>
-        <h2 className="text-4xl sm:text-6xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none mb-3">
-          8 CHAPTERS.<br />
-          1 NATION.<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] to-[#FFC107] drop-shadow-[0_2px_15px_rgba(255,122,0,0.25)]">
-            1 SPIRIT.
-          </span>
+        <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none mb-3">
+          Rashtriya Khel Mahotsav 2026
         </h2>
+        <h3 className="text-lg sm:text-xl md:text-2xl font-extrabold uppercase tracking-wider text-white mb-4">
+          8 Chapters. 1 Nation.{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] to-[#FFC107] drop-shadow-[0_2px_15px_rgba(255,122,0,0.25)]">
+            1 Spirit.
+          </span>
+        </h3>
         <p className="text-xs sm:text-sm text-gray-400 font-medium max-w-[600px] mx-auto mt-4 opacity-75 leading-relaxed">
           Explore our nationwide chapters.
           <br />
@@ -273,6 +279,95 @@ export default function RashtriyaKhelMahotsav() {
                     style={{ transformOrigin: `${coords.x}px ${coords.y}px` }}
                     className={`transition-all duration-300 ${isHovered ? "marker-pulse" : ""}`}
                   />
+                </g>
+              );
+            })}
+
+            {/* ── Persistent City Name Labels ── */}
+            {activePhase >= 1 && CITIES.map((hub) => {
+              const coords = projectedHubs[hub.id];
+              const isHost = hub.isHost;
+              const isHovered = hoveredHub?.id === hub.id;
+
+              // Smart label placement per city to avoid overlap
+              const labelOffsets = {
+                mumbai:    { dx: -10, dy: -14, anchor: "end"   },
+                delhi:     { dx:  -8, dy: -14, anchor: "end"   },
+                jaipur:    { dx: -10, dy: -14, anchor: "end"   },
+                kolkata:   { dx:  12, dy:  -8, anchor: "start" },
+                lucknow:   { dx:  12, dy:   0, anchor: "start" },
+                hyderabad: { dx:  12, dy:  -8, anchor: "start" },
+                bangalore: { dx: -10, dy: -14, anchor: "end"   },
+                chennai:   { dx:   0, dy:  22, anchor: "middle"},
+              };
+              const off = labelOffsets[hub.id] || { dx: 12, dy: -8, anchor: "start" };
+
+              const labelX = coords.x + off.dx;
+              const labelY = coords.y + off.dy;
+
+              return (
+                <g
+                  key={`label-${hub.id}`}
+                  style={{ animation: "fadeInLabel 0.8s ease forwards" }}
+                  className="pointer-events-none"
+                >
+                  {/* Small tick leader line from pin edge to label */}
+                  {!isHost && (
+                    <line
+                      x1={coords.x}
+                      y1={coords.y - (isHost ? 6 : 4)}
+                      x2={labelX + (off.anchor === "end" ? 6 : off.anchor === "start" ? -6 : 0)}
+                      y2={labelY + 2}
+                      stroke={isHovered ? "#FFC107" : "#FF7A00"}
+                      strokeWidth="0.6"
+                      strokeOpacity="0.5"
+                      className="transition-colors duration-300"
+                    />
+                  )}
+
+                  {/* City Name Text */}
+                  <text
+                    x={labelX}
+                    y={labelY}
+                    textAnchor={off.anchor}
+                    fontSize={isHost ? "13" : "11"}
+                    fontWeight="800"
+                    fontFamily="'Inter', sans-serif"
+                    letterSpacing="0.06em"
+                    fill={isHost ? "#FFC107" : isHovered ? "#FFC107" : "#FF9040"}
+                    className="transition-colors duration-300 uppercase select-none"
+                  >
+                    {hub.name}
+                  </text>
+
+                  {/* HOST HUB badge under Chennai label */}
+                  {isHost && (
+                    <>
+                      <rect
+                        x={coords.x - 22}
+                        y={labelY + 3}
+                        width="44"
+                        height="11"
+                        rx="2"
+                        fill="#FFC107"
+                        opacity="0.9"
+                      />
+                      <text
+                        x={coords.x}
+                        y={labelY + 12}
+                        textAnchor="middle"
+                        fontSize="7"
+                        fontWeight="900"
+                        fontFamily="'Inter', sans-serif"
+                        letterSpacing="0.12em"
+                        fill="#000"
+                        className="uppercase select-none"
+                      >
+                        HOST HUB
+                      </text>
+                    </>
+                  )}
+
                 </g>
               );
             })}

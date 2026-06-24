@@ -6,8 +6,9 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 
 // Import lucide icons
-import { Flame, Play, Pause, Camera, X, Volume2, VolumeX, Eye, Trophy, Award, Sparkles, Tv, HardDrive } from "lucide-react";
+import { Flame, Play, Pause, Camera, X, Volume2, VolumeX, Eye, Trophy, Award, Sparkles, Tv, HardDrive, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import photoRegistry from "@/lib/photoRegistry.json";
 
 // Import images for highlights
 import DelhiBadminton1 from "@/assets/Meetups/DelhiBadminton1.jpg";
@@ -19,206 +20,88 @@ import KanpurCricket1 from "@/assets/Meetups/KanpurCricket1.png";
 import KanpurCricket2 from "@/assets/Meetups/KanpurCricket2.png";
 import LucknowCricket1 from "@/assets/Meetups/LucknowCricket1.jpg";
 import LucknowCricket2 from "@/assets/Meetups/LucknowCricket2.jpg";
-import TeamCelebration from "@/assets/athlete_mixed_team.png";
-import ChennaiFootball from "@/assets/RKM26 - Chennai Chapter.jpg";
-import LucknowTrophy from "@/assets/RKM - Lucknow Chapter.jpg";
-import JaipurMeetup from "@/assets/RKM26 - Jaipur Chapter.jpg";
+// Unused testing phase images removed
 
-// Paradox Sub-sections Metadata
+
+// Sportify Sub-sections Metadata (Dynamically mapped to public folders)
 const PARADOX_SUBSECTIONS = [
   {
-    id: "closing-ceremony",
-    chapter: "01",
-    name: "Closing Ceremony",
-    timecode: "21:30:00",
-    desc: "Emotional final moments, group cheers, and the heavy trophy lifts under stadium floodlights.",
-    photos: [TeamCelebration, LucknowTrophy, JaipurMeetup, DelhiBadminton2]
-  },
-  {
     id: "certificate-distribution",
-    chapter: "02",
+    chapter: "01",
     name: "Team Certificate Distribution",
     timecode: "19:45:00",
     desc: "Honoring our technical leads, web operations team, and active coordinators on stage.",
-    photos: [LucknowTrophy, ChennaiFootball, TeamCelebration, KanpurCricket1]
+    photos: photoRegistry.medalsDistribution || []
   },
   {
     id: "badminton",
-    chapter: "03",
-    name: "Paradox Badminton League",
+    chapter: "02",
+    name: "Sportify Badminton League",
     timecode: "11:00:00",
     desc: "Lightning singles court playoff showdowns and precision racquet drops.",
-    photos: ["/events/badminton.jpg", DelhiBadminton1, DelhiBadminton2, DelhiBadminton3, JaipurMeetup]
+    photos: photoRegistry.pblBadminton || []
   },
   {
     id: "football",
-    chapter: "04",
-    name: "Paradox Champions League",
+    chapter: "03",
+    name: "Sportify Champions League",
     timecode: "17:00:00",
     desc: "High-octane goals, defensive sweeps, and penalty shootouts that defined the festival.",
-    photos: ["/events/football.jpg", ChennaiFootball, KanpurCricket1, LucknowCricket2]
+    photos: photoRegistry.pclFootball || []
   },
   {
     id: "volleyball",
-    chapter: "05",
+    chapter: "04",
     name: "VolleyVibes",
     timecode: "15:30:00",
     desc: "Spikes, massive defensive blocks, and high energy from the roaring court stands.",
-    photos: ["/events/volleyball.jpg", DelhiBadminton2, LucknowCricket1, JaipurMeetup]
+    photos: photoRegistry.volleyVibes || []
   },
   {
     id: "kampus-run",
-    chapter: "06",
+    chapter: "05",
     name: "Kampus Run",
     timecode: "06:15:00",
     desc: "The early morning 5K marathon challenge across the scenic IIT Madras campus lines.",
-    photos: ["/events/run.jpg", JaipurMeetup, DelhiHockey2, DelhiBadminton1]
+    photos: photoRegistry.run || []
   },
   {
     id: "ipl-auction",
-    chapter: "07",
+    chapter: "06",
     name: "IPL Auction Showdown",
     timecode: "14:00:00",
     desc: "Strategic bidding wars, team budgeting calculations, and record-breaking player acquisitions.",
-    photos: ["/events/cricket.jpg", KanpurCricket2, LucknowCricket2, TeamCelebration]
-  },
-  {
-    id: "zumba",
-    chapter: "08",
-    name: "The Burn Club (Zumba Workshop)",
-    timecode: "08:30:00",
-    desc: "High-energy beats, group fitness routines, and athletic training workshops.",
-    photos: ["/events/zumba.jpg", TeamCelebration, JaipurMeetup, DelhiBadminton2]
-  },
-  {
-    id: "echo-prometheus",
-    chapter: "09",
-    name: "ECHO//PROMETHEUS",
-    timecode: "16:00:00",
-    desc: "Esports arena battles, screen clutches, and strategic gameplay showdowns.",
-    photos: ["/events/tech.jpg", LucknowTrophy, KanpurCricket1, LucknowCricket2]
+    photos: photoRegistry.ipl || []
   }
 ];
 
-// Community Wall Masonry Content
-const COMMUNITY_WALL_ITEMS = [
-  {
-    type: "chapter",
-    title: "National RKM Championships",
-    count: "200+ Players",
-    date: "22 Feb 2026",
-    location: "Chennai Chapter"
-  },
-  {
-    type: "quote",
-    text: "We came for sports. We stayed for people.",
-    author: "Sportify Diaries"
-  },
-  {
-    type: "chapter",
-    title: "Lucknow Cricket Chapter",
-    count: "80 Players",
-    date: "18 Feb 2026",
-    location: "Lucknow Chapter"
-  },
-  {
-    type: "image",
-    image: ChennaiFootball,
-    caption: "Late night playoffs finals under floodlights"
-  },
-  {
-    type: "chapter",
-    title: "Delhi Badminton Meetup",
-    count: "14 Players",
-    date: "15 Nov 2025",
-    location: "Delhi Chapter"
-  },
-  {
-    type: "quote",
-    text: "Every city became home.",
-    author: "Sportify Diaries"
-  },
-  {
-    type: "chapter",
-    title: "Chennai RKM Football Open",
-    count: "110 Players",
-    date: "22 Feb 2026",
-    location: "Chennai Chapter"
-  },
-  {
-    type: "image",
-    image: LucknowTrophy,
-    caption: "Championship victory and team celebrations"
-  },
-  {
-    type: "chapter",
-    title: "Kanpur Turf Cricket",
-    count: "22 Players",
-    date: "16 Nov 2025",
-    location: "Kanpur Chapter"
-  },
-  {
-    type: "chapter",
-    title: "Delhi Badminton Championship",
-    count: "18 Players",
-    date: "15 Nov 2025",
-    location: "Delhi Chapter"
-  },
-  {
-    type: "quote",
-    text: "Some trophies faded. Friendships didn't.",
-    author: "Sportify Diaries"
-  },
-  {
-    type: "chapter",
-    title: "Lucknow Regional Cup",
-    count: "60 Players",
-    date: "18 Feb 2026",
-    location: "Lucknow Chapter"
-  },
-  {
-    type: "image",
-    image: JaipurMeetup,
-    caption: "Jaipur regional meetup cohort gathering"
-  },
-  {
-    type: "chapter",
-    title: "Jaipur Turf Meetup",
-    count: "40 Players",
-    date: "24 Nov 2025",
-    location: "Jaipur Chapter"
-  },
-  {
-    type: "chapter",
-    title: "Delhi National Hockey Cheer",
-    count: "50 Supporters",
-    date: "23 Oct 2024",
-    location: "Delhi Chapter"
-  }
-];
+// Community Wall quotes and chapters removed to focus entirely on photos as requested.
+
 
 // Broadcast Deck Multi-cam Videos
 const CAM_FEEDS = [
   {
     id: "cam-1",
-    name: "CAM_01 // THE OPENING CEREMONY",
-    desc: "Torch run and flags parade kick-starting the festival.",
-    videoSrc: "/RKM.mp4",
+    name: "CAM_01 // SPORTIFY OPENING CEREMONY",
+    desc: "Torch run and official opening ceremony of the tournament.",
+    videoSrc: "/videos/the sportify.mp4",
     badge: "MAIN FEED"
   },
   {
     id: "cam-2",
-    name: "CAM_02 // CLASH OF RIVALS",
-    desc: "Behind-the-scenes high stakes match points and huddles.",
-    videoSrc: "/RKM.mp4",
-    badge: "B-ROLL FEED"
+    name: "CAM_02 // SPORTIFY COMPETITIVE CLASH",
+    desc: "Competitive match points, playoff showdowns, and team huddles.",
+    videoSrc: "",
+    badge: "B-ROLL FEED",
+    comingSoon: true
   },
   {
     id: "cam-3",
-    name: "CAM_03 // PODIUM VICTORY",
-    desc: "Closing ceremonies, trophy lift, and final celebrations.",
-    videoSrc: "/RKM.mp4",
-    badge: "AUDIENCE CORNER"
+    name: "CAM_03 // SPORTIFY PODIUM VICTORY",
+    desc: "Championship celebrations, trophy lift, and closing ceremonies.",
+    videoSrc: "",
+    badge: "AUDIENCE CORNER",
+    comingSoon: true
   }
 ];
 
@@ -226,27 +109,24 @@ const CAM_FEEDS = [
 const REELS_DATA = [
   {
     id: "rkm-highlights",
-    title: "RKM Championship Highlights",
+    title: "Sportify Championship Highlights",
     badge: "Live Reel",
     year: "2026",
-    videoSrc: "/RKM.mp4",
-    poster: ChennaiFootball
+    videoSrc: "/videos/Reel -1.mp4"
   },
   {
     id: "mumbai-playoff",
-    title: "Mumbai Regional Playoff",
+    title: "Sportify Regional Highlights",
     badge: "Event Recap",
     year: "2026",
-    videoSrc: "/RKM.mp4",
-    poster: JaipurMeetup
+    videoSrc: "/videos/Reel - 2.mp4"
   },
   {
     id: "paradox-aftermovie-reel",
-    title: "Paradox '26 Cinematic Recap",
+    title: "Sportify Cinematic Aftermovie",
     badge: "Cinematic Cut",
     year: "2026",
-    videoSrc: "/RKM.mp4",
-    poster: TeamCelebration
+    videoSrc: "/videos/Reel - 3.mp4"
   }
 ];
 
@@ -254,20 +134,58 @@ const REELS_DATA = [
 const STATS = [
   { value: "4 Days", label: "DURATION" },
   { value: "12 Houses", label: "COMPETITION" },
-  { value: "1,000+", label: "PARTICIPANTS" },
-  { value: "20+", label: "EVENTS" },
-  { value: "8+", label: "CITIES REPRESENTED" }
+  { value: "5,000+", label: "REGISTRATIONS" },
+  { value: "7", label: "SPORTS EVENTS" }
 ];
 
 export default function HighlightsPage() {
   const [fullscreenPhoto, setFullscreenPhoto] = useState(null);
-  const [selectedSubId, setSelectedSubId] = useState("closing-ceremony");
+  const [selectedSubId, setSelectedSubId] = useState("certificate-distribution");
   const [activePlayer, setActivePlayer] = useState(null); // 'aftermovie', 'broadcast', or 'reel-id'
 
   // Aftermovie Video Controls
   const aftermovieVideoRef = useRef(null);
   const [isAftermoviePlaying, setIsAftermoviePlaying] = useState(false);
   const [aftermovieActiveChapter, setAftermovieActiveChapter] = useState(0);
+
+  // Dynamic Community Wall Shuffling state & logic
+  const [shuffleKey, setShuffleKey] = useState(0);
+  const [communityPhotos, setCommunityPhotos] = useState([]);
+
+  useEffect(() => {
+    const photosPool = photoRegistry.communityWall || [];
+    
+    const getRandomPhotos = (pool, count) => {
+      if (!pool || pool.length === 0) return [];
+      const shuffled = [...pool].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    };
+
+    // Initialize with 9 photos
+    setCommunityPhotos(getRandomPhotos(photosPool, 9));
+
+    // Staggered shuffle every 30 seconds
+    const performShuffle = () => {
+      setShuffleKey((prev) => prev + 1);
+      const newPhotos = getRandomPhotos(photosPool, 9);
+      newPhotos.forEach((photo, index) => {
+        setTimeout(() => {
+          setCommunityPhotos((prev) => {
+            const next = [...prev];
+            if (index < next.length) {
+              next[index] = photo;
+            } else {
+              next.push(photo);
+            }
+            return next;
+          });
+        }, index * 200); // 200ms stagger delay between swaps
+      });
+    };
+
+    const interval = setInterval(performShuffle, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const aftermovieChapters = [
     { name: "OPENING CEREMONY", time: 0, label: "00:00" },
@@ -411,8 +329,6 @@ export default function HighlightsPage() {
           animation: marquee 30s linear infinite;
         }
 
-
-
         /* Glitch animation for camera feeds switching */
         @keyframes glitch-flash {
           0% { opacity: 0.9; }
@@ -425,6 +341,24 @@ export default function HighlightsPage() {
         }
         .glitch-effect {
           animation: glitch-flash 0.25s linear infinite;
+        }
+
+        /* Custom thin scrollbar for photo grid */
+        .photo-grid-scroll::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        .photo-grid-scroll::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.02);
+          border-radius: 99px;
+        }
+        .photo-grid-scroll::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #ff5a00, #ffe808);
+          border-radius: 99px;
+          box-shadow: 0 0 6px rgba(255, 90, 0, 0.3);
+        }
+        .photo-grid-scroll::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #ff7e00, #fff200);
         }
       `}</style>
 
@@ -494,7 +428,7 @@ export default function HighlightsPage() {
                 OFFICIAL HIGHLIGHTS
               </span>
               <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white leading-none">
-                PARADOX '26 <br />
+                SPORTIFY EVENT <br />
                 <span className="text-[#FFC107]">AFTERMOVIE</span>
               </h2>
               <div className="w-16 h-[2px] bg-[#FF7A00]" />
@@ -504,11 +438,11 @@ export default function HighlightsPage() {
               
               <div className="pt-2">
                 <button
-                  onClick={toggleAftermoviePlay}
-                  className="px-6 py-3.5 bg-[#121212] border border-white/10 hover:border-[#FF7A00]/50 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2.5 outline-none shadow-lg"
+                  disabled
+                  className="px-6 py-3.5 bg-[#121212]/50 border border-white/5 text-gray-500 font-extrabold text-xs uppercase tracking-wider rounded-xl cursor-not-allowed flex items-center justify-center gap-2.5 outline-none opacity-60"
                 >
-                  <Play className="h-4 w-4 fill-white text-white" />
-                  Watch Full Film
+                  <Clock className="h-4 w-4 text-gray-500" />
+                  Coming Soon
                 </button>
               </div>
             </div>
@@ -519,67 +453,44 @@ export default function HighlightsPage() {
                 <video
                   ref={aftermovieVideoRef}
                   src="/RKM.mp4"
-                  className="w-full h-full object-cover"
-                  onTimeUpdate={handleAftermovieTimeUpdate}
-                  onClick={toggleAftermoviePlay}
+                  className="w-full h-full object-cover pointer-events-none"
                   playsInline
                 />
                 
-                {/* Big Circular Orange Play Button Overlay */}
-                <AnimatePresence>
-                  {!isAftermoviePlaying && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      onClick={toggleAftermoviePlay}
-                      className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 cursor-pointer z-20"
-                    >
-                      <div className="w-16 h-16 rounded-full bg-[#FF7A00] flex items-center justify-center shadow-[0_0_30px_rgba(255,122,0,0.55)] hover:scale-110 transition-transform duration-300">
-                        <Play className="h-7 w-7 fill-black text-black ml-1" />
-                      </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-[#FFC107] mt-4 drop-shadow-md">
-                        PLAY PARADOX AFTERMOVIE
-                      </span>
-                      <span className="text-[8px] font-bold text-gray-400 mt-1">
-                        DURATION: 00:45 • SOUND ON
-                      </span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Video Playback State Badge Overlay */}
-                {isAftermoviePlaying && (
-                  <div className="absolute top-4 right-4 z-20 px-3 py-1 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 text-[9px] font-mono tracking-widest text-emerald-400 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
-                    PLAYING LIVE
+                {/* Coming Soon Overlay */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-xs z-20 text-center p-6 select-none">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FF7A00]/10 border border-[#FF7A00]/20 rounded-full mb-4 shadow-[0_0_15px_rgba(255,122,0,0.1)]">
+                    <span className="w-1.5 h-1.5 bg-[#FF7A00] rounded-full animate-pulse" />
+                    <span className="text-[10px] uppercase font-mono font-black tracking-widest text-[#FFC107]">
+                      STATUS // POST PRODUCTION
+                    </span>
                   </div>
-                )}
+                  <h3 className="text-3xl md:text-5xl font-black tracking-tight text-white uppercase mb-2">
+                    COMING <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] to-[#FFC107]">SOON</span>
+                  </h3>
+                  <p className="text-gray-400 text-[10px] md:text-xs max-w-xs uppercase tracking-widest font-semibold leading-relaxed">
+                    The official Sportify event aftermovie is currently in post-production. Stay tuned!
+                  </p>
+                </div>
               </div>
 
-              {/* Interactive Chapters Grid Timeline */}
+              {/* Chapters Grid Timeline (Disabled) */}
               <div className="grid grid-cols-5 gap-2 pt-2 text-left">
                 {aftermovieChapters.map((ch, idx) => {
-                  const isActive = aftermovieActiveChapter === idx;
                   return (
-                    <button
+                    <div
                       key={ch.name}
-                      onClick={() => handleSeekAftermovie(ch.time)}
-                      className="flex flex-col text-left group cursor-pointer border-none outline-none focus:outline-none transition-all"
+                      className="flex flex-col text-left transition-all opacity-40 select-none"
                     >
                       {/* Accent highlight line */}
-                      <div className={`h-[3px] w-full rounded-full transition-all duration-300 mb-2 ${
-                        isActive ? "bg-[#FF7A00]" : "bg-white/10 group-hover:bg-white/30"
-                      }`} />
-                      <span className={`text-[7px] md:text-[9px] font-black tracking-wider transition-colors duration-300 block line-clamp-1 uppercase ${
-                        isActive ? "text-[#FFC107]" : "text-gray-500 group-hover:text-gray-300"
-                      }`}>
+                      <div className="h-[3px] w-full rounded-full bg-white/10 mb-2" />
+                      <span className="text-[7px] md:text-[9px] font-black tracking-wider text-gray-500 block line-clamp-1 uppercase">
                         {ch.name}
                       </span>
-                      <span className="text-[7px] md:text-[8px] font-mono font-bold text-gray-600 group-hover:text-gray-400 mt-0.5">
+                      <span className="text-[7px] md:text-[8px] font-mono font-bold text-gray-600 mt-0.5">
                         {ch.label}
                       </span>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -588,7 +499,7 @@ export default function HighlightsPage() {
           </div>
 
           {/* Statistics Centered Row */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 pt-20 text-center border-t border-white/5 mt-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-20 text-center border-t border-white/5 mt-16">
             {STATS.map((s) => (
               <div key={s.label} className="space-y-1">
                 <p className="text-3xl sm:text-4xl font-extrabold text-[#FFC107] uppercase tracking-tight">
@@ -604,7 +515,7 @@ export default function HighlightsPage() {
         </div>
       </section>
 
-      {/* 3. Paradox '26 Photos: THE FILMSTRIP DOCUMENTARY (Upgraded UX with left timeline Chapters slate and Pinterest auto-height grid) */}
+      {/* 3. Sportify Event Photos: THE FILMSTRIP DOCUMENTARY (Upgraded UX with left timeline Chapters slate and Pinterest auto-height grid) */}
       <section className="py-24 bg-[#050505] border-t border-white/5 relative z-20">
         <div className="container mx-auto px-6 max-w-6xl space-y-16">
           
@@ -613,7 +524,7 @@ export default function HighlightsPage() {
               EXCLUSIVE STAGE ARCHIVES
             </span>
             <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white leading-none">
-              PARADOX '26 CAPTURES
+              SPORTIFY GALLERY CAPTURES
             </h2>
             <div className="h-[2px] w-20 bg-[#FF7A00] rounded-full mx-auto" />
             <p className="text-gray-400 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
@@ -631,7 +542,7 @@ export default function HighlightsPage() {
               <div className="flex items-center space-x-2.5 pb-3 border-b border-white/5 mb-2 px-2">
                 <HardDrive className="h-4 w-4 text-[#FF7A00]" />
                 <span className="text-[10px] font-mono font-black uppercase tracking-wider text-gray-400">
-                  FILM REEL SECTIONS // 7 CHAPTERS
+                  FILM REEL SECTIONS // 6 CHAPTERS
                 </span>
               </div>
 
@@ -686,43 +597,45 @@ export default function HighlightsPage() {
                 </p>
               </div>
 
-              <motion.div
-                key={selectedSubId}
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="columns-2 md:columns-3 gap-4 space-y-4"
-              >
-                {selectedSubsection.photos.map((photo, pIdx) => {
-                  const isStringSrc = typeof photo === "string";
-                  return (
-                    <div
-                      key={pIdx}
-                      className="break-inside-avoid relative rounded-2xl overflow-hidden border border-white/5 bg-[#0b0b0b] cursor-zoom-in group hover:border-[#FF7A00]/50 transition-all duration-300 shadow-md"
-                      onClick={() => setFullscreenPhoto(photo)}
-                    >
-                      {isStringSrc ? (
-                        <img
-                          src={photo}
-                          alt={`${selectedSubsection.name} Photo ${pIdx + 1}`}
-                          className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-500 rounded-2xl"
-                        />
-                      ) : (
-                        <Image
-                          src={photo}
-                          alt={`${selectedSubsection.name} Photo ${pIdx + 1}`}
-                          className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-500 rounded-2xl"
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                        <span className="text-[9px] font-mono text-gray-300 font-bold uppercase tracking-widest">
-                          ZOOM PHOTO
-                        </span>
+              <div className="max-h-none md:max-h-[520px] overflow-y-visible md:overflow-y-auto pr-0 md:pr-3 photo-grid-scroll">
+                <motion.div
+                  key={selectedSubId}
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="columns-2 sm:columns-3 md:columns-4 gap-3"
+                >
+                  {selectedSubsection.photos.map((photo, pIdx) => {
+                    const isStringSrc = typeof photo === "string";
+                    return (
+                      <div
+                        key={pIdx}
+                        className="break-inside-avoid relative rounded-xl overflow-hidden border border-white/5 bg-[#0b0b0b] cursor-zoom-in group hover:border-[#FF7A00]/50 transition-all duration-300 shadow-md mb-3"
+                        onClick={() => setFullscreenPhoto(photo)}
+                      >
+                        {isStringSrc ? (
+                          <img
+                            src={photo}
+                            alt={`${selectedSubsection.name} Photo ${pIdx + 1}`}
+                            className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-500 rounded-xl"
+                          />
+                        ) : (
+                          <Image
+                            src={photo}
+                            alt={`${selectedSubsection.name} Photo ${pIdx + 1}`}
+                            className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-500 rounded-xl"
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                          <span className="text-[9px] font-mono text-gray-300 font-bold uppercase tracking-widest">
+                            ZOOM PHOTO
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </motion.div>
+                    );
+                  })}
+                </motion.div>
+              </div>
             </div>
 
           </div>
@@ -730,7 +643,7 @@ export default function HighlightsPage() {
         </div>
       </section>
 
-      {/* 4. Paradox Cinematic Video Edits: THE BROADCAST CONTROL DESK (Interactive sports video production switcher console) */}
+      {/* 4. Sportify Cinematic Video Edits: THE BROADCAST CONTROL DESK (Interactive sports video production switcher console) */}
       <section className="py-24 bg-[#080808] border-t border-white/5 relative z-20 overflow-hidden">
         {/* Soft background lens flares */}
         <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-[#FF7A00]/5 rounded-full blur-[160px] pointer-events-none" />
@@ -739,14 +652,14 @@ export default function HighlightsPage() {
           
           <div className="text-center space-y-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#FF7A00] font-mono">
-              PARADOX BROADCAST DIVISION
+              SPORTIFY BROADCAST DIVISION
             </span>
             <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white leading-none">
               CINEMATIC EDITS
             </h2>
             <div className="h-[2px] w-20 bg-[#FF7A00] rounded-full mx-auto" />
             <p className="text-gray-400 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
-              Take the director seat in our interactive Multi-Cam Broadcast desk. Switch camera feeds below to mix specific cinematic Paradox cuts onto the main monitors.
+              Take the director seat in our interactive Multi-Cam Broadcast desk. Switch camera feeds below to mix specific cinematic Sportify cuts onto the main monitors.
             </p>
           </div>
 
@@ -772,14 +685,34 @@ export default function HighlightsPage() {
 
               {/* Main CRT Widescreen Screen Container */}
               <div className="relative aspect-video rounded-2xl overflow-hidden bg-black border border-white/5 shadow-2xl group flex items-center justify-center">
-                <video
-                  ref={monitorVideoRef}
-                  src={selectedCam.videoSrc}
-                  className={`w-full h-full object-cover z-10 ${glitchActive ? "glitch-effect opacity-50 filter grayscale" : "opacity-90"}`}
-                  loop
-                  muted={isMonitorMuted}
-                  playsInline
-                />
+                {!selectedCam.comingSoon && (
+                  <video
+                    ref={monitorVideoRef}
+                    src={selectedCam.videoSrc}
+                    className={`w-full h-full object-cover z-10 ${glitchActive ? "glitch-effect opacity-50 filter grayscale" : "opacity-90"}`}
+                    loop
+                    muted={isMonitorMuted}
+                    playsInline
+                  />
+                )}
+
+                {/* Coming Soon Overlay for specific camera feeds */}
+                {selectedCam.comingSoon && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/85 backdrop-blur-xs z-30 text-center p-6 select-none">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FF7A00]/10 border border-[#FF7A00]/20 rounded-full mb-3 shadow-[0_0_15px_rgba(255,122,0,0.1)]">
+                      <span className="w-1.5 h-1.5 bg-[#FF7A00] rounded-full animate-pulse" />
+                      <span className="text-[10px] uppercase font-mono font-black tracking-widest text-[#FFC107]">
+                        FEED STATE // NOT ACTIVE
+                      </span>
+                    </div>
+                    <h3 className="text-2xl md:text-4xl font-black tracking-tight text-white uppercase mb-2">
+                      FEED COMING <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] to-[#FFC107]">SOON</span>
+                    </h3>
+                    <p className="text-gray-400 text-[9px] md:text-xs max-w-xs uppercase tracking-widest font-semibold leading-relaxed">
+                      This camera angle feed is currently in post-production.
+                    </p>
+                  </div>
+                )}
 
                 {/* Blinking Glitch Overlay during cam changes */}
                 {glitchActive && (
@@ -798,7 +731,7 @@ export default function HighlightsPage() {
 
                 {/* Central Play/Pause Trigger Overlay */}
                 <AnimatePresence>
-                  {!isMonitorPlaying && !glitchActive && (
+                  {!isMonitorPlaying && !glitchActive && !selectedCam.comingSoon && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -838,8 +771,13 @@ export default function HighlightsPage() {
               <div className="flex justify-between items-center border-t border-white/5 pt-4 mt-4">
                 <div className="flex items-center space-x-3">
                   <button
+                    disabled={selectedCam.comingSoon}
                     onClick={toggleMonitorPlay}
-                    className="px-4 py-2 bg-[#FF7A00]/10 hover:bg-[#FF7A00]/20 border border-[#FF7A00]/30 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#FF7A00] flex items-center gap-1.5 cursor-pointer outline-none"
+                    className={`px-4 py-2 border rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 outline-none ${
+                      selectedCam.comingSoon
+                        ? "bg-[#121212]/50 border-white/5 text-gray-500 cursor-not-allowed opacity-60"
+                        : "bg-[#FF7A00]/10 hover:bg-[#FF7A00]/20 border-[#FF7A00]/30 text-[#FF7A00] cursor-pointer"
+                    }`}
                   >
                     {isMonitorPlaying ? (
                       <>
@@ -854,7 +792,7 @@ export default function HighlightsPage() {
                     )}
                   </button>
                   <span className="text-[9px] font-mono text-gray-500 font-bold hidden sm:inline">
-                    FEED STATE: {isMonitorPlaying ? "PLAYING" : "PAUSED"}
+                    FEED STATE: {selectedCam.comingSoon ? "COMING SOON" : (isMonitorPlaying ? "PLAYING" : "PAUSED")}
                   </span>
                 </div>
 
@@ -947,7 +885,7 @@ export default function HighlightsPage() {
       <section className="py-24 bg-[#070707] border-t border-white/5 relative z-20">
         <div className="container mx-auto px-6 max-w-6xl space-y-12">
           
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-2 flex flex-col items-center">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#FF7A00] font-mono">
               VISUAL CENTER
             </span>
@@ -958,64 +896,43 @@ export default function HighlightsPage() {
             <p className="text-gray-400 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
               An asymmetrical compilation representing our players, houses, and meetups nationwide.
             </p>
+
+            {/* Premium Autoplay Progress Shuffle Status Indicator */}
+            <div className="w-full max-w-xs space-y-2 pt-2 select-none">
+              <div className="flex justify-between items-center text-[9px] font-mono tracking-widest text-gray-500 uppercase px-0.5">
+                <span className="flex items-center gap-1.5 font-bold">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FFC107] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#FFC107]"></span>
+                  </span>
+                  <span>AUTOPLAY ACTIVE</span>
+                </span>
+                <span className="font-bold">SHUFFLE CYCLE // 30S</span>
+              </div>
+              <div className="h-[2px] w-full bg-white/10 rounded-full overflow-hidden relative">
+                <motion.div
+                  key={shuffleKey}
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 30, ease: "linear" }}
+                  className="h-full bg-gradient-to-r from-[#FF7A00] to-[#FFC107] rounded-full"
+                />
+              </div>
+              <p className="text-[9.5px] text-[#FFC107]/80 uppercase tracking-wider font-bold pt-1 font-mono">
+                ★ Grid updates automatically with new memories ★
+              </p>
+            </div>
           </div>
 
-          {/* Masonry Columns */}
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-            {COMMUNITY_WALL_ITEMS.map((item, idx) => {
-              if (item.type === "quote") {
-                return (
-                  <div
-                    key={idx}
-                    className="break-inside-avoid bg-[#0b0b0b]/60 border border-white/5 p-8 rounded-3xl text-center backdrop-blur-md relative overflow-hidden transition-all duration-300 hover:border-orange-500/25 shadow-lg"
-                  >
-                    <span className="text-4xl font-serif text-[#FF7A00]/25 absolute top-4 left-6">“</span>
-                    <p className="text-base md:text-lg font-serif italic text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] to-[#FFC107] leading-relaxed mb-4 relative z-10">
-                      {item.text}
-                    </p>
-                    <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest">
-                      — {item.author}
-                    </div>
-                  </div>
-                );
-              }
-              if (item.type === "chapter") {
-                return (
-                  <div
-                    key={idx}
-                    className="break-inside-avoid bg-[#0b0b0b]/80 border border-[#FF7A00]/15 p-6 rounded-3xl relative overflow-hidden transition-all duration-300 hover:border-orange-500/40 shadow-lg"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#FF7A00]/5 to-transparent pointer-events-none" />
-                    <span className="text-[8px] font-mono font-black uppercase tracking-widest text-[#FFC107] bg-white/5 px-2 py-0.5 border border-white/10 rounded">
-                      {item.location}
-                    </span>
-                    <h4 className="text-lg font-black text-white uppercase mt-3 leading-tight">
-                      {item.title}
-                    </h4>
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-xl font-extrabold text-[#FF7A00]">{item.count}</span>
-                      <span className="text-[9px] text-gray-500 font-bold uppercase">{item.date}</span>
-                    </div>
-                  </div>
-                );
-              }
-              return (
-                <div
-                  key={idx}
-                  className="break-inside-avoid relative rounded-3xl overflow-hidden border border-white/5 bg-[#0b0b0b] group hover:border-[#FF7A00]/45 transition-all duration-300 cursor-zoom-in shadow-xl"
-                  onClick={() => setFullscreenPhoto(item.image)}
-                >
-                  <Image
-                    src={item.image}
-                    alt={item.caption || "Community image"}
-                    className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                    <p className="text-xs text-gray-300 font-medium">{item.caption}</p>
-                  </div>
-                </div>
-              );
-            })}
+          {/* Masonry Columns with Stable Staggered Fade Transitions */}
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-6">
+            {communityPhotos.map((photo, idx) => (
+              <CommunityWallCard
+                key={idx}
+                photo={photo}
+                onClick={setFullscreenPhoto}
+              />
+            ))}
           </div>
 
         </div>
@@ -1168,7 +1085,7 @@ function ReelDeckCard({ reel, index, activePlayer, setActivePlayer }) {
         muted={isMuted}
         playsInline
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover z-0 transition-transform duration-[1000ms] cubic-bezier(0.25, 1, 0.5, 1) scale-100 group-hover:scale-105"
+        className="absolute inset-0 w-full h-full object-contain bg-black z-0 transition-transform duration-[1000ms] cubic-bezier(0.25, 1, 0.5, 1) scale-100 group-hover:scale-105"
       />
 
       {/* Dark overlay vignette layer */}
@@ -1218,3 +1135,48 @@ function ReelDeckCard({ reel, index, activePlayer, setActivePlayer }) {
     </div>
   );
 }
+
+// ----------------------------------------------------
+// Community Wall Photo Card Component (Smooth Fade Transition)
+// ----------------------------------------------------
+function CommunityWallCard({ photo, onClick }) {
+  const [displayPhoto, setDisplayPhoto] = useState(photo);
+  const [isFading, setIsFading] = useState(false);
+
+  useEffect(() => {
+    if (photo && photo !== displayPhoto) {
+      setIsFading(true);
+      const timer = setTimeout(() => {
+        setDisplayPhoto(photo);
+        setIsFading(false);
+      }, 400); // Fade-out duration
+      return () => clearTimeout(timer);
+    } else if (photo && !displayPhoto) {
+      setDisplayPhoto(photo);
+    }
+  }, [photo, displayPhoto]);
+
+  if (!displayPhoto) return null;
+
+  return (
+    <div
+      onClick={() => onClick(displayPhoto)}
+      className="break-inside-avoid relative rounded-3xl overflow-hidden border border-white/5 bg-[#0b0b0b] group hover:border-[#FF7A00]/45 transition-all duration-300 cursor-zoom-in shadow-xl mb-6 min-h-[150px] flex items-center justify-center"
+    >
+      <div
+        className="w-full h-full transition-opacity duration-400 ease-in-out"
+        style={{ opacity: isFading ? 0 : 1 }}
+      >
+        <img
+          src={displayPhoto}
+          alt="Community wall photo"
+          className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-500 rounded-3xl"
+        />
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-5 pointer-events-none z-10">
+        <p className="text-xs text-gray-300 font-medium tracking-wide">IIT Madras sports meetups nationwide</p>
+      </div>
+    </div>
+  );
+}
+
