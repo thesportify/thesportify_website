@@ -13,6 +13,7 @@ const LIB_DIR = path.join(__dirname, '..', 'lib');
 const folders = {
   communityWall: 'COMMUNITY WALL',
   medalsDistribution: 'Medals Distribution',
+  paradoxMedals: 'paradox medals distrbution',
   pblBadminton: 'PBL (Badminton)',
   pclFootball: 'PCL (Football)',
   run: 'Run',

@@ -34,8 +34,16 @@ const PARADOX_SUBSECTIONS = [
     photos: photoRegistry.medalsDistribution || []
   },
   {
-    id: "badminton",
+    id: "paradox-medals",
     chapter: "02",
+    name: "Paradox Medals Distribution",
+    timecode: "20:15:00",
+    desc: "Celebrating championship victories with gold medals and trophies awarded to our standout athletes.",
+    photos: photoRegistry.paradoxMedals || []
+  },
+  {
+    id: "badminton",
+    chapter: "03",
     name: "Sportify Badminton League",
     timecode: "11:00:00",
     desc: "Lightning singles court playoff showdowns and precision racquet drops.",
@@ -43,7 +51,7 @@ const PARADOX_SUBSECTIONS = [
   },
   {
     id: "football",
-    chapter: "03",
+    chapter: "04",
     name: "Sportify Champions League",
     timecode: "17:00:00",
     desc: "High-octane goals, defensive sweeps, and penalty shootouts that defined the festival.",
@@ -51,7 +59,7 @@ const PARADOX_SUBSECTIONS = [
   },
   {
     id: "volleyball",
-    chapter: "04",
+    chapter: "05",
     name: "VolleyVibes",
     timecode: "15:30:00",
     desc: "Spikes, massive defensive blocks, and high energy from the roaring court stands.",
@@ -59,7 +67,7 @@ const PARADOX_SUBSECTIONS = [
   },
   {
     id: "kampus-run",
-    chapter: "05",
+    chapter: "06",
     name: "Kampus Run",
     timecode: "06:15:00",
     desc: "The early morning 5K marathon challenge across the scenic IIT Madras campus lines.",
@@ -67,7 +75,7 @@ const PARADOX_SUBSECTIONS = [
   },
   {
     id: "ipl-auction",
-    chapter: "06",
+    chapter: "07",
     name: "IPL Auction Showdown",
     timecode: "14:00:00",
     desc: "Strategic bidding wars, team budgeting calculations, and record-breaking player acquisitions.",
@@ -186,6 +194,18 @@ export default function HighlightsPage() {
     const interval = setInterval(performShuffle, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const [shuffledPhotos, setShuffledPhotos] = useState([]);
+
+  useEffect(() => {
+    const sub = PARADOX_SUBSECTIONS.find(s => s.id === selectedSubId);
+    if (sub && sub.photos) {
+      const shuffled = [...sub.photos].sort(() => 0.5 - Math.random());
+      setShuffledPhotos(shuffled);
+    } else {
+      setShuffledPhotos([]);
+    }
+  }, [selectedSubId]);
 
   const aftermovieChapters = [
     { name: "OPENING CEREMONY", time: 0, label: "00:00" },
@@ -314,6 +334,7 @@ export default function HighlightsPage() {
   };
 
   const selectedSubsection = PARADOX_SUBSECTIONS.find(sub => sub.id === selectedSubId);
+  const displayPhotos = shuffledPhotos.length > 0 ? shuffledPhotos : (selectedSubsection?.photos || []);
 
   return (
     <main className="min-h-screen bg-[#050505] text-white selection:bg-[#FF7A00]/30 selection:text-white overflow-x-hidden relative">
@@ -455,6 +476,7 @@ export default function HighlightsPage() {
                   src="/RKM.mp4"
                   className="w-full h-full object-cover pointer-events-none"
                   playsInline
+                  preload="none"
                 />
                 
                 {/* Coming Soon Overlay */}
@@ -542,7 +564,7 @@ export default function HighlightsPage() {
               <div className="flex items-center space-x-2.5 pb-3 border-b border-white/5 mb-2 px-2">
                 <HardDrive className="h-4 w-4 text-[#FF7A00]" />
                 <span className="text-[10px] font-mono font-black uppercase tracking-wider text-gray-400">
-                  FILM REEL SECTIONS // 6 CHAPTERS
+                  FILM REEL SECTIONS // 7 CHAPTERS
                 </span>
               </div>
 
@@ -605,7 +627,7 @@ export default function HighlightsPage() {
                   transition={{ duration: 0.5 }}
                   className="columns-2 sm:columns-3 md:columns-4 gap-3"
                 >
-                  {selectedSubsection.photos.map((photo, pIdx) => {
+                  {displayPhotos.map((photo, pIdx) => {
                     const isStringSrc = typeof photo === "string";
                     return (
                       <div
@@ -693,6 +715,7 @@ export default function HighlightsPage() {
                     loop
                     muted={isMonitorMuted}
                     playsInline
+                    preload="metadata"
                   />
                 )}
 
@@ -1084,7 +1107,7 @@ function ReelDeckCard({ reel, index, activePlayer, setActivePlayer }) {
         loop
         muted={isMuted}
         playsInline
-        preload="auto"
+        preload="none"
         className="absolute inset-0 w-full h-full object-contain bg-black z-0 transition-transform duration-[1000ms] cubic-bezier(0.25, 1, 0.5, 1) scale-100 group-hover:scale-105"
       />
 
