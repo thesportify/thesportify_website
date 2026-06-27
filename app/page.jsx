@@ -1,21 +1,25 @@
-// src/Home.jsx
-
 import Hero from '../components/hero'
-import SportifyInParadox from '../components/SportifyInParadox'
 import RashtriyaKhelMahotsav from '../components/RashtriyaKhelMahotsav'
-import FeaturedEvents from '../components/featuredEvents'
+import MeetupsGallery from '../components/MeetupGallery'
+import ConstitutionSection from '../components/ConstitutionSection'
 import JoinCommunity from '../components/joinCommunity'
 import Footer from '../components/footer'
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-black via-[#1a1a1a] to-black dark:bg-gray-950">
+    <main className="min-h-screen bg-[#050505] text-white overflow-hidden">
       <Hero />
-      <SportifyInParadox />
       <RashtriyaKhelMahotsav />
-      <FeaturedEvents />
+      <MeetupsGallery />
+      <section className="relative w-full py-16 bg-[#050505] overflow-hidden border-b border-white/5 z-30" id="constitution">
+        <div className="container mx-auto px-4 relative z-10">
+          <ConstitutionSection />
+        </div>
+      </section>
       <JoinCommunity />
       <Footer />
     </main>
   )
 }
+
+

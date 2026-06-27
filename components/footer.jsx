@@ -1,51 +1,93 @@
-// src/components/Footer.jsx
+"use client";
 
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import {
   Instagram,
   Youtube,
   Linkedin,
   Mail,
   Phone,
-  MapPin,
 } from "lucide-react";
 import logo from "../assets/sportify_logo1.png";
 import Image from "next/image";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [particles, setParticles] = useState([]);
+
+  // Generate a few footer embers
+  useEffect(() => {
+    const list = Array.from({ length: 12 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 4 + 1.5,
+      duration: Math.random() * 4 + 3,
+      delay: Math.random() * 2,
+    }));
+    setParticles(list);
+  }, []);
 
   return (
-    <footer className="bg-gradient-to-b from-[#111111] via-[#1a1a1a] to-black text-white pt-16 pb-8 border-t border-gray-800 px-16">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 mb-8 gap-12 items-start justify-between">
-          {/* Logo & About */}
-          <div className="flex flex-col justify-start">
-            {/* Heading: Logo & Title */}
-            <div className="flex items-center mb-4">
+    <footer className="relative bg-[#050505] text-white pt-20 pb-10 overflow-hidden border-t border-white/5 select-none">
+      
+      {/* Stadium Light Orange Bar Divider */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#FF7A00] to-transparent shadow-[0_0_15px_#FF7A00] z-20" />
+      
+      {/* Dynamic Embers Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-30">
+        {particles.map((p) => (
+          <motion.div
+            key={p.id}
+            className="absolute rounded-full bg-[#FF7A00]"
+            style={{
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              width: p.size,
+              height: p.size,
+            }}
+            animate={{
+              y: [0, -60, 0],
+              opacity: [0.1, 0.6, 0.1],
+            }}
+            transition={{
+              duration: p.duration,
+              delay: p.delay,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="container mx-auto px-6 md:px-12 relative z-10 max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start justify-between pb-12 border-b border-white/5">
+          
+          {/* Logo & Description */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
               <Image
                 src={logo}
                 alt="Sportify Logo"
                 width={50}
                 height={50}
-                className="mr-3 drop-shadow-md"
+                className="mr-1 filter drop-shadow-[0_0_15px_rgba(255,122,0,0.3)]"
               />
-              <h3 className="text-2xl font-extrabold tracking-wide text-[#f8f8f8]">
+              <h3 className="text-2xl font-black tracking-wider text-white uppercase">
                 THE SPORTIFY
               </h3>
             </div>
-
-            <p className="text-gray-400 mb-4 text-sm leading-relaxed">
-              IIT Madras BS Degree Sports Society — spreading the joy of sports
-              and fostering a community of athletes.
+            
+            <p className="text-gray-400 text-sm leading-relaxed max-w-sm font-medium">
+              IIT Madras BS Degree Sports Society — spreading the flame of sports, fostering a community of athletes, and celebrating competition.
             </p>
 
-            <div className="flex space-x-4">
+            {/* Social Coordinates */}
+            <div className="flex gap-4 pt-2">
               {[
                 { Icon: Instagram, href: "https://www.instagram.com/sportify_iitm/" },
-                {
-                  Icon: Linkedin,
-                  href: " https://www.linkedin.com/company/the-sportify-society/",
-                },
+                { Icon: Linkedin, href: "https://www.linkedin.com/company/the-sportify-society/" },
                 { Icon: Youtube, href: "https://www.youtube.com/@thesportifyiitmbs/" },
               ].map(({ Icon, href }, idx) => (
                 <a
@@ -53,7 +95,7 @@ export default function Footer() {
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-white transition-colors hover:scale-110 duration-300"
+                  className="p-2.5 rounded-full border border-white/5 bg-[#0b0b0b] text-gray-500 hover:text-[#FF7A00] hover:border-[#FF7A00]/40 transition-all duration-300 transform hover:scale-105 cursor-pointer"
                 >
                   <Icon className="h-5 w-5" />
                 </a>
@@ -61,55 +103,59 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Contact */}
-          <div className="flex flex-col items-start md:items-end">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#ff5a00] via-[#ff9a00] to-[#ffe808] relative inline-block">
-                Contact Us
-                <span className="absolute left-0 -bottom-1 w-full h-0.5 bg-gradient-to-r from-[#ff5a00] via-[#ff9a00] to-[#ffe808]" />
-              </h3>
+          {/* Contact Coordinates */}
+          <div className="flex flex-col items-start md:items-end space-y-4">
+            <div>
+              <h4 className="text-sm font-black uppercase tracking-widest text-[#FFC107]">
+                Contact Box
+              </h4>
             </div>
-            <ul className="space-y-3 text-sm text-gray-400 text-left md:text-right">
-              <li className="flex items-start md:justify-end">
-                
-              </li>
-              <li className="flex flex-col sm:flex-row gap-2 mt-2 md:justify-end">
+
+            <div className="flex flex-col gap-3.5 w-full md:items-end">
+              <div className="flex flex-wrap gap-2.5 justify-start md:justify-end">
                 <a
                   href="tel:+919878449480"
-                  className="inline-flex items-center bg-white/5 hover:bg-[#ff9a00]/10 border border-white/10 hover:border-[#ff9a00]/40 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg transition-all duration-300 text-xs font-semibold shadow-sm hover:scale-[1.02]"
+                  className="inline-flex items-center bg-white/5 hover:bg-[#FF7A00]/10 border border-white/5 hover:border-[#FF7A00]/30 text-gray-300 hover:text-white px-3.5 py-2 rounded-xl transition-all duration-300 text-xs font-bold"
                 >
-                  <Phone className="h-3.5 w-3.5 mr-2 text-[#ff9a00]" />
+                  <Phone className="h-3.5 w-3.5 mr-2 text-[#FF7A00]" />
                   +91 9878449480
                 </a>
+                
                 <a
                   href="tel:+917870825906"
-                  className="inline-flex items-center bg-white/5 hover:bg-[#ff9a00]/10 border border-white/10 hover:border-[#ff9a00]/40 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg transition-all duration-300 text-xs font-semibold shadow-sm hover:scale-[1.02]"
+                  className="inline-flex items-center bg-white/5 hover:bg-[#FF7A00]/10 border border-white/5 hover:border-[#FF7A00]/30 text-gray-300 hover:text-white px-3.5 py-2 rounded-xl transition-all duration-300 text-xs font-bold"
                 >
-                  <Phone className="h-3.5 w-3.5 mr-2 text-[#ff9a00]" />
+                  <Phone className="h-3.5 w-3.5 mr-2 text-[#FF7A00]" />
                   +91 7870825906
                 </a>
-              </li>
-              <li className="flex mt-2 md:justify-end">
-                <a
-                  href="mailto:thesportify.society@study.iitm.ac.in"
-                  className="inline-flex items-center bg-white/5 hover:bg-[#ff9a00]/10 border border-white/10 hover:border-[#ff9a00]/40 text-gray-300 hover:text-white px-4 py-2 rounded-lg transition-all duration-300 text-xs font-semibold shadow-sm hover:scale-[1.02]"
-                >
-                  <Mail className="h-3.5 w-3.5 mr-2 text-[#ff9a00]" />
-                  thesportify.society@study.iitm.ac.in
-                </a>
-              </li>
-            </ul>
+              </div>
+
+              <a
+                href="mailto:thesportify.society@study.iitm.ac.in"
+                className="inline-flex items-center bg-white/5 hover:bg-[#FF7A00]/10 border border-white/5 hover:border-[#FF7A00]/30 text-gray-300 hover:text-white px-4 py-2.5 rounded-xl transition-all duration-300 text-xs font-bold w-max"
+              >
+                <Mail className="h-3.5 w-3.5 mr-2 text-[#FF7A00]" />
+                thesportify.society@study.iitm.ac.in
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Footer Bottom Bar */}
+        <div className="pt-8 text-xs text-gray-500 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="font-medium">
+            © {currentYear}{" "}
+            <span className="text-white font-extrabold">THE SPORTIFY</span>. All
+            rights reserved.
+          </p>
+          <div className="flex gap-4">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#FF7A00]">
+              Official Sports Society
+            </span>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-gray-800 pt-6 text-sm text-gray-500 flex flex-col justify-between items-center">
-          <p className="mb-4 md:mb-0">
-            © {currentYear}{" "}
-            <span className="text-white font-semibold">THE SPORTIFY</span>. All
-            rights reserved.
-          </p>
-        </div>
       </div>
     </footer>
   );

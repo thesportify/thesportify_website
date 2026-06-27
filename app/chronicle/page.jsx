@@ -5,14 +5,24 @@ import Image from "next/image";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import NewsletterComponent from "@/components/ThePodium";
+import ConstitutionSection from "@/components/ConstitutionSection";
 import TenureReportModal from "@/components/TenureReportModal";
 import podiumBG from "@/assets/PodiumBG.jpeg";
 
-// Import core leadership images
-// (using direct ImageKit URLs in component)
+// Import images for collage background
+import ChennaiFootball from "@/assets/RKM26 - Chennai Chapter.jpg";
+import LucknowTrophy from "@/assets/RKM - Lucknow Chapter.jpg";
+import JaipurMeetup from "@/assets/RKM26 - Jaipur Chapter.jpg";
+import DelhiBadminton1 from "@/assets/Meetups/DelhiBadminton1.jpg";
 
-import { Users, MapPin, Award, Trophy, Star, ChevronRight, Eye, Calendar, ChevronDown } from "lucide-react";
+// Import lucide icons
+import { 
+  Users, MapPin, Award, Trophy, Star, ChevronRight,
+  Eye, Calendar, ChevronDown, Scroll, Flame 
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+const PHOTOS_DRIVE_LINK = "https://drive.google.com/drive/folders/1Jaz9kdMbLGtucr7fznjE6Hq92FhPlhcW?usp=drive_link";
 
 const tenureReportsData = {
   "2026-27": {
@@ -78,6 +88,7 @@ export default function ChroniclePage() {
   const [selectedTenure, setSelectedTenure] = useState("2025-26");
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
 
+  const constitutionRef = useRef(null);
   const tenureRef = useRef(null);
   const newsletterRef = useRef(null);
 
@@ -86,26 +97,38 @@ export default function ChroniclePage() {
   // Scroll handler to highlight active sub-nav item
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 200; // Offset for header/navbar
+      const scrollPosition = window.scrollY + 200;
 
-      const tenureTop = tenureRef.current?.offsetTop || 0;
+      const constitutionTop = constitutionRef.current?.offsetTop || Infinity;
+      const tenureTop = tenureRef.current?.offsetTop || Infinity;
       const newsletterTop = newsletterRef.current?.offsetTop || Infinity;
 
       if (scrollPosition >= newsletterTop - 100) {
         setActiveSection("newsletter");
-      } else {
+      } else if (scrollPosition >= tenureTop - 100) {
         setActiveSection("tenure");
+      } else if (scrollPosition >= constitutionTop - 100) {
+        setActiveSection("constitution");
+      } else {
+        setActiveSection("");
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToSection = (sectionId) => {
     setActiveSection(sectionId);
-    const targetRef = sectionId === "tenure" ? tenureRef : newsletterRef;
-    if (targetRef.current) {
+    let targetRef;
+    if (sectionId === "constitution") {
+      targetRef = constitutionRef;
+    } else if (sectionId === "tenure") {
+      targetRef = tenureRef;
+    } else if (sectionId === "newsletter") {
+      targetRef = newsletterRef;
+    }
+    if (targetRef && targetRef.current) {
       const topOffset = targetRef.current.offsetTop - 100;
       window.scrollTo({
         top: topOffset,
@@ -121,9 +144,9 @@ export default function ChroniclePage() {
 
   return (
     <main
-      className="min-h-screen bg-gradient-to-br from-black via-[#121420] to-black text-white selection:bg-[#ff9a00]/30 selection:text-white"
+      className="min-h-screen bg-[#050505] text-white selection:bg-[#FF7A00]/30 selection:text-white"
       style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85)), url(${podiumBG.src})`,
+        backgroundImage: `linear-gradient(rgba(5, 5, 5, 0.92), rgba(5, 5, 5, 0.95)), url(${podiumBG.src})`,
         backgroundSize: "cover",
         backgroundAttachment: "fixed",
         backgroundPosition: "center",
@@ -131,59 +154,83 @@ export default function ChroniclePage() {
     >
       <Navbar />
 
-      <div className="container mx-auto px-4 md:px-8 lg:px-16 py-20">
-        
-        {/* Page Header */}
-        <div className="text-center mt-12 mb-8 space-y-4">
-          <div className="inline-flex items-center justify-center p-2.5 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 rounded-full border border-orange-500/20 mb-2">
-            <Star className="h-6 w-6 text-[#ff9a00] animate-pulse" />
+      {/* Hero Section */}
+      <section className="relative w-full min-h-[60vh] flex flex-col items-center justify-center overflow-hidden border-b border-white/5 py-24">
+        {/* Collage Background */}
+        <div className="absolute inset-0 z-0 select-none opacity-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 w-full h-full">
+            <div className="relative w-full h-full"><Image src={ChennaiFootball} alt="Chennai" fill className="object-cover" /></div>
+            <div className="relative w-full h-full"><Image src={LucknowTrophy} alt="Lucknow" fill className="object-cover" /></div>
+            <div className="relative w-full h-full"><Image src={JaipurMeetup} alt="Jaipur" fill className="object-cover" /></div>
+            <div className="relative w-full h-full"><Image src={DelhiBadminton1} alt="Delhi" fill className="object-cover" /></div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-            SPORTIFY{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff5a00] via-[#ffaa00] to-[#ffe808]">
-              CHRONICLE
-            </span>
-          </h1>
-          <p className="text-gray-400 text-sm md:text-md max-w-xl mx-auto font-medium">
-            A record of our leadership, achievements, events and publications through the years.
-          </p>
+          <div className="absolute inset-0 bg-black/90 mix-blend-multiply" />
         </div>
 
+        <div className="relative z-10 max-w-4xl px-6 text-center space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 rounded-full mb-2">
+            <Scroll className="h-4 w-4 text-[#FF7A00] animate-pulse" />
+            <span className="text-[10px] uppercase font-black tracking-widest text-[#FF7A00]">DOCUMENTATION HUB</span>
+          </div>
+
+          <h1 className="text-[clamp(2.2rem,6vw,4.8rem)] font-black uppercase tracking-tight leading-none text-white">
+            SPORTIFY CHRONICLES
+          </h1>
+
+          <p className="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed font-medium">
+            Documenting the journey of India&apos;s first student-led national sports community, one chapter, one event, and one memory at a time.
+          </p>
+        </div>
+      </section>
+
+      <div className="container mx-auto px-4 md:px-8 lg:px-16 py-12">
+
         {/* Floating Sub-Navigation Menu */}
-        <div className="sticky top-20 z-40 flex justify-center mb-16">
-          <div className="bg-[#0b0f1d]/75 backdrop-blur-lg border border-gray-900 rounded-2xl p-1.5 shadow-2xl flex space-x-1.5">
+        <div className="sticky top-20 z-40 flex justify-center mb-16 px-2">
+          <div className="bg-[#0b0f1d]/75 backdrop-blur-lg border border-white/5 rounded-2xl p-1 md:p-1.5 shadow-2xl flex flex-wrap justify-center gap-1 sm:gap-1.5 max-w-full">
             <button
               onClick={() => scrollToSection("tenure")}
-              className={`flex items-center space-x-2 py-2.5 px-6 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 ${
+              className={`flex items-center space-x-1.5 sm:space-x-2 py-2 px-2.5 sm:py-2.5 sm:px-4 rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 shrink-0 ${
                 activeSection === "tenure"
-                  ? "bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 text-[#ff9a00] shadow-[0_0_15px_rgba(255,154,0,0.1)]"
+                  ? "bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 text-[#FF7A00] shadow-[0_0_15px_rgba(255,122,0,0.1)]"
                   : "text-gray-400 hover:text-white border border-transparent hover:bg-gray-900/30"
               }`}
             >
-              <Users className="h-4 w-4" />
+              <Users className="h-3.5 w-3.5" />
               <span>Tenure Reports</span>
             </button>
             <button
-              onClick={() => scrollToSection("newsletter")}
-              className={`flex items-center space-x-2 py-2.5 px-6 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 ${
-                activeSection === "newsletter"
-                  ? "bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 text-[#ff9a00] shadow-[0_0_15px_rgba(255,154,0,0.1)]"
+              onClick={() => scrollToSection("constitution")}
+              className={`flex items-center space-x-1.5 sm:space-x-2 py-2 px-2.5 sm:py-2.5 sm:px-4 rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 shrink-0 ${
+                activeSection === "constitution"
+                  ? "bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 text-[#FF7A00] shadow-[0_0_15px_rgba(255,122,0,0.1)]"
                   : "text-gray-400 hover:text-white border border-transparent hover:bg-gray-900/30"
               }`}
             >
-              <Trophy className="h-4 w-4" />
-              <span>The Podium Newsletter</span>
+              <Scroll className="h-3.5 w-3.5" />
+              <span>Constitution</span>
+            </button>
+            <button
+              onClick={() => scrollToSection("newsletter")}
+              className={`flex items-center space-x-1.5 sm:space-x-2 py-2 px-2.5 sm:py-2.5 sm:px-4 rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-300 shrink-0 ${
+                activeSection === "newsletter"
+                  ? "bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 text-[#FF7A00] shadow-[0_0_15px_rgba(255,122,0,0.1)]"
+                  : "text-gray-400 hover:text-white border border-transparent hover:bg-gray-900/30"
+              }`}
+            >
+              <Eye className="h-3.5 w-3.5" />
+              <span>The Podium</span>
             </button>
           </div>
         </div>
 
-        {/* Section 1: Tenure Reports */}
-        <section ref={tenureRef} className="space-y-8 scroll-mt-28 mb-20">
-          <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-gray-900 pb-4">
+        {/* Section 2: Tenure Reports */}
+        <section ref={tenureRef} id="tenure" className="space-y-8 scroll-mt-28 mb-24 border-t border-white/5 pt-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-white/5 pb-4">
             <div>
               <div className="flex items-center space-x-4">
                 <h2 className="text-2xl font-bold flex items-center space-x-2 tracking-tight">
-                  <Users className="h-6 w-6 text-[#ff9a00]" />
+                  <Users className="h-6 w-6 text-[#FF7A00]" />
                   <span>TENURE REPORTS</span>
                 </h2>
 
@@ -191,9 +238,9 @@ export default function ChroniclePage() {
                 <div className="relative">
                   <button
                     onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-gray-950 border border-gray-800 rounded-xl text-xs text-white font-bold tracking-wider hover:border-orange-500/30 transition-all duration-300 focus:outline-none"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-[#0b0b0b] border border-white/10 rounded-xl text-xs text-white font-bold tracking-wider hover:border-orange-500/30 transition-all duration-300 focus:outline-none"
                   >
-                    <Calendar size={12} className="text-[#ff5a00]" />
+                    <Calendar size={12} className="text-[#FF7A00]" />
                     <span>{selectedTenure} TENURE</span>
                     <ChevronDown size={12} className="text-gray-400" />
                   </button>
@@ -204,7 +251,7 @@ export default function ChroniclePage() {
                         initial={{ opacity: 0, y: 8, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                        className="absolute left-0 mt-2 min-w-[150px] bg-gray-950 border border-gray-800 rounded-xl p-1 shadow-2xl z-[100]"
+                        className="absolute left-0 mt-2 min-w-[150px] bg-[#0b0b0b] border border-white/10 rounded-xl p-1 shadow-2xl z-[100]"
                       >
                         {Object.keys(tenureReportsData).map((year) => (
                           <button
@@ -214,11 +261,11 @@ export default function ChroniclePage() {
                               setIsYearDropdownOpen(false);
                             }}
                             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
-                              selectedTenure === year ? "bg-orange-500/20 text-[#ffce00]" : "text-gray-400 hover:text-white hover:bg-white/5"
+                              selectedTenure === year ? "bg-orange-500/20 text-[#FFC107]" : "text-gray-400 hover:text-white hover:bg-white/5"
                             }`}
                           >
                             <span>{year} Tenure</span>
-                            {selectedTenure === year && <div className="w-1 h-1 rounded-full bg-[#ffce00] shadow-[0_0_6px_#ffce00]" />}
+                            {selectedTenure === year && <div className="w-1 h-1 rounded-full bg-[#FFC107] shadow-[0_0_6px_#FFC107]" />}
                           </button>
                         ))}
                       </motion.div>
@@ -234,7 +281,7 @@ export default function ChroniclePage() {
             {!activeReport.isSkeleton && (
               <button
                 onClick={() => openReport(selectedTenure)}
-                className="mt-4 md:mt-0 flex items-center space-x-1.5 text-xs font-bold text-gray-400 hover:text-white transition-all duration-300"
+                className="mt-4 md:mt-0 flex items-center space-x-1.5 text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 bg-transparent border-none cursor-pointer"
               >
                 <span>View Tenure Report</span>
                 <ChevronRight className="h-4 w-4" />
@@ -242,26 +289,25 @@ export default function ChroniclePage() {
             )}
           </div>
 
-          {/* Full-width Layout (Matching Newsletter block format) */}
+          {/* Full-width Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
             
-            {/* Left Panel: Leadership Team (Secretary & Deputy Secretary) */}
+            {/* Left Panel: Leadership Team */}
             <div className="lg:col-span-5 flex flex-col justify-between gap-6">
-              
               {activeReport.leaders.map((leader, idx) => (
-                <div key={idx} className="backdrop-blur-md rounded-3xl p-6 border border-gray-900 bg-gray-900/40 hover:border-gray-800 transition-all duration-300 flex items-center space-x-6">
-                  <div className="relative w-28 h-36 md:w-32 md:h-40 rounded-2xl overflow-hidden border-2 border-[#ff9a00]/30 shadow-[0_0_15px_rgba(255,154,0,0.1)] bg-slate-900 shrink-0">
+                <div key={idx} className="backdrop-blur-md rounded-3xl p-6 border border-white/5 bg-[#0b0b0b]/40 hover:border-white/10 transition-all duration-300 flex items-center space-x-6">
+                  <div className="relative w-28 h-36 md:w-32 md:h-40 rounded-2xl overflow-hidden border-2 border-[#FF7A00]/30 shadow-[0_0_15px_rgba(255,122,0,0.1)] bg-slate-900 shrink-0">
                     <Image
                       src={leader.image}
                       alt={leader.name}
                       fill
                       sizes="(max-width: 768px) 112px, 128px"
                       className="object-cover"
-                      priority
+                      unoptimized={leader.image.startsWith("data:")}
                     />
                   </div>
                   <div className="space-y-2">
-                    <span className="text-[10px] md:text-[11px] uppercase tracking-widest text-[#ffaa44] font-extrabold bg-[#ff9a00]/10 px-2.5 py-1 rounded-md border border-[#ff9a00]/20 inline-block">
+                    <span className="text-[10px] md:text-[11px] uppercase tracking-widest text-[#ffaa44] font-extrabold bg-[#FF7A00]/10 px-2.5 py-1 rounded-md border border-[#FF7A00]/20 inline-block">
                       {leader.position}
                     </span>
                     <h3 className="text-lg md:text-xl font-extrabold text-white">
@@ -273,14 +319,11 @@ export default function ChroniclePage() {
                   </div>
                 </div>
               ))}
-
             </div>
 
-            {/* Right Panel: Tenure Overview, Metrics, and Button */}
-            <div className="lg:col-span-7 bg-[#070b14]/90 backdrop-blur-md rounded-3xl p-6 md:p-8 border-2 border-[#ff9a00] shadow-[0_0_30px_rgba(255,154,0,0.06)] hover:border-[#ff9a00]/85 transition-all duration-500 flex flex-col justify-between gap-6">
-              
-              {/* Header block */}
-              <div className="flex items-center justify-between border-b border-gray-900 pb-4">
+            {/* Right Panel: Tenure Overview */}
+            <div className="lg:col-span-7 bg-[#0b0b0b]/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-white/10 shadow-[0_0_30px_rgba(255,122,0,0.03)] hover:border-orange-500/20 transition-all duration-500 flex flex-col justify-between gap-6">
+              <div className="flex items-center justify-between border-b border-white/5 pb-4">
                 <div>
                   <h3 className="text-xl md:text-2xl font-extrabold text-white tracking-tight uppercase">
                     {activeReport.title}
@@ -296,7 +339,6 @@ export default function ChroniclePage() {
                 )}
               </div>
 
-              {/* Brief Description */}
               <p className="text-gray-300 text-sm leading-relaxed">
                 {activeReport.description}
               </p>
@@ -310,9 +352,9 @@ export default function ChroniclePage() {
                   else if (metric.icon === "trophy") IconComponent = Trophy;
 
                   return (
-                    <div key={idx} className="bg-black/20 border border-gray-900 rounded-2xl p-4 flex flex-col items-center justify-center text-center space-y-2 hover:border-gray-800 transition-all duration-300">
-                      <div className="p-1.5 bg-[#ff9a00]/5 rounded-lg border border-[#ff9a00]/10">
-                        <IconComponent className="h-5 w-5 text-[#ff9a00]" />
+                    <div key={idx} className="bg-black/20 border border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center text-center space-y-2 hover:border-white/10 transition-all duration-300">
+                      <div className="p-1.5 bg-[#FF7A00]/5 rounded-lg border border-[#FF7A00]/10">
+                        <IconComponent className="h-5 w-5 text-[#FF7A00]" />
                       </div>
                       <div className="space-y-0.5">
                         <div className="text-lg md:text-xl font-extrabold text-white">{metric.value}</div>
@@ -327,54 +369,59 @@ export default function ChroniclePage() {
               {activeReport.isSkeleton ? (
                 <button
                   disabled
-                  className="w-full py-3.5 px-6 rounded-xl bg-gray-900/50 border border-gray-800/80 text-gray-500 font-extrabold text-xs md:text-sm tracking-wider uppercase transition-all duration-300 flex items-center justify-center space-x-2 cursor-not-allowed opacity-60"
+                  className="w-full py-3.5 px-6 rounded-xl bg-gray-900/50 border border-gray-800/80 text-gray-500 font-extrabold text-xs md:text-sm tracking-wider uppercase flex items-center justify-center space-x-2 cursor-not-allowed opacity-60"
                 >
                   <span>Report Coming Soon</span>
                 </button>
               ) : (
                 <button
                   onClick={() => openReport(selectedTenure)}
-                  className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-orange-600 to-yellow-500 hover:from-orange-500 hover:to-yellow-400 text-black font-extrabold text-xs md:text-sm tracking-wider uppercase transition-all duration-300 flex items-center justify-center space-x-2 shadow-[0_4px_25px_rgba(234,88,12,0.15)] hover:shadow-[0_4px_30px_rgba(234,88,12,0.3)] cursor-pointer"
+                  className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-orange-600 to-yellow-500 hover:from-orange-500 hover:to-yellow-400 text-black font-extrabold text-xs md:text-sm tracking-wider uppercase transition-all duration-300 flex items-center justify-center space-x-2 shadow-[0_4px_25px_rgba(234,88,12,0.15)] hover:shadow-[0_4px_30px_rgba(234,88,12,0.3)] cursor-pointer border-none outline-none"
                 >
                   <span>View Full Report</span>
                   <ChevronRight className="h-4 w-4 stroke-[3px]" />
                 </button>
               )}
-
             </div>
 
           </div>
         </section>
 
-        {/* Section 2: The Podium Newsletter */}
-        <section ref={newsletterRef} className="space-y-8 scroll-mt-28 mb-16">
-          <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-gray-900 pb-4">
+        {/* Section 3: Sportify Constitution */}
+        <section id="constitution" ref={constitutionRef} className="space-y-8 scroll-mt-28 mb-24 border-t border-white/5 pt-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-white/5 pb-4">
             <div>
               <h2 className="text-2xl font-bold flex items-center space-x-2 tracking-tight">
-                <Trophy className="h-6 w-6 text-[#ff9a00]" />
+                <Scroll className="h-6 w-6 text-[#FF7A00]" />
+                <span>SPORTIFY CONSTITUTION</span>
+              </h2>
+              <p className="text-xs md:text-sm text-gray-500 mt-1">
+                Official rules, roles, and administrative bylaws of the Sportify Sports Society.
+              </p>
+            </div>
+          </div>
+
+          <ConstitutionSection />
+        </section>
+
+        {/* Section 4: The Podium Newsletter */}
+        <section ref={newsletterRef} id="newsletter" className="space-y-8 scroll-mt-28 mb-24 border-t border-white/5 pt-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-white/5 pb-4">
+            <div>
+              <h2 className="text-2xl font-bold flex items-center space-x-2 tracking-tight">
+                <Trophy className="h-6 w-6 text-[#FF7A00]" />
                 <span>THE PODIUM NEWSLETTER</span>
               </h2>
               <p className="text-xs md:text-sm text-gray-500 mt-1">
                 Your monthly digest of everything sports. Read match reports, interviews, and features.
               </p>
             </div>
-            <button
-              onClick={() => {
-                const el = document.querySelector('[ref="carouselRef"]') || document.getElementById("carousel-head");
-                if (el) {
-                  el.scrollIntoView({ behavior: "smooth", block: "center" });
-                }
-              }}
-              id="carousel-head"
-              className="mt-4 md:mt-0 flex items-center space-x-1.5 text-xs font-bold text-gray-400 hover:text-white transition-all duration-300"
-            >
-              <span>Browse All Editions</span>
-              <ChevronRight className="h-4 w-4" />
-            </button>
           </div>
 
           <NewsletterComponent />
         </section>
+
+
 
       </div>
 

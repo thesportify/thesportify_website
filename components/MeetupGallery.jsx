@@ -1,163 +1,217 @@
+"use client";
+
+import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
+import gsap from "gsap";
 
 import DelhiBadminton1 from "../assets/Meetups/DelhiBadminton1.jpg";
 import DelhiBadminton2 from "../assets/Meetups/DelhiBadminton2.png";
-import DelhiBadminton3 from "../assets/Meetups/DelhiBadminton3.jpg";
 import DelhiHockey1 from "../assets/Meetups/DelhiHockey1.jpg";
-import DelhiHockey2 from "../assets/Meetups/DelhiHockey2.jpg";
 import KanpurCricket1 from "../assets/Meetups/KanpurCricket1.png";
 import KanpurCricket2 from "../assets/Meetups/KanpurCricket2.png";
 import LucknowCricket1 from "../assets/Meetups/LucknowCricket1.jpg";
 import LucknowCricket2 from "../assets/Meetups/LucknowCricket2.jpg";
 
-import meetupBG from "../assets/MeetupBG.png";
-
+const MEMORIES = [
+  { type: "image", src: DelhiBadminton1, label: "Delhi Badminton Meetup", count: "14 Players", year: "2025" },
+  { type: "quote", text: "Some matches end. Memories don't.", author: "Sportify Diaries" },
+  { type: "image", src: DelhiBadminton2, label: "Delhi Badminton Playoff", count: "18 Players", year: "2025" },
+  { type: "video", src: "/RKM.mp4", label: "RKM Championship Highlights", count: "Live Reel", year: "2026" },
+  { type: "image", src: DelhiHockey1, label: "Delhi Hockey Championship", count: "30 Cheerleaders", year: "2025" },
+  { type: "quote", text: "We came for sports. We stayed for people.", author: "Sportify Diaries" },
+  { type: "image", src: KanpurCricket1, label: "Kanpur Turf Match", count: "22 Players", year: "2025" },
+  { type: "image", src: KanpurCricket2, label: "Kanpur Cricket Finals", count: "150+ Crowds", year: "2025" },
+  { type: "image", src: LucknowCricket1, label: "Lucknow Cricket Meetup", count: "25 Players", year: "2025" },
+  { type: "quote", text: "Every city became home.", author: "Sportify Diaries" },
+  { type: "image", src: LucknowCricket2, label: "Lucknow Cricket Final Match", count: "Championship Hub", year: "2025" }
+];
 
 export default function MeetupsGallery() {
+  const containerRef = useRef(null);
+  const trackRef = useRef(null);
+  const [hoveredIdx, setHoveredIdx] = useState(null);
+  const scrollTweenRef = useRef(null);
+
+  const duplicatedMemories = [...MEMORIES, ...MEMORIES, ...MEMORIES];
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const trackWidth = track.scrollWidth / 3;
+
+    // Continuous infinite auto-scroll completing cycle slowly in 45s
+    scrollTweenRef.current = gsap.to(track, {
+      x: `-=${trackWidth}`,
+      ease: "none",
+      duration: 45,
+      repeat: -1,
+      modifiers: {
+        x: (x) => {
+          const val = parseFloat(x);
+          if (val <= -trackWidth * 2) {
+            return `${val + trackWidth}px`;
+          }
+          return `${val}px`;
+        }
+      }
+    });
+
+    return () => {
+      if (scrollTweenRef.current) scrollTweenRef.current.kill();
+    };
+  }, []);
+
+  const handleMouseEnter = (e, idx) => {
+    setHoveredIdx(idx);
+    
+    // Pause horizontal track movement immediately
+    if (scrollTweenRef.current) scrollTweenRef.current.pause();
+
+    // Fade in video sound smoothly
+    const videoEl = e.currentTarget.querySelector("video");
+    if (videoEl) {
+      videoEl.muted = false;
+      videoEl.volume = 0;
+      gsap.to(videoEl, { volume: 0.8, duration: 0.4 });
+    }
+  };
+
+  const handleMouseLeave = (e) => {
+    setHoveredIdx(null);
+    
+    // Resume horizontal track movement immediately
+    if (scrollTweenRef.current) scrollTweenRef.current.play();
+
+    // Fade out video sound smoothly
+    const videoEl = e.currentTarget.querySelector("video");
+    if (videoEl) {
+      gsap.to(videoEl, {
+        volume: 0,
+        duration: 0.4,
+        onComplete: () => {
+          videoEl.muted = true;
+        }
+      });
+    }
+  };
+
   return (
-    <section
-      className="pt-[4rem] pb-[6rem] bg-gradient-to-br from-black via-[#1a1a1a] to-black dark:bg-gray-950 px-4 md:px-16 overflow-hidden sm:overflow-visible relative"
+    <section 
+      ref={containerRef}
+      className="relative w-full py-28 bg-[#050505] overflow-hidden border-b border-white/5 select-none z-30"
       id="meetups-gallery"
-      style={{
-              backgroundImage: `url(${meetupBG.src})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              zIndex: 1,
-            }}
     >
-      <div className="container mx-auto px-0 sm:px-4 relative">
+      {/* Edge Vignette Overlays */}
+      <div className="absolute top-0 bottom-0 left-0 w-24 sm:w-64 bg-gradient-to-r from-[#050505] to-transparent z-20 pointer-events-none" />
+      <div className="absolute top-0 bottom-0 right-0 w-24 sm:w-64 bg-gradient-to-l from-[#050505] to-transparent z-20 pointer-events-none" />
 
-        <div className="text-center mb-28 md:mb-16 scroll-reveal px-3 py-6 sm:px-0 sm:py-0">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 text-white">
-            Meetups Across{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff5a00] via-[#ffce00] to-[#ffe808]">
-              India
-            </span>
-          </h2>
-          <p className="text-gray-300 max-w-xl mx-auto text-sm sm:text-base">
-            A joy-filled photo gallery of our society's meetups in various cities, celebrating sports and togetherness. Relive the moments of fun, friendship, and sporting spirit!
-          </p>
-        </div>
+      {/* Header */}
+      <div className="container mx-auto px-6 mb-16 relative z-10 text-center">
+        <span className="text-xs md:text-sm font-black tracking-widest text-[#FF7A00] uppercase block mb-3 animate-pulse">
+          Memories That Built Our Community
+        </span>
+        <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-4">
+          THE SPORTIFY{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] via-[#FFC107] to-white">
+            CHRONOLOGY
+          </span>
+        </h2>
+        <p className="text-gray-400 text-sm max-w-xl mx-auto leading-relaxed font-medium mb-3">
+          Cheering on stadium galleries, local turf meetups, and cross-country networks.
+        </p>
+        <p className="text-gray-500 text-[11px] uppercase tracking-widest max-w-xl mx-auto font-bold opacity-85">
+          Hover to preview memories. Audio will play on interaction.
+        </p>
+      </div>
 
-        <div className="meetups-album">
-          <Photos/>
-          <Meetups/>
+      {/* Scroller Rail */}
+      <div className="w-full flex items-center relative overflow-hidden py-6">
+        <div 
+          ref={trackRef}
+          className="flex gap-6 md:gap-10 whitespace-nowrap will-change-transform overflow-visible scrollbar-none w-full"
+        >
+          {duplicatedMemories.map((item, idx) => {
+            const isAnyHovered = hoveredIdx !== null;
+            const isCurrentHovered = hoveredIdx === idx;
+
+            if (item.type === "quote") {
+              return (
+                <div
+                  key={idx}
+                  className="flex-shrink-0 w-[80vw] sm:w-[420px] h-[45vh] md:h-[480px] snap-center flex flex-col justify-center items-center p-12 bg-[#0b0b0b]/60 border border-white/5 rounded-[32px] text-center select-none backdrop-blur-[10px] relative overflow-hidden transition-all duration-300 shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
+                >
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,122,0,0.025)_0%,transparent_60%)]" />
+                  
+                  {/* Decorative glowing quote mark symbol */}
+                  <span className="text-5xl font-serif text-[#FF7A00]/20 select-none absolute top-10 left-10">“</span>
+                  
+                  <p className="text-xl md:text-3xl font-serif italic text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] to-[#FFC107] leading-relaxed whitespace-normal max-w-xs drop-shadow-[0_2px_8px_rgba(255,122,0,0.1)] relative z-10">
+                    {item.text}
+                  </p>
+                  
+                  <div className="w-8 h-[1px] bg-gradient-to-r from-[#FF7A00] to-transparent mt-8" />
+                  
+                  <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest mt-4">
+                    {item.author}
+                  </span>
+                </div>
+              );
+            }
+
+            return (
+              <div
+                key={idx}
+                onMouseEnter={(e) => handleMouseEnter(e, idx)}
+                onMouseLeave={handleMouseLeave}
+                className={`flex-shrink-0 w-[80vw] sm:w-[480px] h-[45vh] md:h-[480px] snap-center relative rounded-[32px] overflow-hidden bg-[#0b0b0b] border transition-all duration-300 ease-out origin-center cursor-pointer ${
+                  isCurrentHovered 
+                    ? "border-[#FF7A00]/50 shadow-[0_0_30px_rgba(255,122,0,0.25)]" 
+                    : isAnyHovered 
+                      ? "border-white/5 opacity-40 blur-[1px]" 
+                      : "border-white/10 shadow-[0_20px_45px_rgba(0,0,0,0.7)]"
+                }`}
+              >
+                {item.type === "video" ? (
+                  <video
+                    src={item.src}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover pointer-events-none select-none"
+                  />
+                ) : (
+                  <Image
+                    src={item.src}
+                    alt={item.label}
+                    fill
+                    sizes="(max-width: 768px) 80vw, 480px"
+                    className="object-cover pointer-events-none select-none"
+                    priority={idx < 5}
+                  />
+                )}
+                
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/35 z-10 pointer-events-none" />
+
+                {/* Subtitle labels */}
+                <div className="absolute bottom-6 left-6 z-20 pointer-events-none flex flex-col gap-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[#FFC107] bg-[#050505]/75 px-3.5 py-1.5 rounded-full border border-white/5 backdrop-blur-[10px] w-fit">
+                    {item.label}
+                  </span>
+                  <div className="flex gap-2 text-[9px] font-bold text-gray-400">
+                    <span className="bg-[#050505]/60 px-2.5 py-1 rounded border border-white/5 backdrop-blur-[10px]">{item.count}</span>
+                    <span className="bg-[#050505]/60 px-2.5 py-1 rounded border border-white/5 backdrop-blur-[10px]">{item.year}</span>
+                  </div>
+                </div>
+                
+                <div className="absolute inset-0 border border-white/10 rounded-[32px] z-30 pointer-events-none" />
+              </div>
+            );
+          })}
         </div>
       </div>
+      
     </section>
   );
-}
-
-
-function Photos() {
-  const images = [
-    { src: DelhiBadminton1, alt: "Delhi Badminton Meetup 1" },
-    { src: DelhiBadminton2, alt: "Delhi Badminton Meetup 2" },
-    { src: DelhiBadminton3, alt: "Delhi Badminton Meetup 3" },
-    { src: DelhiHockey1, alt: "Delhi Hockey Meetup 1" },
-    { src: DelhiHockey2, alt: "Delhi Hockey Meetup 2" },
-    { src: KanpurCricket1, alt: "Kanpur Cricket Meetup 1" },
-    { src: KanpurCricket2, alt: "Kanpur Cricket Meetup 2" },
-    { src: LucknowCricket1, alt: "Lucknow Cricket Meetup 1" },
-    { src: LucknowCricket2, alt: "Lucknow Cricket Meetup 2" },
-  ];
-  const positions = [
-    { top: '-15%', left: '0', rotate: '-6deg' },
-    { top: '20%', left: '25%', rotate: '4deg' },
-    { top: '-18%', right: '0', rotate: '3deg' },
-    { top: '5%', right: '25%', rotate: '-5deg' },
-    { bottom: '-8%', left: '8%', rotate: '2deg' },
-    { bottom: '12%', right: '5%', rotate: '-3deg' },
-    { bottom: '-8%', left: '38%', rotate: '3deg' },
-    { bottom: '-7%', right: '-2%', rotate: '-3deg' },
-    { left: '-4%', bottom: '15%', rotate: '-4deg' },
-  ];
-
-  return <div className="absolute inset-0">
-    {images.map((img, idx) => {
-      const style = {
-        ...positions[idx],
-        transform: `${positions[idx].transform || ''} rotate(${positions[idx].rotate})`,
-      };
-      return (
-        <div key={idx} style={style} className="meetup-photo animate-glow-card">
-          <Image
-            src={img.src}
-            alt={img.alt}
-            className="w-full h-full object-cover rounded-xl"
-            loading="lazy"
-          />
-
-          <div className="absolute top-2 right-2 px-3 py-1 rounded-lg backdrop-blur-md bg-black/40 text-xs font-semibold text-white drop-shadow flex items-center justify-end">
-            {img.alt}
-          </div>
-        </div>
-      );
-    })}
-  </div>
-}
-
-
-function Meetups() {
-  const meetupsData = [
-    {
-      id: "meetup-1",
-      title: "Kanpur Sports Cricket Meetup",
-      date: "20 September, 2025",
-      location: "Fazalganj Shastri Nagar, Kanpur",
-      description: "A vibrant cricket meetup in Kanpur organized by Sportify where students gathered for matches, snacks, and plenty of cricket banter in a fun community setting.",
-      tags: ["Cricket", "Meetup", "Kanpur", "Community"],
-      instaLink: "https://www.instagram.com/p/DPLJcGlkkfs/?img_index=1"
-    },
-    {
-      id: "meetup-2",
-      title: "Delhi Badminton Meetup",
-      date: "7 September, 2025",
-      location: "Power Smash Academy, Delhi",
-      description: "Badminton lovers in Delhi gathered at Power Smash Academy for exciting rallies, friendly matches, and a fun community sports meetup.",
-      tags: ["Badminton", "Meetup", "Delhi", "Community"],
-      instaLink: "https://www.instagram.com/p/DOjSIvuk98Z/?img_index=1"
-    },
-    {
-      id: "meetup-3",
-      title: "Lucknow Football Meetup",
-      date: "25 March, 2025",
-      location: "Players Town (Turf) near BBAU, Lucknow",
-      description: "A passionate football meetup in Lucknow where fans connected over the game with friendly matches and a shared love for the sport.",
-      tags: ["Football", "Meetup", "Lucknow", "Community"],
-      instaLink: "https://www.instagram.com/p/DGGHB6yy_xQ/?img_index=1"
-    },
-    {
-      id: "meetup-4",
-      title: "Delhi Meetup - India vs Germany Hockey",
-      date: "23 October, 2024",
-      location: "Major Dhyan Chand National Stadium, New Delhi",
-      description: "Sportify Society hosted a meetup to cheer on the Indian National Hockey Team during the India vs Germany Hockey Bilateral Series. The event united sports-loving students for live support of the home team.",
-      tags: ["Hockey", "Meetup", "Live Event", "India vs Germany", "Cheer"],
-      instaLink: "https://www.instagram.com/p/DBjBrWST_p1/?img_index=1"
-    }
-  ];
-
-  return <div className="absolute inset-0 flex items-center justify-center gap-[2rem] flex-wrap max-md:overflow-y-auto">
-    {meetupsData.map((meetup, idx) => {
-    return (
-      <div key={meetup.id} className={"bg-gradient-to-r from-gray-900 via-gray-800 to-yellow-700 rounded-xl md:shadow-[0_32px_80px_0_rgba(20,20,20,0.7),0_12px_40px_0_rgba(0,0,0,0.5)] border-2 border-gray-700 p-4 inline-flex flex-col items-center transition-transform duration-300 !w-[270px] relative"}>
-        <span className="absolute top-2 left-2 w-3 h-3 bg-gradient-to-br from-yellow-400 via-orange-400 to-gray-400 rounded-full border border-gray-700 shadow-md" ></span>
-        <span className="absolute top-2 right-2 w-3 h-3 bg-gradient-to-br from-yellow-400 via-orange-400 to-gray-400 rounded-full border border-gray-700 shadow-md" ></span>
-        <span className="absolute bottom-2 left-2 w-3 h-3 bg-gradient-to-br from-yellow-400 via-orange-400 to-gray-400 rounded-full border border-gray-700 shadow-md" ></span>
-        <span className="absolute bottom-2 right-2 w-3 h-3 bg-gradient-to-br from-yellow-400 via-orange-400 to-gray-400 rounded-full border border-gray-700 shadow-md" ></span>
-        <h3 className="text-lg font-bold text-white mb-3 text-center">{meetup.title}</h3>
-        <span className="text-xs text-yellow-200 mb-4 block font-[500]">{meetup.date} | {meetup.location}</span>
-        <p className="text-xs text-gray-200 mb-5 text-center">{meetup.description.length > 150 ? meetup.description.slice(0, 150) + '...' : meetup.description}</p>
-        <div className="flex flex-wrap gap-1 mb-2 justify-center">
-          {meetup.tags.map((tag, i) => (
-            <span key={i} className="px-1 py-0.5 bg-gradient-to-r from-orange-900 via-orange-700 to-yellow-700 text-white text-[10px] rounded-full shadow">{tag}</span>
-          ))}
-        </div>
-        <a href={meetup.instaLink} target="_blank" rel="noopener noreferrer" className="text-xs text-yellow-400 font-semibold underline hover:text-yellow-200">View on Instagram</a>
-      </div>
-    );
-    })}
-  </div>
 }

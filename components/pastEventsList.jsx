@@ -12,6 +12,7 @@ import bg1 from "../assets/PasteveBG1.jpeg";
 import bg2 from "../assets/PasteveBG2.jpeg";
 import Image from "next/image";
 import "./pastEventsList.css";
+import RkmEventHighlight from "./RkmEventHighlight";
 
 const createParticles = () =>
   Array.from({ length: 10 }, (_, i) => ({
@@ -168,6 +169,9 @@ export default function EventsList({ events }) {
       {/* Background mesh gradient */}
       <div className="fixed -z-10 px-80 inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-gray-900 to-black"></div>
       {displayedEvents.map((event, index) => {
+        if (event.isRKM) {
+          return <RkmEventHighlight key={event.id} />;
+        }
         const bgImage = index % 2 === 0 ? bg1 : bg2;
         return (
           <div
