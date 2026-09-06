@@ -95,6 +95,7 @@ const CAM_FEEDS = [
     videoSrc: "/videos/the sportify.mp4",
     badge: "MAIN FEED"
   },
+  /*
   {
     id: "cam-2",
     name: "CAM_02 // SPORTIFY COMPETITIVE CLASH",
@@ -110,7 +111,7 @@ const CAM_FEEDS = [
     videoSrc: "",
     badge: "AUDIENCE CORNER",
     comingSoon: true
-  }
+  }*/
 ];
 
 // Creative Video Reels Data (Concluding general reels at the bottom)
@@ -162,7 +163,7 @@ export default function HighlightsPage() {
 
   useEffect(() => {
     const photosPool = photoRegistry.communityWall || [];
-    
+
     const getRandomPhotos = (pool, count) => {
       if (!pool || pool.length === 0) return [];
       const shuffled = [...pool].sort(() => 0.5 - Math.random());
@@ -226,7 +227,7 @@ export default function HighlightsPage() {
   // Coordinate multiple video players to ensure only one plays at a time
   useEffect(() => {
     if (!activePlayer) return;
-    
+
     if (activePlayer === "aftermovie") {
       if (monitorVideoRef.current) {
         monitorVideoRef.current.pause();
@@ -442,7 +443,7 @@ export default function HighlightsPage() {
       <section className="py-20 bg-[#080808] border-t border-white/5 relative z-20">
         <div className="container mx-auto px-6 max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
+
             {/* Left Column: Metadata & Descriptions */}
             <div className="lg:col-span-5 space-y-6">
               <span className="text-xs font-black uppercase tracking-widest text-[#FF7A00] font-mono">
@@ -456,14 +457,14 @@ export default function HighlightsPage() {
               <p className="text-gray-400 text-sm md:text-base leading-relaxed">
                 4 days. Thousands of memories. One unforgettable festival. Click the timestamps below the screen to explore specific chapters in this highlight documentary.
               </p>
-              
+
               <div className="pt-2">
                 <button
-                  disabled
-                  className="px-6 py-3.5 bg-[#121212]/50 border border-white/5 text-gray-500 font-extrabold text-xs uppercase tracking-wider rounded-xl cursor-not-allowed flex items-center justify-center gap-2.5 outline-none opacity-60"
+                  onClick={toggleAftermoviePlay}
+                  className="px-6 py-3.5 bg-[#FF7A00] border border-[#FF7A00]/50 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-2.5 outline-none hover:bg-[#FFC107] hover:text-black transition-all shadow-[0_0_15px_rgba(255,122,0,0.2)]"
                 >
-                  <Clock className="h-4 w-4 text-gray-500" />
-                  Coming Soon
+                  {isAftermoviePlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                  {isAftermoviePlaying ? "Pause Video" : "Play Aftermovie"}
                 </button>
               </div>
             </div>
@@ -473,49 +474,36 @@ export default function HighlightsPage() {
               <div className="relative aspect-video rounded-3xl overflow-hidden bg-[#0c0c0c] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] group">
                 <video
                   ref={aftermovieVideoRef}
-                  src="/RKM.mp4"
-                  className="w-full h-full object-cover pointer-events-none"
+                  src="/videos/0707-copy(1).mp4"
+                  className="w-full h-full object-cover"
                   playsInline
-                  preload="none"
+                  preload="metadata"
+                  onTimeUpdate={handleAftermovieTimeUpdate}
                 />
-                
-                {/* Coming Soon Overlay */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-xs z-20 text-center p-6 select-none">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FF7A00]/10 border border-[#FF7A00]/20 rounded-full mb-4 shadow-[0_0_15px_rgba(255,122,0,0.1)]">
-                    <span className="w-1.5 h-1.5 bg-[#FF7A00] rounded-full animate-pulse" />
-                    <span className="text-[10px] uppercase font-mono font-black tracking-widest text-[#FFC107]">
-                      STATUS // POST PRODUCTION
-                    </span>
-                  </div>
-                  <h3 className="text-3xl md:text-5xl font-black tracking-tight text-white uppercase mb-2">
-                    COMING <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A00] to-[#FFC107]">SOON</span>
-                  </h3>
-                  <p className="text-gray-400 text-[10px] md:text-xs max-w-xs uppercase tracking-widest font-semibold leading-relaxed">
-                    The official Sportify event aftermovie is currently in post-production. Stay tuned!
-                  </p>
-                </div>
+
+                {/* Custom Play Overlay */}
+                <AnimatePresence>
+                  {!isAftermoviePlaying && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      onClick={toggleAftermoviePlay}
+                      className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 cursor-pointer z-20 hover:bg-black/40 transition-colors duration-300"
+                    >
+                      <div className="w-16 h-16 rounded-full bg-white/10 border border-white/25 hover:border-[#FF7A00]/50 flex items-center justify-center shadow-lg transition-transform duration-300 hover:scale-110 backdrop-blur-sm">
+                        <Play className="h-7 w-7 fill-white text-white ml-1" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#FFC107] mt-4 drop-shadow-md">
+                        CLICK TO PLAY AFTERMOVIE
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
-              {/* Chapters Grid Timeline (Disabled) */}
-              <div className="grid grid-cols-5 gap-2 pt-2 text-left">
-                {aftermovieChapters.map((ch, idx) => {
-                  return (
-                    <div
-                      key={ch.name}
-                      className="flex flex-col text-left transition-all opacity-40 select-none"
-                    >
-                      {/* Accent highlight line */}
-                      <div className="h-[3px] w-full rounded-full bg-white/10 mb-2" />
-                      <span className="text-[7px] md:text-[9px] font-black tracking-wider text-gray-500 block line-clamp-1 uppercase">
-                        {ch.name}
-                      </span>
-                      <span className="text-[7px] md:text-[8px] font-mono font-bold text-gray-600 mt-0.5">
-                        {ch.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+              {/* Chapters Grid Timeline */}
+
             </div>
 
           </div>
@@ -540,7 +528,7 @@ export default function HighlightsPage() {
       {/* 3. Sportify Event Photos: THE FILMSTRIP DOCUMENTARY (Upgraded UX with left timeline Chapters slate and Pinterest auto-height grid) */}
       <section className="py-24 bg-[#050505] border-t border-white/5 relative z-20">
         <div className="container mx-auto px-6 max-w-6xl space-y-16">
-          
+
           <div className="text-center space-y-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#FF7A00] font-mono">
               EXCLUSIVE STAGE ARCHIVES
@@ -556,11 +544,11 @@ export default function HighlightsPage() {
 
           {/* Upgraded Layout: Left side vertical film slate list, Right side Pinterest grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
+
             {/* Left Column: Filmstrip Chapters Slate */}
             <div className="lg:col-span-4 space-y-3 bg-[#0a0a0a] p-4 rounded-3xl border border-white/5 shadow-2xl relative">
               <div className="absolute top-0 right-4 h-full w-[1px] bg-white/5 pointer-events-none hidden lg:block" />
-              
+
               <div className="flex items-center space-x-2.5 pb-3 border-b border-white/5 mb-2 px-2">
                 <HardDrive className="h-4 w-4 text-[#FF7A00]" />
                 <span className="text-[10px] font-mono font-black uppercase tracking-wider text-gray-400">
@@ -575,22 +563,19 @@ export default function HighlightsPage() {
                     <button
                       key={sub.id}
                       onClick={() => setSelectedSubId(sub.id)}
-                      className={`flex-shrink-0 snap-start w-60 lg:w-full flex items-center justify-between text-left p-3.5 rounded-2xl border transition-all duration-300 outline-none cursor-pointer ${
-                        isActive
-                          ? "bg-gradient-to-r from-[#FF7A00]/10 to-[#FFC107]/5 border-[#FF7A00]/40 shadow-lg shadow-orange-500/5 text-white"
-                          : "bg-transparent border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5"
-                      }`}
+                      className={`flex-shrink-0 snap-start w-60 lg:w-full flex items-center justify-between text-left p-3.5 rounded-2xl border transition-all duration-300 outline-none cursor-pointer ${isActive
+                        ? "bg-gradient-to-r from-[#FF7A00]/10 to-[#FFC107]/5 border-[#FF7A00]/40 shadow-lg shadow-orange-500/5 text-white"
+                        : "bg-transparent border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5"
+                        }`}
                     >
                       <div className="flex items-center space-x-3.5">
-                        <span className={`text-[10px] font-mono font-black tracking-widest ${
-                          isActive ? "text-[#FFC107]" : "text-gray-700"
-                        }`}>
+                        <span className={`text-[10px] font-mono font-black tracking-widest ${isActive ? "text-[#FFC107]" : "text-gray-700"
+                          }`}>
                           {sub.chapter}
                         </span>
                         <div className="space-y-0.5">
-                          <h4 className={`text-xs font-black uppercase tracking-wider ${
-                            isActive ? "text-white" : "text-gray-400"
-                          }`}>
+                          <h4 className={`text-xs font-black uppercase tracking-wider ${isActive ? "text-white" : "text-gray-400"
+                            }`}>
                             {sub.name}
                           </h4>
                           <span className="text-[8px] font-mono font-bold text-gray-600 block">
@@ -669,9 +654,9 @@ export default function HighlightsPage() {
       <section className="py-24 bg-[#080808] border-t border-white/5 relative z-20 overflow-hidden">
         {/* Soft background lens flares */}
         <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-[#FF7A00]/5 rounded-full blur-[160px] pointer-events-none" />
-        
+
         <div className="container mx-auto px-6 max-w-6xl space-y-12">
-          
+
           <div className="text-center space-y-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#FF7A00] font-mono">
               SPORTIFY BROADCAST DIVISION
@@ -687,11 +672,11 @@ export default function HighlightsPage() {
 
           {/* Interactive Broadcast Console Wrapper */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch pt-4">
-            
+
             {/* Left Console Panel (8 Columns): Main Feed Monitor */}
             <div className="lg:col-span-8 flex flex-col justify-between bg-[#0e0e0e] border border-white/10 rounded-3xl p-5 shadow-2xl relative">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,122,0,0.02)_0%,transparent_80%)] pointer-events-none" />
-              
+
               {/* Monitor Header with telemetry data */}
               <div className="flex justify-between items-center border-b border-white/5 pb-3.5 mb-4 text-[9px] font-mono tracking-widest text-gray-500">
                 <div className="flex items-center space-x-2">
@@ -796,11 +781,10 @@ export default function HighlightsPage() {
                   <button
                     disabled={selectedCam.comingSoon}
                     onClick={toggleMonitorPlay}
-                    className={`px-4 py-2 border rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 outline-none ${
-                      selectedCam.comingSoon
-                        ? "bg-[#121212]/50 border-white/5 text-gray-500 cursor-not-allowed opacity-60"
-                        : "bg-[#FF7A00]/10 hover:bg-[#FF7A00]/20 border-[#FF7A00]/30 text-[#FF7A00] cursor-pointer"
-                    }`}
+                    className={`px-4 py-2 border rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 outline-none ${selectedCam.comingSoon
+                      ? "bg-[#121212]/50 border-white/5 text-gray-500 cursor-not-allowed opacity-60"
+                      : "bg-[#FF7A00]/10 hover:bg-[#FF7A00]/20 border-[#FF7A00]/30 text-[#FF7A00] cursor-pointer"
+                      }`}
                   >
                     {isMonitorPlaying ? (
                       <>
@@ -860,11 +844,10 @@ export default function HighlightsPage() {
                       <button
                         key={cam.id}
                         onClick={() => handleCamSwitch(cam)}
-                        className={`w-full flex flex-col p-3 rounded-2xl border text-left cursor-pointer transition-all duration-300 outline-none select-none relative overflow-hidden ${
-                          isSelected
-                            ? "bg-gradient-to-br from-[#FF7A00]/15 to-[#FFC107]/5 border-[#FF7A00]/40 shadow-lg"
-                            : "bg-[#111111]/70 border-white/5 text-gray-400 hover:border-white/20 hover:text-white"
-                        }`}
+                        className={`w-full flex flex-col p-3 rounded-2xl border text-left cursor-pointer transition-all duration-300 outline-none select-none relative overflow-hidden ${isSelected
+                          ? "bg-gradient-to-br from-[#FF7A00]/15 to-[#FFC107]/5 border-[#FF7A00]/40 shadow-lg"
+                          : "bg-[#111111]/70 border-white/5 text-gray-400 hover:border-white/20 hover:text-white"
+                          }`}
                       >
                         {/* Selector indicator */}
                         {isSelected && (
@@ -872,18 +855,16 @@ export default function HighlightsPage() {
                         )}
 
                         <div className="flex justify-between items-center mb-1">
-                          <span className={`text-[9px] font-mono font-black uppercase tracking-wider ${
-                            isSelected ? "text-[#FFC107]" : "text-gray-500"
-                          }`}>
+                          <span className={`text-[9px] font-mono font-black uppercase tracking-wider ${isSelected ? "text-[#FFC107]" : "text-gray-500"
+                            }`}>
                             {cam.name}
                           </span>
                           <span className="text-[8px] font-mono font-black px-1.5 py-0.5 bg-black/40 rounded border border-white/5 text-gray-400">
                             {cam.badge}
                           </span>
                         </div>
-                        <p className={`text-[9.5px] leading-relaxed line-clamp-1 ${
-                          isSelected ? "text-gray-300" : "text-gray-500"
-                        }`}>
+                        <p className={`text-[9.5px] leading-relaxed line-clamp-1 ${isSelected ? "text-gray-300" : "text-gray-500"
+                          }`}>
                           {cam.desc}
                         </p>
                       </button>
@@ -907,7 +888,7 @@ export default function HighlightsPage() {
       {/* 5. VISUAL CENTER: COMMUNITY WALL */}
       <section className="py-24 bg-[#070707] border-t border-white/5 relative z-20">
         <div className="container mx-auto px-6 max-w-6xl space-y-12">
-          
+
           <div className="text-center space-y-2 flex flex-col items-center">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#FF7A00] font-mono">
               VISUAL CENTER
@@ -964,7 +945,7 @@ export default function HighlightsPage() {
       {/* 6. Tilted Floating Reels Deck (Concluding general reels moved to bottom as requested) */}
       <section className="py-24 bg-[#050505] border-t border-white/5 relative z-20 overflow-hidden">
         <div className="container mx-auto px-6 max-w-6xl space-y-16">
-          
+
           <div className="text-center space-y-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#FF7A00] font-mono">
               CINEMATIC GENERAL REELS

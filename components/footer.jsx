@@ -31,10 +31,10 @@ export default function Footer() {
 
   return (
     <footer className="relative bg-[#050505] text-white pt-20 pb-10 overflow-hidden border-t border-white/5 select-none">
-      
+
       {/* Stadium Light Orange Bar Divider */}
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#FF7A00] to-transparent shadow-[0_0_15px_#FF7A00] z-20" />
-      
+
       {/* Dynamic Embers Background */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-30">
         {particles.map((p) => (
@@ -63,7 +63,7 @@ export default function Footer() {
 
       <div className="container mx-auto px-6 md:px-12 relative z-10 max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start justify-between pb-12 border-b border-white/5">
-          
+
           {/* Logo & Description */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
@@ -78,7 +78,7 @@ export default function Footer() {
                 THE SPORTIFY
               </h3>
             </div>
-            
+
             <p className="text-gray-400 text-sm leading-relaxed max-w-sm font-medium">
               IIT Madras BS Degree Sports Society — spreading the flame of sports, fostering a community of athletes, and celebrating competition.
             </p>
@@ -114,19 +114,19 @@ export default function Footer() {
             <div className="flex flex-col gap-3.5 w-full md:items-end">
               <div className="flex flex-wrap gap-2.5 justify-start md:justify-end">
                 <a
-                  href="tel:+919878449480"
+                  href="tel:+918764892588"
                   className="inline-flex items-center bg-white/5 hover:bg-[#FF7A00]/10 border border-white/5 hover:border-[#FF7A00]/30 text-gray-300 hover:text-white px-3.5 py-2 rounded-xl transition-all duration-300 text-xs font-bold"
                 >
                   <Phone className="h-3.5 w-3.5 mr-2 text-[#FF7A00]" />
-                  +91 9878449480
+                  +91 8764892588
                 </a>
-                
+
                 <a
-                  href="tel:+917870825906"
+                  href="tel:+919761281928"
                   className="inline-flex items-center bg-white/5 hover:bg-[#FF7A00]/10 border border-white/5 hover:border-[#FF7A00]/30 text-gray-300 hover:text-white px-3.5 py-2 rounded-xl transition-all duration-300 text-xs font-bold"
                 >
                   <Phone className="h-3.5 w-3.5 mr-2 text-[#FF7A00]" />
-                  +91 7870825906
+                  +91 9761281928
                 </a>
               </div>
 

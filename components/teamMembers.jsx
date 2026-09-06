@@ -63,7 +63,7 @@ const getBio = (name, category) => {
 
 export default function TeamMembers({ teamMembersByYear = {} }) {
   const years = Object.keys(teamMembersByYear).sort((a, b) => b.localeCompare(a));
-  const [selectedYear, setSelectedYear] = useState("2025-26");
+  const [selectedYear, setSelectedYear] = useState(years[0] || "2026-27");
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
 
   const departments = [
@@ -119,10 +119,7 @@ export default function TeamMembers({ teamMembersByYear = {} }) {
       {/* Year Selection & Section Title bar */}
       <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/5">
         <div className="flex items-center gap-2">
-          <Flame className="h-5 w-5 text-[#FF7A00] animate-pulse" />
-          <span className="text-sm font-black uppercase tracking-widest text-[#FFC107] font-mono">
-            Sportify Roster
-          </span>
+          
         </div>
 
         {/* Year Dropdown */}
